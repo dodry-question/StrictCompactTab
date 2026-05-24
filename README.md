@@ -4,32 +4,24 @@
 [![Manifest](https://img.shields.io/badge/manifest-V3-blueviolet?style=flat-square)](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json)
 [![Platforms](https://img.shields.io/badge/platforms-Firefox%20%7C%20Chromium-informational?style=flat-square)](#installation)
 
-A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally. It replaces the default start page with a clean, fast interface featuring a search bar, customizable shortcuts, a clock, and local configuration storage.
-
-<p align="center">
-  <img src="preview_main.png" alt="Strict Compact Tab Main Interface" width="100%">
-</p>
-
-<details>
-  <summary>Show Settings Panel Preview</summary>
-  <br>
-  <p align="center">
-    <img src="preview_settings.png" alt="Strict Compact Tab Settings Interface" width="100%">
-  </p>
-</details>
+A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally. It replaces the default start page with a clean, fast interface featuring a search bar, customizable shortcuts, a clock, and local configuration storage [3].
 
 ---
 
 ## Key Features
 
 * **Hidden Dual-Column Settings**: A settings panel is accessible via a gear icon in the bottom-left corner, which remains completely invisible and reveals itself only when hovered over.
-* **Shortcut Management**: Full control over your start page tiles, allowing you to add new shortcuts, edit titles and URLs inline, or delete them.
-* **Drag & Drop Sorting**: Reorder your shortcut list with native drag-and-drop mechanics, including automatic scrolling when an item is dragged near the top or bottom boundary of the list.
+* **Shortcut Management & Custom Icons**: Full control over your start page tiles, allowing you to add new shortcuts, edit titles and URLs inline, or delete them. Features a built-in upload button to assign custom PNG icons to your shortcuts, saving them directly as Base64 strings in local storage for zero-latency loading.
+* **Shortcut Tabs and Categories**: Organize your favorite sites into custom categories (e.g., Work, Dev, Entertainment). If only one category exists, the interface remains clean and classic. If two or more exist, an elegant horizontal category bar appears above the shortcut grid.
+* **Mouse Wheel Scroll Navigation**: Cycle through your shortcut categories globally on the main screen by simply scrolling the mouse wheel up or down.
+* **Smooth Transitions**: Switching between shortcut categories is accompanied by a soft, fast, and visually appealing fade-out/fade-in animation.
+* **Drag & Drop Sorting**: Reorder your shortcuts or category tabs using native drag-and-drop mechanics. The shortcut list includes automatic container scrolling when dragging near boundaries.
 * **Grid Optimization**: Adjust the size of shortcut tiles (85px, 98px, or 110px) and limit the maximum number of items in a single row (from 6 to 12).
 * **Local Assets Customization**: Upload a custom background wallpaper and change the page's tab favicon directly from the settings. Selected files are converted to Base64 and kept in your browser's local storage with no external HTTP requests.
+* **Responsive Settings Layout**: The settings panel is fully responsive. On narrow screens or smaller viewports, the dual-column layout dynamically rearranges into a single vertical layout to prevent element clipping and ensure readability.
 * **Adjustable Clock and Date**: Toggle the display of the current day of the week, choose between 12-hour (AM/PM) and 24-hour formats, and toggle the seconds counter.
 * **Complete Privacy**: All configurations, shortcut lists, custom wallpapers, and favicons are stored strictly on your local machine using the storage API. No telemetry, tracking, or external server connections are used.
-* **JSON Backup and Restore**: Export your entire setup to a single JSON configuration file or import previous backups with safe fallback values and page reload handling.
+* **JSON Backup and Restore**: Export your entire setup (including categories and shortcuts) to a single JSON configuration file or import previous backups with safe fallback values and page reload handling.
 
 ---
 
@@ -60,7 +52,7 @@ When loaded for the first time, the extension starts as a blank slate—a black 
 To configure your interface:
 1. Hover your cursor over the bottom-left corner of the window.
 2. Click the gear icon that fades into view.
-3. Use the left column of the settings panel to add shortcuts, configure the grid layout, upload your wallpaper, or change the tab icon.
+3. Use the left column of the settings panel to add shortcuts, configure the grid layout, upload your wallpaper, change the tab icon, or manage your custom shortcut categories.
 4. Alternatively, use the **Backup** section to import an existing JSON configuration file to restore your settings.
 
 ---
