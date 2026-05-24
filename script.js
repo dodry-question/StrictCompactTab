@@ -689,6 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderMainCategories();
         renderShortcuts();
         
+        // Принудительный Reflow, чтобы зафиксировать состояние opacity: 0
         void shortcutsContainer.offsetHeight; 
         
         shortcutsContainer.classList.remove('fade-out');

@@ -62,7 +62,7 @@ body {
   z-index: 10;
 }
 
-/* Изящная поисковая строка DuckDuckGo */
+/* Изящная поисковая строка */
 .search-form {
   width: 100%;
   max-width: 580px;
@@ -440,6 +440,25 @@ body {
 .settings-field label {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.5);
+}
+
+/* Контейнер для селектора поисковой системы с превью-иконкой */
+.select-with-icon-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.settings-search-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.select-with-icon-wrapper .settings-select {
+  flex: 1;
 }
 
 /* Ряд вкладок-категорий настроек */
@@ -863,23 +882,4 @@ body {
     padding-top: 24px;
     margin-top: 12px;
   }
-}
-
-/* Контейнер для селектора поисковой системы с превью-иконкой */
-.select-with-icon-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-}
-
-.settings-search-logo {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.select-with-icon-wrapper .settings-select {
-  flex: 1;
 }
