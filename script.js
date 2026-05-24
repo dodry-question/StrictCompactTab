@@ -1,5 +1,83 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // --- СЛОВАРЬ ПЕРЕВОДОВ (ЛОКАЛИЗАЦИЯ) ---
+  const TRANSLATIONS = {
+    en: {
+      searchPlaceholder: "Search the web...",
+      searchBtnTitle: "Search",
+      settingsTitle: "Screen Settings",
+      addShortcutTitle: "Add New Shortcut",
+      namePlaceholder: "Name",
+      urlPlaceholder: "URL Link",
+      addBtn: "Add",
+      uploadIconTitle: "Upload custom icon (optional)",
+      gridDisplayTitle: "Grid Display",
+      shortcutSizeLabel: "Shortcut Size",
+      sizeSmall: "Small (85x85px)",
+      sizeMedium: "Medium (98x98px)",
+      sizeLarge: "Large (110x110px)",
+      columnsLabel: "Max in row",
+      bgImageTitle: "Background Image",
+      chooseFileBtn: "Choose File",
+      resetBtn: "Reset",
+      tabFaviconTitle: "Tab Favicon",
+      chooseIconBtn: "Choose Icon",
+      clockDateSettingsTitle: "Clock and Date Settings",
+      showDateLabel: "Show date and day of the week",
+      format12hLabel: "12-hour format (AM/PM)",
+      showSecondsLabel: "Display seconds",
+      backupTitle: "Backup Configuration",
+      exportBtn: "Export",
+      importBtn: "Import",
+      manageShortcutsTitle: "Manage Shortcuts",
+      listEmpty: "Shortcuts list is empty",
+      btnEdit: "Edit",
+      btnDelete: "Delete",
+      btnSave: "Save",
+      btnCancel: "Cancel",
+      importSuccess: "Import successful!",
+      importError: "Import error. Make sure the file is a correct JSON backup.",
+      importReadError: "Error reading the backup file."
+    },
+    ru: {
+      searchPlaceholder: "Искать в интернете...",
+      searchBtnTitle: "Искать",
+      settingsTitle: "Настройки экрана",
+      addShortcutTitle: "Добавить новый ярлык",
+      namePlaceholder: "Название",
+      urlPlaceholder: "Ссылка URL",
+      addBtn: "Добавить",
+      uploadIconTitle: "Загрузить иконку (опционально)",
+      gridDisplayTitle: "Отображение сетки",
+      shortcutSizeLabel: "Размер ярлыков",
+      sizeSmall: "Маленький (85x85px)",
+      sizeMedium: "Средний (98x98px)",
+      sizeLarge: "Крупный (110x110px)",
+      columnsLabel: "В ряду (макс.)",
+      bgImageTitle: "Фоновое изображение",
+      chooseFileBtn: "Выбрать файл",
+      resetBtn: "Сбросить",
+      tabFaviconTitle: "Иконка вкладки",
+      chooseIconBtn: "Выбрать иконку",
+      clockDateSettingsTitle: "Настройки часов и даты",
+      showDateLabel: "Показывать дату и день недели",
+      format12hLabel: "12-часовой формат (AM/PM)",
+      showSecondsLabel: "Отображать секунды",
+      backupTitle: "Резервное копирование",
+      exportBtn: "Экспорт",
+      importBtn: "Импорт",
+      manageShortcutsTitle: "Управление ярлыками",
+      listEmpty: "Список ярлыков пуст",
+      btnEdit: "Редактировать",
+      btnDelete: "Удалить",
+      btnSave: "Сохранить",
+      btnCancel: "Отмена",
+      importSuccess: "Импорт успешно выполнен!",
+      importError: "Ошибка при импорте. Убедитесь, что выбран правильный файл резервной копии JSON.",
+      importReadError: "Ошибка при чтении файла бэкапа."
+    }
+  };
+
   // --- РАСШИРЕННАЯ СИСТЕМА ХРАНЕНИЯ (с поддержкой бэкапов) ---
   const storage = {
     get: (keys, callback) => {
@@ -67,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     size: "small",
     customBackground: null,
     customFavicon: null,
+    language: "en",
     showDate: true,
     format12h: false,
     showSeconds: false
@@ -112,14 +191,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dateElement) {
       if (STATE.showDate) {
         dateElement.style.display = 'block';
-        const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
-        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+        let dayName = '';
+        let monthName = '';
+        let dateString = '';
         
-        const dayName = days[now.getDay()];
-        const dayNum = now.getDate();
-        const monthName = months[now.getMonth()];
+        if (STATE.language === 'ru') {
+          const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+          const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+          dayName = days[now.getDay()];
+          const dayNum = now.getDate();
+          monthName = months[now.getMonth()];
+          dateString = `${dayName}, ${dayNum} ${monthName}`;
+        } else {
+          const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+          dayName = days[now.getDay()];
+          const dayNum = now.getDate();
+          monthName = months[now.getMonth()];
+          dateString = `${dayName}, ${monthName} ${dayNum}`;
+        }
         
-        dateElement.textContent = `${dayName}, ${dayNum} ${monthName}`;
+        dateElement.textContent = dateString;
       } else {
         dateElement.style.display = 'none';
       }
@@ -164,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Настройки сетки макета
   const sizeSelect = document.getElementById('shortcut-size-select');
   const columnsSelect = document.getElementById('shortcut-columns-select');
+  const languageSelect = document.getElementById('language-select');
 
   if (sizeSelect) {
     sizeSelect.addEventListener('change', (e) => {
@@ -178,6 +271,16 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.columns = parseInt(e.target.value, 10);
       saveState();
       renderShortcuts();
+    });
+  }
+
+  if (languageSelect) {
+    languageSelect.addEventListener('change', (e) => {
+      STATE.language = e.target.value;
+      saveState();
+      applyLanguage(STATE.language);
+      updateClockAndDate();
+      renderModalShortcutsList();
     });
   }
 
@@ -209,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const iconLabel = document.querySelector('.add-shortcut-form .btn-square-upload');
           if (iconLabel) {
             iconLabel.style.borderColor = '';
-            iconLabel.title = 'Загрузить иконку (опционально)';
+            iconLabel.title = TRANSLATIONS[STATE.language].uploadIconTitle;
           }
         };
 
@@ -232,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const file = e.target.files[0];
       const iconLabel = document.querySelector('.add-shortcut-form .btn-square-upload');
       if (file && iconLabel) {
-        iconLabel.title = `Выбрана иконка: ${file.name}`;
+        iconLabel.title = file.name;
         iconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
       }
     });
@@ -305,6 +408,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (faviconLink) {
       faviconLink.href = STATE.customFavicon || 'favicon.png';
     }
+  }
+
+  // --- ДИНАМИЧЕСКАЯ ЛОКАЛИЗАЦИЯ ИНТЕРФЕЙСА ---
+  function applyLanguage(lang) {
+    const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
+    
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key]) {
+        el.textContent = dict[key];
+      }
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (dict[key]) {
+        el.placeholder = dict[key];
+      }
+    });
+
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.getAttribute('data-i18n-title');
+      if (dict[key]) {
+        el.title = dict[key];
+      }
+    });
   }
 
   // --- УПРАВЛЕНИЕ ТУМБЛЕРАМИ ЧАСОВ И ДАТЫ ---
@@ -383,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const showDate = data.showDate ?? true;
           const customBackground = data.customBackground ?? null;
           const customFavicon = data.customFavicon ?? null;
+          const language = data.language ?? 'en';
 
           const cleanedData = {
             shortcuts,
@@ -392,7 +522,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showSeconds,
             showDate,
             customBackground,
-            customFavicon
+            customFavicon,
+            language
           };
 
           storage.clearAndSet(cleanedData, () => {
@@ -400,13 +531,13 @@ document.addEventListener('DOMContentLoaded', () => {
           });
 
         } catch (err) {
-          alert('Ошибка при импорте. Убедитесь, что выбран правильный файл резервной копии JSON.');
+          alert(TRANSLATIONS[STATE.language].importError);
           importFileInput.value = '';
         }
       };
 
       reader.onerror = () => {
-        alert('Ошибка при чтении файла бэкапа.');
+        alert(TRANSLATIONS[STATE.language].importReadError);
         importFileInput.value = '';
       };
 
@@ -417,18 +548,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'columns', 'size', 'customBackground', 'customFavicon', 'showDate', 'format12h', 'showSeconds'], (result) => {
+    storage.get(['shortcuts', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'showDate', 'format12h', 'showSeconds'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.columns = result.columns ?? 10;
       STATE.size = result.size ?? "small";
       STATE.customBackground = result.customBackground ?? null;
       STATE.customFavicon = result.customFavicon ?? null;
+      STATE.language = result.language ?? "en";
       STATE.showDate = result.showDate ?? true;
       STATE.format12h = result.format12h ?? false;
       STATE.showSeconds = result.showSeconds ?? false;
 
       if (sizeSelect) sizeSelect.value = STATE.size;
       if (columnsSelect) columnsSelect.value = STATE.columns;
+      if (languageSelect) languageSelect.value = STATE.language;
 
       if (showDateCb) showDateCb.checked = STATE.showDate;
       if (timeFormatCb) timeFormatCb.checked = STATE.format12h;
@@ -436,6 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       applyBackground();
       applyFavicon();
+      applyLanguage(STATE.language);
       updateClockAndDate();
       renderShortcuts();
     });
@@ -448,6 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
       size: STATE.size,
       customBackground: STATE.customBackground,
       customFavicon: STATE.customFavicon,
+      language: STATE.language,
       showDate: STATE.showDate,
       format12h: STATE.format12h,
       showSeconds: STATE.showSeconds
@@ -536,8 +671,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!modalList) return;
     modalList.innerHTML = '';
 
+    const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+
     if (STATE.shortcuts.length === 0) {
-      modalList.innerHTML = '<div style="color: rgba(255,255,255,0.3); font-size: 11px; text-align: center; padding: 12px;">Список ярлыков пуст</div>';
+      modalList.innerHTML = `<div style="color: rgba(255,255,255,0.3); font-size: 11px; text-align: center; padding: 12px;">${currentDict.listEmpty}</div>`;
       return;
     }
 
@@ -558,13 +695,13 @@ document.addEventListener('DOMContentLoaded', () => {
         nameInput.type = 'text';
         nameInput.value = item.name;
         nameInput.className = 'settings-input inline-input';
-        nameInput.placeholder = 'Название';
+        nameInput.placeholder = currentDict.namePlaceholder;
 
         const urlInput = document.createElement('input');
         urlInput.type = 'text';
         urlInput.value = item.url;
         urlInput.className = 'settings-input inline-input';
-        urlInput.placeholder = 'Ссылка URL';
+        urlInput.placeholder = currentDict.urlPlaceholder;
 
         fieldsWrapper.appendChild(nameInput);
         fieldsWrapper.appendChild(urlInput);
@@ -574,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn btn-inline-cancel';
-        cancelBtn.textContent = 'Отмена';
+        cancelBtn.textContent = currentDict.btnCancel;
         cancelBtn.addEventListener('click', () => {
           editingIndex = -1;
           renderModalShortcutsList();
@@ -582,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const saveBtn = document.createElement('button');
         saveBtn.className = 'btn btn-inline-save';
-        saveBtn.textContent = 'Сохранить';
+        saveBtn.textContent = currentDict.btnSave;
 
         const inlineIconInput = document.createElement('input');
         inlineIconInput.type = 'file';
@@ -593,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const inlineIconLabel = document.createElement('label');
         inlineIconLabel.htmlFor = `edit-shortcut-icon-file-${index}`;
         inlineIconLabel.className = 'btn-square-upload';
-        inlineIconLabel.title = 'Обновить иконку (опционально)';
+        inlineIconLabel.title = currentDict.uploadIconTitle;
 
         const uploadImg = document.createElement('img');
         uploadImg.src = 'upload-icon.png';
@@ -605,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inlineIconInput.addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (file) {
-            inlineIconLabel.title = `Выбрана иконка: ${file.name}`;
+            inlineIconLabel.title = file.name;
             inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
           }
         });
@@ -704,7 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const editBtn = document.createElement('button');
         editBtn.className = 'btn btn-edit';
-        editBtn.textContent = 'Редактировать';
+        editBtn.textContent = currentDict.btnEdit;
         editBtn.addEventListener('click', () => {
           editingIndex = index;
           renderModalShortcutsList();
@@ -712,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-delete';
-        deleteBtn.textContent = 'Удалить';
+        deleteBtn.textContent = currentDict.btnDelete;
         deleteBtn.addEventListener('click', () => {
           STATE.shortcuts.splice(index, 1);
           saveState();

@@ -21,8 +21,8 @@
     <!-- Поисковая строка DuckDuckGo -->
     <form id="search-form" class="search-form">
       <img src="duckduckgo.png" class="search-engine-logo" alt="">
-      <input id="search-input" class="search-input" type="text" placeholder="Искать в интернете..." autofocus autocomplete="off">
-      <button type="submit" class="search-btn" title="Искать">
+      <input id="search-input" class="search-input" type="text" data-i18n-placeholder="searchPlaceholder" placeholder="Search..." autofocus autocomplete="off">
+      <button type="submit" class="search-btn" data-i18n-title="searchBtnTitle" title="Search">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
@@ -36,7 +36,7 @@
 
   <!-- Невидимая триггер-зона настроек в левом нижнем углу -->
   <div id="settings-trigger-zone" class="settings-trigger-zone">
-    <button id="settings-open-btn" class="settings-icon-btn" title="Настройки макета">
+    <button id="settings-open-btn" class="settings-icon-btn" data-i18n-title="settingsTitle" title="Settings">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"></circle>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -48,7 +48,7 @@
   <div id="settings-modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Настройки экрана</h2>
+        <h2 data-i18n="settingsTitle">Screen Settings</h2>
         <button id="settings-close-btn" class="modal-close-icon">&times;</button>
       </div>
 
@@ -59,13 +59,13 @@
           
           <!-- 1. Добавить новый ярлык -->
           <div class="settings-section">
-            <h3>Добавить новый ярлык</h3>
+            <h3 data-i18n="addShortcutTitle">Add New Shortcut</h3>
             <form id="add-shortcut-form" class="add-shortcut-form">
-              <input id="new-shortcut-name" type="text" placeholder="Название" class="settings-input" required autocomplete="off">
-              <input id="new-shortcut-url" type="text" placeholder="Ссылка URL" class="settings-input" required autocomplete="off">
+              <input id="new-shortcut-name" type="text" data-i18n-placeholder="namePlaceholder" placeholder="Name" class="settings-input" required autocomplete="off">
+              <input id="new-shortcut-url" type="text" data-i18n-placeholder="urlPlaceholder" placeholder="URL Link" class="settings-input" required autocomplete="off">
               <div class="form-actions-row">
-                <button type="submit" class="btn btn-add">Добавить</button>
-                <label class="btn-square-upload" title="Загрузить иконку (опционально)">
+                <button type="submit" class="btn btn-add" data-i18n="addBtn">Add</button>
+                <label class="btn-square-upload" data-i18n-title="uploadIconTitle" title="Upload custom icon (optional)">
                   <img src="upload-icon.png" alt="Upload">
                   <input id="new-shortcut-icon-file" type="file" accept="image/*" style="display: none;">
                 </label>
@@ -75,18 +75,18 @@
 
           <!-- 2. Отображение сетки -->
           <div class="settings-section">
-            <h3>Отображение сетки</h3>
+            <h3 data-i18n="gridDisplayTitle">Grid Display</h3>
             <div class="settings-row">
               <div class="settings-field">
-                <label for="shortcut-size-select">Размер ярлыков</label>
+                <label for="shortcut-size-select" data-i18n="shortcutSizeLabel">Shortcut Size</label>
                 <select id="shortcut-size-select" class="settings-select">
-                  <option value="small">Маленький (85x85px)</option>
-                  <option value="medium">Средний (98x98px)</option>
-                  <option value="large">Крупный (110x110px)</option>
+                  <option value="small" data-i18n="sizeSmall">Small (85x85px)</option>
+                  <option value="medium" data-i18n="sizeMedium">Medium (98x98px)</option>
+                  <option value="large" data-i18n="sizeLarge">Large (110x110px)</option>
                 </select>
               </div>
               <div class="settings-field">
-                <label for="shortcut-columns-select">В ряду (макс.)</label>
+                <label for="shortcut-columns-select" data-i18n="columnsLabel">Max in row</label>
                 <select id="shortcut-columns-select" class="settings-select">
                   <option value="6">6</option>
                   <option value="7">7</option>
@@ -98,57 +98,66 @@
                 </select>
               </div>
             </div>
+            
+            <!-- Выбор языка интерфейса -->
+            <div class="settings-field">
+              <label id="label-language" for="language-select">Language / Язык</label>
+              <select id="language-select" class="settings-select">
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+              </select>
+            </div>
           </div>
 
           <!-- 3. Фоновое изображение -->
           <div class="settings-section">
-            <h3>Фоновое изображение</h3>
+            <h3 data-i18n="bgImageTitle">Background Image</h3>
             <div class="settings-row-align">
               <label class="btn btn-file-label">
-                Выбрать файл
+                <span data-i18n="chooseFileBtn">Choose File</span>
                 <input id="bg-file-input" type="file" accept="image/*" style="display: none;">
               </label>
-              <button id="bg-reset-btn" class="btn btn-danger-action">Сбросить</button>
+              <button id="bg-reset-btn" class="btn btn-danger-action" data-i18n="resetBtn">Reset</button>
             </div>
           </div>
 
           <!-- 4. Иконка вкладки (Динамический favicon) -->
           <div class="settings-section">
-            <h3>Иконка вкладки</h3>
+            <h3 data-i18n="tabFaviconTitle">Tab Favicon</h3>
             <div class="settings-row-align">
               <label class="btn btn-file-label">
-                Выбрать иконку
+                <span data-i18n="chooseIconBtn">Choose Icon</span>
                 <input id="favicon-file-input" type="file" accept="image/*" style="display: none;">
               </label>
-              <button id="favicon-reset-btn" class="btn btn-danger-action">Сбросить</button>
+              <button id="favicon-reset-btn" class="btn btn-danger-action" data-i18n="resetBtn">Reset</button>
             </div>
           </div>
 
           <!-- 5. Настройки часов и даты -->
           <div class="settings-section">
-            <h3>Настройки часов и даты</h3>
+            <h3 data-i18n="clockDateSettingsTitle">Clock and Date Settings</h3>
             <div class="settings-toggle-group">
               <label class="toggle-label">
                 <input type="checkbox" id="show-date-checkbox">
-                <span>Показывать дату и день недели</span>
+                <span data-i18n="showDateLabel">Show date and day of the week</span>
               </label>
               <label class="toggle-label">
                 <input type="checkbox" id="time-format-checkbox">
-                <span>12-часовой формат (AM/PM)</span>
+                <span data-i18n="format12hLabel">12-hour format (AM/PM)</span>
               </label>
               <label class="toggle-label">
                 <input type="checkbox" id="show-seconds-checkbox">
-                <span>Отображать секунды</span>
+                <span data-i18n="showSecondsLabel">Display seconds</span>
               </label>
             </div>
           </div>
 
           <!-- 6. Резервное копирование -->
           <div class="settings-section">
-            <h3>Резервное копирование</h3>
+            <h3 data-i18n="backupTitle">Backup Configuration</h3>
             <div class="settings-row">
-              <button id="btn-export" class="btn btn-secondary">Экспорт</button>
-              <button id="btn-import" class="btn btn-secondary">Импорт</button>
+              <button id="btn-export" class="btn btn-secondary" data-i18n="exportBtn">Export</button>
+              <button id="btn-import" class="btn btn-secondary" data-i18n="importBtn">Import</button>
               <input type="file" id="import-file-input" style="display: none;" accept=".json">
             </div>
           </div>
@@ -158,7 +167,7 @@
         <!-- ПРАВАЯ КОЛОНКА -->
         <div class="modal-col-right">
           <div class="settings-section full-height">
-            <h3>Управление ярлыками</h3>
+            <h3 data-i18n="manageShortcutsTitle">Manage Shortcuts</h3>
             <div id="modal-shortcuts-list" class="modal-shortcuts-list"></div>
           </div>
         </div>
