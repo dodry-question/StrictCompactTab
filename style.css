@@ -864,3 +864,22 @@ body {
     margin-top: 12px;
   }
 }
+
+/* Контейнер для селектора поисковой системы с превью-иконкой */
+.select-with-icon-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.settings-search-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.select-with-icon-wrapper .settings-select {
+  flex: 1;
+}

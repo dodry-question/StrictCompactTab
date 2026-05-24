@@ -869,6 +869,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logo) {
       logo.src = 'assets/search_' + STATE.searchEngine + '.png';
     }
+    const settingsSearchLogo = document.getElementById('settings-search-logo');
+    if (settingsSearchLogo) {
+      settingsSearchLogo.src = 'assets/search_' + STATE.searchEngine + '.png';
+    }
   }
 
   function moveShortcut(fromAbsoluteIndex, toAbsoluteIndex) {
