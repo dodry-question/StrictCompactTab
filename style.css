@@ -704,6 +704,7 @@ body {
   height: 16px;
   object-fit: contain;
   opacity: 0.5;
+  filter: brightness(0) invert(1);
   transition: opacity 0.15s ease;
 }
 
