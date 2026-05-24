@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyFavicon() {
     const faviconLink = document.querySelector('.page-favicon');
     if (faviconLink) {
-      faviconLink.href = STATE.customFavicon || 'favicon.png';
+      faviconLink.href = STATE.customFavicon || 'assets/favicon.png';
     }
   }
 
