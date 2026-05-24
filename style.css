@@ -84,9 +84,10 @@ body {
   background-color: rgba(18, 18, 18, 0.95);
 }
 
-/* Стабильная локальная иконка DuckDuckGo */
+/* Стабильный логотип поисковой системы */
 .search-engine-logo {
-  width: 22px;
+  width: auto;
+  max-width: 44px;
   height: 22px;
   object-fit: contain;
   flex-shrink: 0;

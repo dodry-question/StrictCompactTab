@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultCategoryName: "General",
       addCategoryPrompt: "Enter new category name:",
       renameCategoryPrompt: "Rename category to:",
-      deleteCategoryConfirm: "Are you sure you want to delete this category? All its shortcuts will be moved to General."
+      deleteCategoryConfirm: "Are you sure you want to delete this category? All its shortcuts will be moved to General.",
+      searchEngineLabel: "Search Engine"
     },
     ru: {
       searchPlaceholder: "Искать в интернете...",
@@ -90,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultCategoryName: "Общая",
       addCategoryPrompt: "Введите название новой категории:",
       renameCategoryPrompt: "Переименовать категорию в:",
-      deleteCategoryConfirm: "Вы уверены, что хотите удалить эту категорию? Все её ярлыки будут перенесены в Общую."
+      deleteCategoryConfirm: "Вы уверены, что хотите удалить эту категорию? Все её ярлыки будут перенесены в Общую.",
+      searchEngineLabel: "Поисковая система"
     }
   };
 
@@ -158,13 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const STATE = {
     shortcuts: [],
     categories: [{ id: "default", name: "General" }],
-    activeCategory: "default", // Активная категория на главном экране
-    activeSettingsCategory: "default", // Активная категория в панели настроек
+    activeCategory: "default",
+    activeSettingsCategory: "default",
     columns: 10,
     size: "small",
     customBackground: null,
     customFavicon: null,
     language: "en",
+    searchEngine: "duckduckgo",
     showDate: true,
     format12h: false,
     showSeconds: false
@@ -240,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateClockAndDate, 1000);
   updateClockAndDate();
 
-  // --- ПОИСК DUCKDUCKGO ---
+  // --- ПОИСК С ДИНАМИЧЕСКИМ ПЕРЕНАПРАВЛЕНИЕМ ---
   const searchForm = document.getElementById('search-form');
   const searchInput = document.getElementById('search-input');
   if (searchForm && searchInput) {
@@ -248,7 +251,17 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const query = searchInput.value.trim();
       if (query) {
-        window.location.href = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+        const engines = {
+          google: "https://www.google.com/search?q=",
+          yandex: "https://yandex.ru/search/?text=",
+          brave: "https://search.brave.com/search?q=",
+          duckduckgo: "https://duckduckgo.com/?q=",
+          qwant: "https://www.qwant.com/?q=",
+          bing: "https://www.bing.com/search?q=",
+          startpage: "https://www.startpage.com/do/search?q="
+        };
+        const baseUrl = engines[STATE.searchEngine] || engines.duckduckgo;
+        window.location.href = baseUrl + encodeURIComponent(query);
       }
     });
   }
@@ -278,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeSelect = document.getElementById('shortcut-size-select');
   const columnsSelect = document.getElementById('shortcut-columns-select');
   const languageSelect = document.getElementById('language-select');
+  const searchEngineSelect = document.getElementById('search-engine-select');
 
   if (sizeSelect) {
     sizeSelect.addEventListener('change', (e) => {
@@ -308,6 +322,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  if (searchEngineSelect) {
+    searchEngineSelect.addEventListener('change', (e) => {
+      STATE.searchEngine = e.target.value;
+      saveState();
+      updateSearchEngineUI();
+    });
+  }
+
   // Форма создания нового ярлыка
   const newIconInput = document.getElementById('new-shortcut-icon-file');
   const addForm = document.getElementById('add-shortcut-form');
@@ -334,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
           renderModalShortcutsList();
 
           addForm.reset();
-          populateCategorySelects(); // Восстанавливаем дефолтное выбранное значение селекта
+          populateCategorySelects();
           
           const iconLabel = document.querySelector('.add-shortcut-form .btn-square-upload');
           if (iconLabel) {
@@ -541,7 +563,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       tab.textContent = cat.id === 'default' ? currentDict.defaultCategoryName : cat.name;
       
-      // Сделать вкладки-категории перетаскиваемыми (кроме дефолтной, но для порядка разрешаем перемещать все)
       tab.setAttribute('draggable', true);
       tab.dataset.id = cat.id;
       tab.dataset.index = index;
@@ -552,7 +573,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderModalShortcutsList();
       });
 
-      // Перетаскивание категорий (Drag & Drop)
       tab.addEventListener('dragstart', (e) => {
         dragCategorySrcId = cat.id;
         e.dataTransfer.effectAllowed = 'move';
@@ -590,7 +610,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      // Двойной клик для переименования категории
       tab.addEventListener('dblclick', () => {
         if (cat.id === 'default') return;
         const newName = prompt(currentDict.renameCategoryPrompt, cat.name);
@@ -603,7 +622,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      // Правый клик для удаления категории
       tab.addEventListener('contextmenu', (e) => {
         if (cat.id === 'default') return;
         e.preventDefault();
@@ -611,7 +629,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirmDelete) {
           STATE.categories = STATE.categories.filter(c => c.id !== cat.id);
           
-          // Перенос ярлыков удаленной категории в General ("default")
           STATE.shortcuts.forEach(s => {
             if (s.category === cat.id) {
               s.category = 'default';
@@ -634,34 +651,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Функция для плавного переключения вкладок с fade-out/fade-in анимацией
-  function switchMainCategory(newCategoryId) {
-    const shortcutsContainer = document.getElementById('shortcuts-container');
-    if (shortcutsContainer) {
-      shortcutsContainer.classList.add('fade-out');
-      setTimeout(() => {
-        STATE.activeCategory = newCategoryId;
-        renderMainCategories();
-        renderShortcuts();
-        
-        // Принудительный Reflow, чтобы зафиксировать состояние opacity: 0
-        void shortcutsContainer.offsetHeight; 
-        
-        shortcutsContainer.classList.remove('fade-out');
-      }, 150);
-    } else {
-      STATE.activeCategory = newCategoryId;
-      renderMainCategories();
-      renderShortcuts();
-    }
-  }
-
   function renderMainCategories() {
     const mainTabsContainer = document.getElementById('main-categories-container');
     if (!mainTabsContainer) return;
     mainTabsContainer.innerHTML = '';
 
-    // Если создана ТОЛЬКО ОДНА категория (дефолтная), то скрываем панель переключателей
     if (STATE.categories.length <= 1) {
       mainTabsContainer.style.display = 'none';
       return;
@@ -686,12 +680,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Навигация колесиком мыши (скролл) по категориям вне открытого модального окна
+  function switchMainCategory(newCategoryId) {
+    const shortcutsContainer = document.getElementById('shortcuts-container');
+    if (shortcutsContainer) {
+      shortcutsContainer.classList.add('fade-out');
+      setTimeout(() => {
+        STATE.activeCategory = newCategoryId;
+        renderMainCategories();
+        renderShortcuts();
+        
+        void shortcutsContainer.offsetHeight; 
+        
+        shortcutsContainer.classList.remove('fade-out');
+      }, 150);
+    } else {
+      STATE.activeCategory = newCategoryId;
+      renderMainCategories();
+      renderShortcuts();
+    }
+  }
+
   window.addEventListener('wheel', (e) => {
     if (modal && modal.classList.contains('active')) return;
     if (STATE.categories.length <= 1) return;
 
-    // Убедимся, что жест прокрутки достаточно выраженный по оси Y
     if (Math.abs(e.deltaY) < 15) return;
 
     const currentIndex = STATE.categories.findIndex(c => c.id === STATE.activeCategory);
@@ -704,10 +716,8 @@ document.addEventListener('DOMContentLoaded', () => {
       nextIndex = (currentIndex - 1 + STATE.categories.length) % STATE.categories.length;
     }
 
-    // Вызываем плавное переключение через анимацию
     switchMainCategory(STATE.categories[nextIndex].id);
   }, { passive: true });
-
 
   // --- ЭКСПОРТ И ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
   if (btnExport) {
@@ -744,7 +754,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const shortcuts = Array.isArray(data.shortcuts) ? data.shortcuts : DEFAULT_SHORTCUTS;
           const categories = Array.isArray(data.categories) ? data.categories : [{ id: "default", name: "General" }];
           
-          // Безопасный парсинг ярлыков с пропущенным полем category
           shortcuts.forEach(s => {
             if (!s.category) s.category = "default";
           });
@@ -764,6 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const customBackground = data.customBackground ?? null;
           const customFavicon = data.customFavicon ?? null;
           const language = data.language ?? 'en';
+          const searchEngine = data.searchEngine ?? 'duckduckgo';
 
           const cleanedData = {
             shortcuts,
@@ -775,7 +785,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showDate,
             customBackground,
             customFavicon,
-            language
+            language,
+            searchEngine
           };
 
           storage.clearAndSet(cleanedData, () => {
@@ -800,7 +811,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'showDate', 'format12h', 'showSeconds'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
       STATE.columns = result.columns ?? 10;
@@ -808,11 +819,11 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.customBackground = result.customBackground ?? null;
       STATE.customFavicon = result.customFavicon ?? null;
       STATE.language = result.language ?? "en";
+      STATE.searchEngine = result.searchEngine ?? "duckduckgo";
       STATE.showDate = result.showDate ?? true;
       STATE.format12h = result.format12h ?? false;
       STATE.showSeconds = result.showSeconds ?? false;
 
-      // Обеспечение наличия свойства category у ярлыков
       STATE.shortcuts.forEach(s => {
         if (!s.category) s.category = "default";
       });
@@ -820,14 +831,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sizeSelect) sizeSelect.value = STATE.size;
       if (columnsSelect) columnsSelect.value = STATE.columns;
       if (languageSelect) languageSelect.value = STATE.language;
-
-      if (showDateCb) showDateCb.checked = STATE.showDate;
-      if (timeFormatCb) timeFormatCb.checked = STATE.format12h;
-      if (showSecondsCb) showSecondsCb.checked = STATE.showSeconds;
+      if (searchEngineSelect) searchEngineSelect.value = STATE.searchEngine;
 
       applyBackground();
       applyFavicon();
       applyLanguage(STATE.language);
+      updateSearchEngineUI();
       updateClockAndDate();
       populateCategorySelects();
       renderMainCategories();
@@ -844,10 +853,22 @@ document.addEventListener('DOMContentLoaded', () => {
       customBackground: STATE.customBackground,
       customFavicon: STATE.customFavicon,
       language: STATE.language,
+      searchEngine: STATE.searchEngine,
       showDate: STATE.showDate,
       format12h: STATE.format12h,
       showSeconds: STATE.showSeconds
     });
+  }
+
+  function updateSearchEngineUI() {
+    const select = document.getElementById('search-engine-select');
+    if (select) {
+      select.value = STATE.searchEngine;
+    }
+    const logo = document.getElementById('search-engine-logo');
+    if (logo) {
+      logo.src = 'assets/search_' + STATE.searchEngine + '.png';
+    }
   }
 
   function moveShortcut(fromAbsoluteIndex, toAbsoluteIndex) {
@@ -881,7 +902,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
     container.innerHTML = '';
 
-    // Фильтруем ярлыки для вывода, только если категорий больше 1
     const filteredShortcuts = STATE.categories.length > 1
       ? STATE.shortcuts.filter(s => s.category === STATE.activeCategory)
       : STATE.shortcuts;
@@ -939,7 +959,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
 
-    // Показываем только ярлыки, принадлежащие выбранной в настройках категории
     const filteredShortcuts = STATE.shortcuts.filter(s => s.category === STATE.activeSettingsCategory);
 
     if (filteredShortcuts.length === 0) {
@@ -948,7 +967,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     filteredShortcuts.forEach((item) => {
-      // Ищем абсолютный индекс ярлыка в главном массиве STATE.shortcuts
       const absoluteIndex = STATE.shortcuts.indexOf(item);
 
       const row = document.createElement('div');
@@ -975,7 +993,6 @@ document.addEventListener('DOMContentLoaded', () => {
         urlInput.className = 'settings-input inline-input';
         urlInput.placeholder = currentDict.urlPlaceholder;
 
-        // Поле выбора категории ярлыка при инлайн-редактировании
         const catSelect = document.createElement('select');
         catSelect.className = 'settings-input inline-input';
         STATE.categories.forEach(cat => {
@@ -1017,16 +1034,13 @@ document.addEventListener('DOMContentLoaded', () => {
         inlineIconLabel.title = currentDict.uploadIconTitle;
 
         const uploadImg = document.createElement('img');
-        uploadImg.src = 'upload-icon.png';
+        uploadImg.src = 'assets/upload-icon.png';
         uploadImg.alt = 'Upload';
 
-        // Добавляем в лейбл ТОЛЬКО картинку, исключая вложенность инпута
         inlineIconLabel.appendChild(uploadImg);
 
-        // Временная переменная для надежного сохранения Base64 иконки
         let tempIconBase64 = item.customIcon;
 
-        // Обрабатываем чтение файла асинхронно сразу при изменении инпута
         inlineIconInput.addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (file) {
@@ -1041,7 +1055,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // Добавляем инпут как соседа в actionsWrapper
         actionsWrapper.appendChild(cancelBtn);
         actionsWrapper.appendChild(saveBtn);
         actionsWrapper.appendChild(inlineIconLabel);
@@ -1057,7 +1070,6 @@ document.addEventListener('DOMContentLoaded', () => {
               newUrl = 'https://' + newUrl;
             }
 
-            // Прямое сохранение значения из tempIconBase64
             STATE.shortcuts[absoluteIndex] = { 
               name: newName, 
               url: newUrl, 
