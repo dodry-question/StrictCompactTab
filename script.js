@@ -634,6 +634,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Функция для плавного переключения вкладок с fade-out/fade-in анимацией
+  function switchMainCategory(newCategoryId) {
+    const shortcutsContainer = document.getElementById('shortcuts-container');
+    if (shortcutsContainer) {
+      shortcutsContainer.classList.add('fade-out');
+      setTimeout(() => {
+        STATE.activeCategory = newCategoryId;
+        renderMainCategories();
+        renderShortcuts();
+        shortcutsContainer.classList.remove('fade-out');
+      }, 150);
+    } else {
+      STATE.activeCategory = newCategoryId;
+      renderMainCategories();
+      renderShortcuts();
+    }
+  }
+
   function renderMainCategories() {
     const mainTabsContainer = document.getElementById('main-categories-container');
     if (!mainTabsContainer) return;
@@ -657,9 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tab.textContent = cat.id === 'default' ? currentDict.defaultCategoryName : cat.name;
 
       tab.addEventListener('click', () => {
-        STATE.activeCategory = cat.id;
-        renderMainCategories();
-        renderShortcuts();
+        switchMainCategory(cat.id);
       });
 
       mainTabsContainer.appendChild(tab);
@@ -684,9 +700,8 @@ document.addEventListener('DOMContentLoaded', () => {
       nextIndex = (currentIndex - 1 + STATE.categories.length) % STATE.categories.length;
     }
 
-    STATE.activeCategory = STATE.categories[nextIndex].id;
-    renderMainCategories();
-    renderShortcuts();
+    // Вызываем плавное переключение через анимацию
+    switchMainCategory(STATE.categories[nextIndex].id);
   }, { passive: true });
 
 
@@ -1004,11 +1019,21 @@ document.addEventListener('DOMContentLoaded', () => {
         inlineIconLabel.appendChild(uploadImg);
         inlineIconLabel.appendChild(inlineIconInput);
 
+        // Временная переменная для надежного сохранения Base64 иконки
+        let tempIconBase64 = item.customIcon;
+
+        // Обрабатываем чтение файла асинхронно сразу при изменении инпута
         inlineIconInput.addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (file) {
             inlineIconLabel.title = file.name;
             inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              tempIconBase64 = event.target.result;
+            };
+            reader.readAsDataURL(file);
           }
         });
 
@@ -1026,25 +1051,17 @@ document.addEventListener('DOMContentLoaded', () => {
               newUrl = 'https://' + newUrl;
             }
 
-            const file = inlineIconInput.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                STATE.shortcuts[absoluteIndex] = { name: newName, url: newUrl, customIcon: event.target.result, category: newCat };
-                saveState();
-                editingIndex = -1;
-                renderShortcuts();
-                renderModalShortcutsList();
-              };
-              reader.readAsDataURL(file);
-            } else {
-              const existingIcon = STATE.shortcuts[absoluteIndex].customIcon || null;
-              STATE.shortcuts[absoluteIndex] = { name: newName, url: newUrl, customIcon: existingIcon, category: newCat };
-              saveState();
-              editingIndex = -1;
-              renderShortcuts();
-              renderModalShortcutsList();
-            }
+            // Прямое сохранение значения из tempIconBase64
+            STATE.shortcuts[absoluteIndex] = { 
+              name: newName, 
+              url: newUrl, 
+              customIcon: tempIconBase64, 
+              category: newCat 
+            };
+            saveState();
+            editingIndex = -1;
+            renderShortcuts();
+            renderModalShortcutsList();
           }
         });
 

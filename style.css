@@ -170,6 +170,15 @@ body {
   justify-content: center;
   gap: 16px;
   width: 100%;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Класс для плавного скрытия контейнера */
+.shortcuts-container.fade-out {
+  opacity: 0;
+  transform: scale(0.98);
 }
 
 /* Стили ярлыков */
