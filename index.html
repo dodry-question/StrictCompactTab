@@ -64,14 +64,13 @@
             <form id="add-shortcut-form" class="add-shortcut-form">
               <input id="new-shortcut-name" type="text" placeholder="Название" class="settings-input" required autocomplete="off">
               <input id="new-shortcut-url" type="text" placeholder="Ссылка URL" class="settings-input" required autocomplete="off">
-              <!-- Новая кнопка выбора кастомной иконки ярлыка -->
-              <div class="settings-row-align">
-                <label class="btn btn-file-label" id="new-shortcut-icon-label" style="width: 100%;">
-                  Загрузить иконку (опционально)
-                  <input id="new-shortcut-icon" type="file" accept="image/*" style="display: none;">
+              <div class="form-actions-row">
+                <button type="submit" class="btn btn-add">Добавить</button>
+                <label class="btn-square-upload" title="Загрузить иконку (опционально)">
+                  <img src="upload-icon.png" alt="Upload">
+                  <input id="new-shortcut-icon-file" type="file" accept="image/*" style="display: none;">
                 </label>
               </div>
-              <button type="submit" class="btn btn-add">Добавить</button>
             </form>
           </div>
 

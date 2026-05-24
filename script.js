@@ -58,13 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // --- ЧИСТЫЙ СТАРТОВЫЙ ШАБЛОН ---
+  // --- ЧИСТЫЙ СТАРТОВЫЙ ШАБЛОН (Пустая конфигурация по умолчанию) ---
   const DEFAULT_SHORTCUTS = [];
 
   const STATE = {
     shortcuts: [],
     columns: 10,
-    size: "small", // По умолчанию мелкий размер (85x85px)
+    size: "small", // "small" (85x85px) является размером по умолчанию
     customBackground: null,
     showDate: true,
     format12h: false,
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnImport = document.getElementById('btn-import');
   const importFileInput = document.getElementById('import-file-input');
 
-  // --- ЧАСЫ И ДАТА (С тумблерами и локализацией) ---
+  // --- ЧАСЫ И ДАТА (С тумблерами и локализации) ---
   const clockElement = document.getElementById('clock');
   const dateElement = document.getElementById('date-display');
 
@@ -182,21 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Слушатель выбора кастомной иконки для формы создания ярлыка (визуальный текст файла)
-  const newIconInput = document.getElementById('new-shortcut-icon');
-  const newIconLabel = document.getElementById('new-shortcut-icon-label');
-  if (newIconInput && newIconLabel) {
-    newIconInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        newIconLabel.textContent = `Выбран: ${file.name.substring(0, 15)}...`;
-      } else {
-        newIconLabel.textContent = 'Загрузить иконку (опционально)';
-      }
-    });
-  }
+  // Загрузка кастомного файла иконки для формы создания
+  const newIconInput = document.getElementById('new-shortcut-icon-file');
 
-  // Форма создания нового ярлыка (с возможностью ручной загрузки кастомной иконки)
+  // Форма создания нового ярлыка
   const addForm = document.getElementById('add-shortcut-form');
   const newNameInput = document.getElementById('new-shortcut-name');
   const newUrlInput = document.getElementById('new-shortcut-url');
@@ -219,8 +208,12 @@ document.addEventListener('DOMContentLoaded', () => {
           renderModalShortcutsList();
 
           addForm.reset();
-          if (newIconLabel) {
-            newIconLabel.textContent = 'Загрузить иконку (опционально)';
+          
+          // Сбрасываем рамку квадратной кнопки загрузки после добавления
+          const iconLabel = document.querySelector('.add-shortcut-form .btn-square-upload');
+          if (iconLabel) {
+            iconLabel.style.borderColor = '';
+            iconLabel.title = 'Загрузить иконку (опционально)';
           }
         };
 
@@ -234,6 +227,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           saveShortcut(null);
         }
+      }
+    });
+  }
+
+  // Изменение границы квадратной кнопки загрузки при выборе файла в форме добавления
+  if (newIconInput) {
+    newIconInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      const iconLabel = document.querySelector('.add-shortcut-form .btn-square-upload');
+      if (file && iconLabel) {
+        iconLabel.title = `Выбрана иконка: ${file.name}`;
+        iconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
       }
     });
   }
@@ -269,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (STATE.customBackground) {
       document.body.style.backgroundImage = `url(${STATE.customBackground})`;
     } else {
-      document.body.style.backgroundImage = 'none'; // По умолчанию фоновое изображение отсутствует (черный экран)
+      document.body.style.backgroundImage = 'none'; // По умолчанию черный экран
     }
   }
 
@@ -302,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- ЭКСПОРТ И ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
+  // --- ЭКСПОРТ И СТАБИЛЬНЫЙ ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
   if (btnExport) {
     btnExport.addEventListener('click', () => {
       storage.getAll((allData) => {
@@ -336,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const data = JSON.parse(event.target.result);
 
-          // Безопасный разбор ключей с жесткими дефолтными значениями
+          // Безопасный разбор ключей с жесткими дефолтными значениями (?? оператор)
           const shortcuts = Array.isArray(data.shortcuts) ? data.shortcuts : DEFAULT_SHORTCUTS;
           const columns = data.columns ?? 10;
           const size = data.size ?? 'small';
@@ -363,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
           };
 
           storage.clearAndSet(cleanedData, () => {
-            window.location.reload(); // Перезапуск страницы
+            window.location.reload(); // Жесткий перезапуск страницы
           });
 
         } catch (err) {
@@ -388,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Инициализация состояний с защитой nullish-coalescing от пустых значений undefined
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.columns = result.columns ?? 10;
-      STATE.size = result.size ?? "small"; // "small" (ныне 85x85px) является размером по умолчанию
+      STATE.size = result.size ?? "small"; // "small" (ныне 85x85px) является базовым по умолчанию
       STATE.customBackground = result.customBackground ?? null;
       STATE.showDate = result.showDate ?? true;
       STATE.format12h = result.format12h ?? false;
@@ -483,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hostname = item.url;
       }
 
-      // Прямой вывод через <img> с приоритетом кастомной загруженной иконки
+      // Прямой вывод через <img> с приоритетом кастомной загруженной вручную иконки
       img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
 
       // Дефолтная заглушка при ошибке загрузки стандартного API
@@ -539,40 +544,57 @@ document.addEventListener('DOMContentLoaded', () => {
         urlInput.className = 'settings-input inline-input';
         urlInput.placeholder = 'Ссылка URL';
 
-        // Добавляем ручной выбор кастомной иконки для редактируемого элемента
-        const inlineIconInput = document.createElement('input');
-        inlineIconInput.type = 'file';
-        inlineIconInput.accept = 'image/*';
-        inlineIconInput.style.display = 'none';
-        inlineIconInput.id = `inline-icon-edit-${index}`;
-
-        const inlineIconLabel = document.createElement('label');
-        inlineIconLabel.htmlFor = `inline-icon-edit-${index}`;
-        inlineIconLabel.className = 'btn btn-edit';
-        inlineIconLabel.style.width = '100%';
-        inlineIconLabel.style.textAlign = 'center';
-        inlineIconLabel.textContent = 'Обновить иконку (опционально)';
-
-        inlineIconInput.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            inlineIconLabel.textContent = `Иконка: ${file.name.substring(0, 15)}...`;
-          } else {
-            inlineIconLabel.textContent = 'Обновить иконку (опционально)';
-          }
-        });
-
         fieldsWrapper.appendChild(nameInput);
         fieldsWrapper.appendChild(urlInput);
-        fieldsWrapper.appendChild(inlineIconInput);
-        fieldsWrapper.appendChild(inlineIconLabel);
 
         const actionsWrapper = document.createElement('div');
         actionsWrapper.className = 'inline-edit-actions';
 
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-inline-cancel';
+        cancelBtn.textContent = 'Отмена';
+        cancelBtn.addEventListener('click', () => {
+          editingIndex = -1;
+          renderModalShortcutsList();
+        });
+
         const saveBtn = document.createElement('button');
         saveBtn.className = 'btn btn-inline-save';
         saveBtn.textContent = 'Сохранить';
+
+        // Компактный скрытый инпут и квадратная кнопка для изменения иконки ярлыка
+        const inlineIconInput = document.createElement('input');
+        inlineIconInput.type = 'file';
+        inlineIconInput.accept = 'image/*';
+        inlineIconInput.style.display = 'none';
+        inlineIconInput.id = `edit-shortcut-icon-file-${index}`;
+
+        const inlineIconLabel = document.createElement('label');
+        inlineIconLabel.htmlFor = `edit-shortcut-icon-file-${index}`;
+        inlineIconLabel.className = 'btn-square-upload';
+        inlineIconLabel.title = 'Обновить иконку (опционально)';
+
+        const uploadImg = document.createElement('img');
+        uploadImg.src = 'upload-icon.png';
+        uploadImg.alt = 'Upload';
+
+        inlineIconLabel.appendChild(uploadImg);
+        inlineIconLabel.appendChild(inlineIconInput);
+
+        // Индикатор выбора файла в режиме редактирования
+        inlineIconInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            inlineIconLabel.title = `Выбрана иконка: ${file.name}`;
+            inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)'; // Подсвечиваем рамку при выборе
+          }
+        });
+
+        // Добавляем все элементы управления в строку действий
+        actionsWrapper.appendChild(cancelBtn);
+        actionsWrapper.appendChild(saveBtn);
+        actionsWrapper.appendChild(inlineIconLabel); // Квадратная кнопка теперь стоит в ряду с Сохранить/Отмена
+
         saveBtn.addEventListener('click', () => {
           const newName = nameInput.value.trim();
           let newUrl = urlInput.value.trim();
@@ -594,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
               };
               reader.readAsDataURL(file);
             } else {
-              // Если файл не был выбран, сохраняем существующую кастомную иконку (или null)
+              // Если файл не выбран, сохраняем существующую иконку (или null)
               const existingIcon = STATE.shortcuts[index].customIcon || null;
               STATE.shortcuts[index] = { name: newName, url: newUrl, customIcon: existingIcon };
               saveState();
@@ -604,17 +626,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
         });
-
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'btn btn-inline-cancel';
-        cancelBtn.textContent = 'Отмена';
-        cancelBtn.addEventListener('click', () => {
-          editingIndex = -1;
-          renderModalShortcutsList();
-        });
-
-        actionsWrapper.appendChild(cancelBtn);
-        actionsWrapper.appendChild(saveBtn);
 
         editContainer.appendChild(fieldsWrapper);
         editContainer.appendChild(actionsWrapper);

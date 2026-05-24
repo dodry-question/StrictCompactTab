@@ -663,3 +663,51 @@ body {
   border-top: 2px solid rgba(255, 255, 255, 0.45);
   background-color: rgba(255, 255, 255, 0.04);
 }
+
+/* --- СТИЛИ ДЛЯ КОМПАКТНОЙ КНОПКИ ЗАГРУЗКИ ИКОНОК --- */
+
+/* Контейнер для объединения кнопок добавления в одну линию */
+.form-actions-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Кнопка "Добавить" растягивается, заполняя всю ширину */
+.add-shortcut-form .btn-add {
+  flex: 1;
+}
+
+/* Квадратная кнопка выбора файла */
+.btn-square-upload {
+  width: 38px;
+  height: 38px;
+  background-color: #161617;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-square-upload:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background-color: #1c1c1e;
+}
+
+/* Иконка стрелочки/загрузки внутри квадратной кнопки */
+.btn-square-upload img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+}
+
+/* Подсветка стрелочки при наведении */
+.btn-square-upload:hover img {
+  opacity: 1;
+}
