@@ -129,6 +129,11 @@ body {
   color: #fff;
 }
 
+/* Выборочная инверсия логотипа в белый цвет */
+.search-engine-logo.inverted, .settings-search-logo.inverted {
+  filter: brightness(0) invert(1);
+}
+
 /* Стили вкладок-категорий на главном экране */
 .main-categories-container {
   display: flex;

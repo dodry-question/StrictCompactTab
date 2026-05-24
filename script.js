@@ -869,10 +869,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const logo = document.getElementById('search-engine-logo');
     if (logo) {
       logo.src = 'assets/search_' + STATE.searchEngine + '.png';
+      if (STATE.searchEngine === 'brave') {
+        logo.classList.add('inverted');
+      } else {
+        logo.classList.remove('inverted');
+      }
     }
     const settingsSearchLogo = document.getElementById('settings-search-logo');
     if (settingsSearchLogo) {
       settingsSearchLogo.src = 'assets/search_' + STATE.searchEngine + '.png';
+      if (STATE.searchEngine === 'brave') {
+        settingsSearchLogo.classList.add('inverted');
+      } else {
+        settingsSearchLogo.classList.remove('inverted');
+      }
     }
   }
 
