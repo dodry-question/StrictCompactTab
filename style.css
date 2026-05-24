@@ -14,7 +14,6 @@ html, body {
 }
 
 body {
-  /* Стартовый черный цвет по умолчанию */
   background-color: #000000;
   background-position: center center;
   background-repeat: no-repeat;
@@ -162,7 +161,7 @@ body {
 
 /* Измененные и скорректированные размеры ярлыков */
 .shortcut-card.size-small {
-  width: 85px; /* Базовый размер по умолчанию */
+  width: 85px;
   height: 85px;
   border-radius: 14px;
 }
@@ -177,7 +176,7 @@ body {
 }
 
 .shortcut-card.size-medium {
-  width: 98px; /* Сбалансированный промежуточный размер */
+  width: 98px;
   height: 98px;
   border-radius: 16px;
 }
@@ -192,7 +191,7 @@ body {
 }
 
 .shortcut-card.size-large {
-  width: 110px; /* Солидный крупный размер */
+  width: 110px;
   height: 110px;
   border-radius: 18px;
 }
@@ -259,7 +258,7 @@ body {
   opacity: 1 !important;
 }
 
-/* Модальное окно настроек (Двухколоночный макет) */
+/* Модальное окно настроек */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -283,7 +282,7 @@ body {
   border-radius: 16px;
   width: 90%;
   max-width: 880px;
-  height: 600px;
+  height: 620px;
   padding: 32px;
   display: flex;
   flex-direction: column;
@@ -648,7 +647,7 @@ body {
   color: #fff;
 }
 
-/* --- СТИЛИ ДЛЯ DRAG & DROP СОРТИРОВКИ --- */
+/* Стили для drag & drop сортировки */
 .modal-shortcut-item[draggable="true"] {
   cursor: grab;
 }
@@ -664,21 +663,17 @@ body {
   background-color: rgba(255, 255, 255, 0.04);
 }
 
-/* --- СТИЛИ ДЛЯ КОМПАКТНОЙ КНОПКИ ЗАГРУЗКИ ИКОНОК --- */
-
-/* Контейнер для объединения кнопок добавления в одну линию */
+/* Стили компактных кнопок загрузки иконок */
 .form-actions-row {
   display: flex;
   gap: 8px;
   width: 100%;
 }
 
-/* Кнопка "Добавить" растягивается, заполняя всю ширину */
 .add-shortcut-form .btn-add {
   flex: 1;
 }
 
-/* Квадратная кнопка выбора файла */
 .btn-square-upload {
   width: 38px;
   height: 38px;
@@ -698,7 +693,6 @@ body {
   background-color: #1c1c1e;
 }
 
-/* Иконка стрелочки/загрузки внутри квадратной кнопки */
 .btn-square-upload img {
   width: 16px;
   height: 16px;
@@ -708,7 +702,6 @@ body {
   transition: opacity 0.15s ease;
 }
 
-/* Подсветка стрелочки при наведении */
 .btn-square-upload:hover img {
   opacity: 1;
 }

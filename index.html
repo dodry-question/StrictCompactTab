@@ -20,7 +20,6 @@
     
     <!-- Поисковая строка DuckDuckGo -->
     <form id="search-form" class="search-form">
-      <!-- Иконка DuckDuckGo заменена на локальное стабильное изображение -->
       <img src="duckduckgo.png" class="search-engine-logo" alt="">
       <input id="search-input" class="search-input" type="text" placeholder="Искать в интернете..." autofocus autocomplete="off">
       <button type="submit" class="search-btn" title="Искать">
@@ -113,7 +112,19 @@
             </div>
           </div>
 
-          <!-- 4. Настройки часов и даты -->
+          <!-- 4. Иконка вкладки (Динамический favicon) -->
+          <div class="settings-section">
+            <h3>Иконка вкладки</h3>
+            <div class="settings-row-align">
+              <label class="btn btn-file-label">
+                Выбрать иконку
+                <input id="favicon-file-input" type="file" accept="image/*" style="display: none;">
+              </label>
+              <button id="favicon-reset-btn" class="btn btn-danger-action">Сбросить</button>
+            </div>
+          </div>
+
+          <!-- 5. Настройки часов и даты -->
           <div class="settings-section">
             <h3>Настройки часов и даты</h3>
             <div class="settings-toggle-group">
@@ -132,13 +143,12 @@
             </div>
           </div>
 
-          <!-- 5. Резервное копирование -->
+          <!-- 6. Резервное копирование -->
           <div class="settings-section">
             <h3>Резервное копирование</h3>
             <div class="settings-row">
               <button id="btn-export" class="btn btn-secondary">Экспорт</button>
               <button id="btn-import" class="btn btn-secondary">Импорт</button>
-              <!-- Скрытый статический инпут бэкапа -->
               <input type="file" id="import-file-input" style="display: none;" accept=".json">
             </div>
           </div>

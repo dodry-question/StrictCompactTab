@@ -58,14 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // --- ЧИСТЫЙ СТАРТОВЫЙ ШАБЛОН (Пустая конфигурация по умолчанию) ---
+  // --- ЧИСТЫЙ СТАРТОВЫЙ ШАБЛОН ---
   const DEFAULT_SHORTCUTS = [];
 
   const STATE = {
     shortcuts: [],
     columns: 10,
-    size: "small", // "small" (85x85px) является размером по умолчанию
+    size: "small",
     customBackground: null,
+    customFavicon: null,
     showDate: true,
     format12h: false,
     showSeconds: false
@@ -79,14 +80,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnImport = document.getElementById('btn-import');
   const importFileInput = document.getElementById('import-file-input');
 
-  // --- ЧАСЫ И ДАТА (С тумблерами и локализации) ---
+  // --- ЧАСЫ И ДАТА ---
   const clockElement = document.getElementById('clock');
   const dateElement = document.getElementById('date-display');
 
   function updateClockAndDate() {
     const now = new Date();
     
-    // 1. Форматирование времени
     let hours = now.getHours();
     let minutes = String(now.getMinutes()).padStart(2, '0');
     let seconds = String(now.getSeconds()).padStart(2, '0');
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (STATE.format12h) {
       ampm = hours >= 12 ? ' PM' : ' AM';
       hours = hours % 12;
-      hours = hours ? hours : 12; // Преобразование 0 в 12 для 12-часового формата
+      hours = hours ? hours : 12;
     }
     hours = String(hours).padStart(2, '0');
 
@@ -109,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
       clockElement.textContent = timeString;
     }
 
-    // 2. Форматирование даты
     if (dateElement) {
       if (STATE.showDate) {
         dateElement.style.display = 'block';
@@ -182,10 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Загрузка кастомного файла иконки для формы создания
-  const newIconInput = document.getElementById('new-shortcut-icon-file');
-
   // Форма создания нового ярлыка
+  const newIconInput = document.getElementById('new-shortcut-icon-file');
   const addForm = document.getElementById('add-shortcut-form');
   const newNameInput = document.getElementById('new-shortcut-name');
   const newUrlInput = document.getElementById('new-shortcut-url');
@@ -209,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
           addForm.reset();
           
-          // Сбрасываем рамку квадратной кнопки загрузки после добавления
           const iconLabel = document.querySelector('.add-shortcut-form .btn-square-upload');
           if (iconLabel) {
             iconLabel.style.borderColor = '';
@@ -231,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Изменение границы квадратной кнопки загрузки при выборе файла в форме добавления
   if (newIconInput) {
     newIconInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -274,7 +269,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (STATE.customBackground) {
       document.body.style.backgroundImage = `url(${STATE.customBackground})`;
     } else {
-      document.body.style.backgroundImage = 'none'; // По умолчанию черный экран
+      document.body.style.backgroundImage = 'none';
+    }
+  }
+
+  // --- УПРАВЛЕНИЕ ДИНАМИЧЕСКОЙ ИКОНКОЙ ВКЛАДКИ ---
+  const faviconFileInput = document.getElementById('favicon-file-input');
+  const faviconResetBtn = document.getElementById('favicon-reset-btn');
+
+  if (faviconFileInput) {
+    faviconFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          STATE.customFavicon = event.target.result;
+          saveState();
+          applyFavicon();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  if (faviconResetBtn) {
+    faviconResetBtn.addEventListener('click', () => {
+      STATE.customFavicon = null;
+      saveState();
+      applyFavicon();
+    });
+  }
+
+  function applyFavicon() {
+    const faviconLink = document.querySelector('.page-favicon');
+    if (faviconLink) {
+      faviconLink.href = STATE.customFavicon || 'favicon.png';
     }
   }
 
@@ -307,15 +336,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- ЭКСПОРТ И СТАБИЛЬНЫЙ ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
+  // --- ЭКСПОРТ И ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
   if (btnExport) {
     btnExport.addEventListener('click', () => {
       storage.getAll((allData) => {
         const dataStr = JSON.stringify(allData, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        
         const exportFileName = 'brave_new_tab_backup.json';
-        
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
         linkElement.setAttribute('download', exportFileName);
@@ -341,7 +368,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const data = JSON.parse(event.target.result);
 
-          // Безопасный разбор ключей с жесткими дефолтными значениями (?? оператор)
           const shortcuts = Array.isArray(data.shortcuts) ? data.shortcuts : DEFAULT_SHORTCUTS;
           const columns = data.columns ?? 10;
           const size = data.size ?? 'small';
@@ -356,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const showSeconds = data.showSeconds ?? false;
           const showDate = data.showDate ?? true;
           const customBackground = data.customBackground ?? null;
+          const customFavicon = data.customFavicon ?? null;
 
           const cleanedData = {
             shortcuts,
@@ -364,11 +391,12 @@ document.addEventListener('DOMContentLoaded', () => {
             format12h,
             showSeconds,
             showDate,
-            customBackground
+            customBackground,
+            customFavicon
           };
 
           storage.clearAndSet(cleanedData, () => {
-            window.location.reload(); // Жесткий перезапуск страницы
+            window.location.reload();
           });
 
         } catch (err) {
@@ -389,12 +417,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'columns', 'size', 'customBackground', 'showDate', 'format12h', 'showSeconds'], (result) => {
-      // Инициализация состояний с защитой nullish-coalescing от пустых значений undefined
+    storage.get(['shortcuts', 'columns', 'size', 'customBackground', 'customFavicon', 'showDate', 'format12h', 'showSeconds'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.columns = result.columns ?? 10;
-      STATE.size = result.size ?? "small"; // "small" (ныне 85x85px) является базовым по умолчанию
+      STATE.size = result.size ?? "small";
       STATE.customBackground = result.customBackground ?? null;
+      STATE.customFavicon = result.customFavicon ?? null;
       STATE.showDate = result.showDate ?? true;
       STATE.format12h = result.format12h ?? false;
       STATE.showSeconds = result.showSeconds ?? false;
@@ -407,6 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (showSecondsCb) showSecondsCb.checked = STATE.showSeconds;
 
       applyBackground();
+      applyFavicon();
       updateClockAndDate();
       renderShortcuts();
     });
@@ -418,13 +447,13 @@ document.addEventListener('DOMContentLoaded', () => {
       columns: STATE.columns,
       size: STATE.size,
       customBackground: STATE.customBackground,
+      customFavicon: STATE.customFavicon,
       showDate: STATE.showDate,
       format12h: STATE.format12h,
       showSeconds: STATE.showSeconds
     });
   }
 
-  // Вспомогательная сортировка в массиве
   function moveShortcut(fromIndex, toIndex) {
     const [movedItem] = STATE.shortcuts.splice(fromIndex, 1);
     STATE.shortcuts.splice(toIndex, 0, movedItem);
@@ -433,7 +462,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderModalShortcutsList();
   }
 
-  // Скроллинг правого контейнера у границ при перетаскивании
   function handleAutoscroll(e) {
     const listContainer = document.getElementById('modal-shortcuts-list');
     if (!listContainer) return;
@@ -451,14 +479,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Отрисовка ярлыков на главном экране
   const container = document.getElementById('shortcuts-container');
   
   function renderShortcuts() {
     if (!container) return;
     container.innerHTML = '';
 
-    // Сбалансированная и измененная сетка размеров
     let itemWidth = 85; 
     if (STATE.size === "small") itemWidth = 85;
     if (STATE.size === "medium") itemWidth = 98;
@@ -488,10 +514,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hostname = item.url;
       }
 
-      // Прямой вывод через <img> с приоритетом кастомной загруженной вручную иконки
       img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
 
-      // Дефолтная заглушка при ошибке загрузки стандартного API
       img.onerror = () => {
         img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
       };
@@ -506,7 +530,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Список ярлыков в модальном окне
   const modalList = document.getElementById('modal-shortcuts-list');
 
   function renderModalShortcutsList() {
@@ -523,7 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
       row.className = 'modal-shortcut-item';
 
       if (editingIndex === index) {
-        // --- РЕЖИМ ИНЛАЙН-РЕДАКТИРОВАНИЯ ---
         row.setAttribute('draggable', false);
 
         const editContainer = document.createElement('div');
@@ -562,7 +584,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveBtn.className = 'btn btn-inline-save';
         saveBtn.textContent = 'Сохранить';
 
-        // Компактный скрытый инпут и квадратная кнопка для изменения иконки ярлыка
         const inlineIconInput = document.createElement('input');
         inlineIconInput.type = 'file';
         inlineIconInput.accept = 'image/*';
@@ -581,19 +602,17 @@ document.addEventListener('DOMContentLoaded', () => {
         inlineIconLabel.appendChild(uploadImg);
         inlineIconLabel.appendChild(inlineIconInput);
 
-        // Индикатор выбора файла в режиме редактирования
         inlineIconInput.addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (file) {
             inlineIconLabel.title = `Выбрана иконка: ${file.name}`;
-            inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)'; // Подсвечиваем рамку при выборе
+            inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
           }
         });
 
-        // Добавляем все элементы управления в строку действий
         actionsWrapper.appendChild(cancelBtn);
         actionsWrapper.appendChild(saveBtn);
-        actionsWrapper.appendChild(inlineIconLabel); // Квадратная кнопка теперь стоит в ряду с Сохранить/Отмена
+        actionsWrapper.appendChild(inlineIconLabel);
 
         saveBtn.addEventListener('click', () => {
           const newName = nameInput.value.trim();
@@ -616,7 +635,6 @@ document.addEventListener('DOMContentLoaded', () => {
               };
               reader.readAsDataURL(file);
             } else {
-              // Если файл не выбран, сохраняем существующую иконку (или null)
               const existingIcon = STATE.shortcuts[index].customIcon || null;
               STATE.shortcuts[index] = { name: newName, url: newUrl, customIcon: existingIcon };
               saveState();
@@ -632,7 +650,6 @@ document.addEventListener('DOMContentLoaded', () => {
         row.appendChild(editContainer);
 
       } else {
-        // --- СТАНДАРТНЫЙ РЕЖИМ ОТОБРАЖЕНИЯ (С Drag & Drop) ---
         row.setAttribute('draggable', true);
         row.dataset.index = index;
 
@@ -714,6 +731,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Старт инициализации
   loadState();
 });
