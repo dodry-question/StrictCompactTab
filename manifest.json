@@ -1,8 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Строгая компактная вкладка",
-  "version": "4.0",
-  "description": "Строгая двухколоночная стартовая страница с кастомизацией обоев, часов и резервным копированием.",
+  "name": "Strict Compact Tab",
+  "version": "1.4.0",
+  "description": "A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally.",
+  "author": "dodry-question",
+  "homepage_url": "https://github.com/dodry-question/my-new-tab",
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
@@ -15,5 +17,11 @@
     "32": "favicon.png",
     "48": "favicon.png",
     "128": "favicon.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "strict-compact-tab@dodry-question",
+      "strict_min_version": "109.0"
+    }
   }
 }
