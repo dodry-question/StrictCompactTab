@@ -643,6 +643,10 @@ document.addEventListener('DOMContentLoaded', () => {
         STATE.activeCategory = newCategoryId;
         renderMainCategories();
         renderShortcuts();
+        
+        // Принудительный Reflow, чтобы зафиксировать состояние opacity: 0
+        void shortcutsContainer.offsetHeight; 
+        
         shortcutsContainer.classList.remove('fade-out');
       }, 150);
     } else {
@@ -1016,8 +1020,8 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadImg.src = 'upload-icon.png';
         uploadImg.alt = 'Upload';
 
+        // Добавляем в лейбл ТОЛЬКО картинку, исключая вложенность инпута
         inlineIconLabel.appendChild(uploadImg);
-        inlineIconLabel.appendChild(inlineIconInput);
 
         // Временная переменная для надежного сохранения Base64 иконки
         let tempIconBase64 = item.customIcon;
@@ -1037,9 +1041,11 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
+        // Добавляем инпут как соседа в actionsWrapper
         actionsWrapper.appendChild(cancelBtn);
         actionsWrapper.appendChild(saveBtn);
         actionsWrapper.appendChild(inlineIconLabel);
+        actionsWrapper.appendChild(inlineIconInput); 
 
         saveBtn.addEventListener('click', () => {
           const newName = nameInput.value.trim();
