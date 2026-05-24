@@ -58,13 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // --- ЧИСТЫЙ СТАРТОВЫЙ ШАБЛОН (Пустая конфигурация по умолчанию) ---
+  // --- ЧИСТЫЙ СТАРТОВЫЙ ШАБЛОН ---
   const DEFAULT_SHORTCUTS = [];
 
   const STATE = {
     shortcuts: [],
     columns: 10,
-    size: "small", // "small" (85x85px) является размером по умолчанию
+    size: "small", // По умолчанию мелкий размер (85x85px)
     customBackground: null,
     showDate: true,
     format12h: false,
@@ -129,32 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateClockAndDate, 1000);
   updateClockAndDate();
 
-  // --- АСИНХРОННОЕ СКАЧИВАНИЕ И КЭШИРОВАНИЕ ИКОНОК В BASE64 ---
-  async function getBase64Favicon(url) {
-    try {
-      let hostname;
-      try {
-        hostname = new URL(url).hostname;
-      } catch (e) {
-        hostname = url;
-      }
-      const faviconUrl = `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
-      
-      const response = await fetch(faviconUrl);
-      if (!response.ok) return null;
-      const blob = await response.blob();
-      
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error("Не удалось загрузить favicon:", error);
-      return null;
-    }
-  }
-
   // --- ПОИСК DUCKDUCKGO ---
   const searchForm = document.getElementById('search-form');
   const searchInput = document.getElementById('search-input');
@@ -208,13 +182,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Форма создания нового ярлыка (с асинхронным скачиванием иконки)
+  // Слушатель выбора кастомной иконки для формы создания ярлыка (визуальный текст файла)
+  const newIconInput = document.getElementById('new-shortcut-icon');
+  const newIconLabel = document.getElementById('new-shortcut-icon-label');
+  if (newIconInput && newIconLabel) {
+    newIconInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        newIconLabel.textContent = `Выбран: ${file.name.substring(0, 15)}...`;
+      } else {
+        newIconLabel.textContent = 'Загрузить иконку (опционально)';
+      }
+    });
+  }
+
+  // Форма создания нового ярлыка (с возможностью ручной загрузки кастомной иконки)
   const addForm = document.getElementById('add-shortcut-form');
   const newNameInput = document.getElementById('new-shortcut-name');
   const newUrlInput = document.getElementById('new-shortcut-url');
 
   if (addForm) {
-    addForm.addEventListener('submit', async (e) => {
+    addForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = newNameInput.value.trim();
       let url = newUrlInput.value.trim();
@@ -224,22 +212,28 @@ document.addEventListener('DOMContentLoaded', () => {
           url = 'https://' + url;
         }
 
-        const submitBtn = addForm.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn.textContent;
-        submitBtn.textContent = 'Загрузка...';
-        submitBtn.disabled = true;
+        const saveShortcut = (customIcon) => {
+          STATE.shortcuts.push({ name, url, customIcon });
+          saveState();
+          renderShortcuts();
+          renderModalShortcutsList();
 
-        // Скачиваем и кодируем иконку асинхронно
-        const iconData = await getBase64Favicon(url);
+          addForm.reset();
+          if (newIconLabel) {
+            newIconLabel.textContent = 'Загрузить иконку (опционально)';
+          }
+        };
 
-        STATE.shortcuts.push({ name, url, iconData });
-        saveState();
-        renderShortcuts();
-        renderModalShortcutsList();
-
-        submitBtn.textContent = originalBtnText;
-        submitBtn.disabled = false;
-        addForm.reset();
+        const file = newIconInput ? newIconInput.files[0] : null;
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            saveShortcut(event.target.result);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          saveShortcut(null);
+        }
       }
     });
   }
@@ -275,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (STATE.customBackground) {
       document.body.style.backgroundImage = `url(${STATE.customBackground})`;
     } else {
-      document.body.style.backgroundImage = 'none'; // По умолчанию фоновое изображение отсутствует (чисто черный цвет)
+      document.body.style.backgroundImage = 'none'; // По умолчанию фоновое изображение отсутствует (черный экран)
     }
   }
 
@@ -308,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- ЭКСПОРТ И СТАБИЛЬНЫЙ ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
+  // --- ЭКСПОРТ И ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
   if (btnExport) {
     btnExport.addEventListener('click', () => {
       storage.getAll((allData) => {
@@ -369,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
           };
 
           storage.clearAndSet(cleanedData, () => {
-            window.location.reload(); // Перезапуск страницы для гарантированного чистого сброса
+            window.location.reload(); // Перезапуск страницы
           });
 
         } catch (err) {
@@ -394,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Инициализация состояний с защитой nullish-coalescing от пустых значений undefined
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.columns = result.columns ?? 10;
-      STATE.size = result.size ?? "small"; // По умолчанию мелкий размер (ныне 85x85px)
+      STATE.size = result.size ?? "small"; // "small" (ныне 85x85px) является размером по умолчанию
       STATE.customBackground = result.customBackground ?? null;
       STATE.showDate = result.showDate ?? true;
       STATE.format12h = result.format12h ?? false;
@@ -459,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
     container.innerHTML = '';
 
-    // Сбалансированная сетка размеров
+    // Сбалансированная и измененная сетка размеров
     let itemWidth = 85; 
     if (STATE.size === "small") itemWidth = 85;
     if (STATE.size === "medium") itemWidth = 98;
@@ -482,12 +476,20 @@ document.addEventListener('DOMContentLoaded', () => {
       img.className = 'shortcut-icon';
       img.alt = '';
 
-      // Мгновенный запуск кэшированной иконки, иначе — дефолтная SVG-заглушка
-      if (item.iconData) {
-        img.src = item.iconData;
-      } else {
-        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
+      let hostname = '';
+      try {
+        hostname = new URL(item.url).hostname;
+      } catch (e) {
+        hostname = item.url;
       }
+
+      // Прямой вывод через <img> с приоритетом кастомной загруженной иконки
+      img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
+
+      // Дефолтная заглушка при ошибке загрузки стандартного API
+      img.onerror = () => {
+        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
+      };
 
       const span = document.createElement('span');
       span.className = 'shortcut-label';
@@ -537,8 +539,33 @@ document.addEventListener('DOMContentLoaded', () => {
         urlInput.className = 'settings-input inline-input';
         urlInput.placeholder = 'Ссылка URL';
 
+        // Добавляем ручной выбор кастомной иконки для редактируемого элемента
+        const inlineIconInput = document.createElement('input');
+        inlineIconInput.type = 'file';
+        inlineIconInput.accept = 'image/*';
+        inlineIconInput.style.display = 'none';
+        inlineIconInput.id = `inline-icon-edit-${index}`;
+
+        const inlineIconLabel = document.createElement('label');
+        inlineIconLabel.htmlFor = `inline-icon-edit-${index}`;
+        inlineIconLabel.className = 'btn btn-edit';
+        inlineIconLabel.style.width = '100%';
+        inlineIconLabel.style.textAlign = 'center';
+        inlineIconLabel.textContent = 'Обновить иконку (опционально)';
+
+        inlineIconInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            inlineIconLabel.textContent = `Иконка: ${file.name.substring(0, 15)}...`;
+          } else {
+            inlineIconLabel.textContent = 'Обновить иконку (опционально)';
+          }
+        });
+
         fieldsWrapper.appendChild(nameInput);
         fieldsWrapper.appendChild(urlInput);
+        fieldsWrapper.appendChild(inlineIconInput);
+        fieldsWrapper.appendChild(inlineIconLabel);
 
         const actionsWrapper = document.createElement('div');
         actionsWrapper.className = 'inline-edit-actions';
@@ -546,26 +573,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveBtn = document.createElement('button');
         saveBtn.className = 'btn btn-inline-save';
         saveBtn.textContent = 'Сохранить';
-        saveBtn.addEventListener('click', async () => {
+        saveBtn.addEventListener('click', () => {
           const newName = nameInput.value.trim();
           let newUrl = urlInput.value.trim();
 
           if (newName && newUrl) {
-            saveBtn.textContent = '...';
-            saveBtn.disabled = true;
-
             if (!/^https?:\/\//i.test(newUrl)) {
               newUrl = 'https://' + newUrl;
             }
 
-            // Перезагрузка и асинхронное кэширование измененной иконки
-            const iconData = await getBase64Favicon(newUrl);
-
-            STATE.shortcuts[index] = { name: newName, url: newUrl, iconData };
-            saveState();
-            editingIndex = -1;
-            renderShortcuts();
-            renderModalShortcutsList();
+            const file = inlineIconInput.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                STATE.shortcuts[index] = { name: newName, url: newUrl, customIcon: event.target.result };
+                saveState();
+                editingIndex = -1;
+                renderShortcuts();
+                renderModalShortcutsList();
+              };
+              reader.readAsDataURL(file);
+            } else {
+              // Если файл не был выбран, сохраняем существующую кастомную иконку (или null)
+              const existingIcon = STATE.shortcuts[index].customIcon || null;
+              STATE.shortcuts[index] = { name: newName, url: newUrl, customIcon: existingIcon };
+              saveState();
+              editingIndex = -1;
+              renderShortcuts();
+              renderModalShortcutsList();
+            }
           }
         });
 
