@@ -29,6 +29,9 @@
       </button>
     </form>
 
+    <!-- Горизонтальная панель вкладок-категорий (рендерится только если категорий >= 2) -->
+    <div id="main-categories-container" class="main-categories-container"></div>
+
     <!-- Сетка ярлыков быстрого доступа -->
     <div id="shortcuts-container" class="shortcuts-container"></div>
     
@@ -63,6 +66,13 @@
             <form id="add-shortcut-form" class="add-shortcut-form">
               <input id="new-shortcut-name" type="text" data-i18n-placeholder="namePlaceholder" placeholder="Name" class="settings-input" required autocomplete="off">
               <input id="new-shortcut-url" type="text" data-i18n-placeholder="urlPlaceholder" placeholder="URL Link" class="settings-input" required autocomplete="off">
+              
+              <!-- Выбор категории при добавлении ярлыка -->
+              <div class="settings-field">
+                <label for="new-shortcut-category" data-i18n="shortcutCategoryLabel">Category</label>
+                <select id="new-shortcut-category" class="settings-select"></select>
+              </div>
+
               <div class="form-actions-row">
                 <button type="submit" class="btn btn-add" data-i18n="addBtn">Add</button>
                 <label class="btn-square-upload" data-i18n-title="uploadIconTitle" title="Upload custom icon (optional)">
@@ -168,6 +178,16 @@
         <div class="modal-col-right">
           <div class="settings-section full-height">
             <h3 data-i18n="manageShortcutsTitle">Manage Shortcuts</h3>
+            
+            <!-- Ряд управления категориями в настройках -->
+            <div class="manage-shortcuts-header-row">
+              <div id="settings-categories-tabs" class="settings-categories-tabs"></div>
+              <button id="btn-add-category" class="btn-add-category" data-i18n-title="addCategoryTitle" title="Add Category">
+                <img src="add-category-icon.png" alt="Add Category">
+              </button>
+            </div>
+
+            <!-- Список ярлыков выбранной категории -->
             <div id="modal-shortcuts-list" class="modal-shortcuts-list"></div>
           </div>
         </div>
