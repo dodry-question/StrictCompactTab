@@ -38,6 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
       importSuccess: "Import successful!",
       importError: "Import error. Make sure the file is a correct JSON backup.",
       importReadError: "Error reading the backup file.",
+      themeTitle: "Theme",
+      themeLabel: "Color Theme",
+      themeDark: "Dark",
+      themeLight: "Light",
       
       // Локализация вкладок/категорий
       shortcutCategoryLabel: "Category",
@@ -84,6 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
       importSuccess: "Импорт успешно выполнен!",
       importError: "Ошибка при импорте. Убедитесь, что выбран правильный файл резервной копии JSON.",
       importReadError: "Ошибка при чтении файла бэкапа.",
+      themeTitle: "Тема оформления",
+      themeLabel: "Цветовая тема",
+      themeDark: "Темная",
+      themeLight: "Светлая",
       
       // Локализация вкладок/категорий
       shortcutCategoryLabel: "Категория",
@@ -170,7 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchEngine: "duckduckgo",
     showDate: true,
     format12h: false,
-    showSeconds: false
+    showSeconds: false,
+    theme: "dark"
   };
 
   let editingIndex = -1;
@@ -292,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const columnsSelect = document.getElementById('shortcut-columns-select');
   const languageSelect = document.getElementById('language-select');
   const searchEngineSelect = document.getElementById('search-engine-select');
+  const themeSelect = document.getElementById('theme-select');
 
   if (sizeSelect) {
     sizeSelect.addEventListener('change', (e) => {
@@ -327,6 +337,14 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.searchEngine = e.target.value;
       saveState();
       updateSearchEngineUI();
+    });
+  }
+
+  if (themeSelect) {
+    themeSelect.addEventListener('change', (e) => {
+      STATE.theme = e.target.value;
+      saveState();
+      applyTheme();
     });
   }
 
@@ -422,6 +440,14 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.style.backgroundImage = `url(${STATE.customBackground})`;
     } else {
       document.body.style.backgroundImage = 'none';
+    }
+  }
+
+  function applyTheme() {
+    if (STATE.theme === 'light') {
+      document.body.classList.add('theme-light');
+    } else {
+      document.body.classList.remove('theme-light');
     }
   }
 
@@ -775,6 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const customFavicon = data.customFavicon ?? null;
           const language = data.language ?? 'en';
           const searchEngine = data.searchEngine ?? 'duckduckgo';
+          const theme = data.theme ?? 'dark';
 
           const cleanedData = {
             shortcuts,
@@ -787,7 +814,8 @@ document.addEventListener('DOMContentLoaded', () => {
             customBackground,
             customFavicon,
             language,
-            searchEngine
+            searchEngine,
+            theme
           };
 
           storage.clearAndSet(cleanedData, () => {
@@ -812,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
       STATE.columns = result.columns ?? 10;
@@ -824,6 +852,7 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.showDate = result.showDate ?? true;
       STATE.format12h = result.format12h ?? false;
       STATE.showSeconds = result.showSeconds ?? false;
+      STATE.theme = result.theme ?? "dark";
 
       STATE.shortcuts.forEach(s => {
         if (!s.category) s.category = "default";
@@ -833,9 +862,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (columnsSelect) columnsSelect.value = STATE.columns;
       if (languageSelect) languageSelect.value = STATE.language;
       if (searchEngineSelect) searchEngineSelect.value = STATE.searchEngine;
+      if (themeSelect) themeSelect.value = STATE.theme;
 
       applyBackground();
       applyFavicon();
+      applyTheme();
       applyLanguage(STATE.language);
       updateSearchEngineUI();
       updateClockAndDate();
@@ -857,7 +888,8 @@ document.addEventListener('DOMContentLoaded', () => {
       searchEngine: STATE.searchEngine,
       showDate: STATE.showDate,
       format12h: STATE.format12h,
-      showSeconds: STATE.showSeconds
+      showSeconds: STATE.showSeconds,
+      theme: STATE.theme
     });
   }
 
