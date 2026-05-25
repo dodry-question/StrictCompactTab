@@ -44,6 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
       themeLight: "Light",
       themeNord: "Nord",
       showClockLabel: "Show Clock and Date",
+      weatherSettingsTitle: "Weather Settings",
+      showWeatherLabel: "Show Weather Widget",
+      weatherCityLabel: "City Name",
+      weatherCityPlaceholder: "Enter city (e.g. Moscow, Moscow Oblast, RU)",
+      weatherStatusSearching: "Searching...",
+      weatherStatusFound: "Found",
+      weatherStatusNotFound: "City not found",
+      weatherStatusError: "Error loading weather",
+      weatherLoading: "Loading...",
       
       // Локализация вкладок/категорий
       shortcutCategoryLabel: "Category",
@@ -96,6 +105,15 @@ document.addEventListener('DOMContentLoaded', () => {
       themeLight: "Светлая",
       themeNord: "Nord (Арктическая)",
       showClockLabel: "Показывать часы и дату",
+      weatherSettingsTitle: "Настройки погоды",
+      showWeatherLabel: "Показывать погоду",
+      weatherCityLabel: "Город",
+      weatherCityPlaceholder: "Введите город (например, Москва, Московская обл., RU)",
+      weatherStatusSearching: "Поиск...",
+      weatherStatusFound: "Найдено",
+      weatherStatusNotFound: "Город не найден",
+      weatherStatusError: "Ошибка загрузки погоды",
+      weatherLoading: "Загрузка...",
       
       // Локализация вкладок/категорий
       shortcutCategoryLabel: "Категория",
@@ -184,7 +202,11 @@ document.addEventListener('DOMContentLoaded', () => {
     format12h: false,
     showSeconds: false,
     theme: "dark",
-    showClock: true
+    showClock: true,
+    showWeather: false,
+    weatherCity: "",
+    weatherCoords: { lat: null, lon: null, resolvedName: "" },
+    weatherCache: { temp: "", code: null, desc: "", timestamp: 0 }
   };
 
   let editingIndex = -1;
@@ -199,6 +221,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ЧАСЫ И ДАТА ---
   const clockElement = document.getElementById('clock');
   const dateElement = document.getElementById('date-display');
+
+  // --- ПОГОДА ---
+  const weatherWidget = document.getElementById('weather-widget');
+  const weatherTemp = document.getElementById('weather-temp');
+  const weatherIcon = document.getElementById('weather-icon');
+  const weatherDetails = document.getElementById('weather-details');
+  const showWeatherCb = document.getElementById('show-weather-checkbox');
+  const weatherCityInput = document.getElementById('weather-city-input');
+  const weatherInputStatus = document.getElementById('weather-input-status');
+  const weatherSubsettings = document.getElementById('weather-subsettings');
 
   function updateClockAndDate() {
     const now = new Date();
@@ -334,6 +366,13 @@ document.addEventListener('DOMContentLoaded', () => {
       renderSettingsCategories();
       renderMainCategories();
       renderModalShortcutsList();
+      
+      if (STATE.showWeather) {
+        updateWeatherWidget();
+        if (STATE.weatherCity) {
+          handleCityInputChange();
+        }
+      }
     });
   }
 
@@ -390,11 +429,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const file = newIconInput ? newIconInput.files[0] : null;
         if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            saveShortcut(event.target.result);
-          };
-          reader.readAsDataURL(file);
+          compressImage(file, 128, 128, 0.85, (result) => {
+            saveShortcut(result);
+          });
         } else {
           saveShortcut(null);
         }
@@ -421,13 +458,11 @@ document.addEventListener('DOMContentLoaded', () => {
     bgFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          STATE.customBackground = event.target.result;
+        compressImage(file, 2560, 1440, 0.8, (result) => {
+          STATE.customBackground = result;
           saveState();
           applyBackground();
-        };
-        reader.readAsDataURL(file);
+        });
       }
     });
   }
@@ -438,6 +473,39 @@ document.addEventListener('DOMContentLoaded', () => {
       saveState();
       applyBackground();
     });
+  }
+
+  function compressImage(file, maxWidth, maxHeight, quality, callback) {
+    if (!file) {
+      callback(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        callback(compressedBase64);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   function applyBackground() {
@@ -478,13 +546,11 @@ document.addEventListener('DOMContentLoaded', () => {
     faviconFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          STATE.customFavicon = event.target.result;
+        compressImage(file, 128, 128, 0.85, (result) => {
+          STATE.customFavicon = result;
           saveState();
           applyFavicon();
-        };
-        reader.readAsDataURL(file);
+        });
       }
     });
   }
@@ -568,6 +634,240 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- УПРАВЛЕНИЕ ПОГОДОЙ ---
+  if (showWeatherCb) {
+    showWeatherCb.addEventListener('change', (e) => {
+      STATE.showWeather = e.target.checked;
+      saveState();
+      applyWeatherVisibility();
+      
+      if (STATE.showWeather) {
+        if (STATE.weatherCoords && STATE.weatherCoords.lat !== null) {
+          updateWeatherWidget();
+        } else if (STATE.weatherCity) {
+          handleCityInputChange();
+        }
+      } else {
+        if (weatherInputStatus) weatherInputStatus.textContent = "";
+      }
+    });
+  }
+
+  if (weatherCityInput) {
+    weatherCityInput.addEventListener('input', handleCityInputChange);
+  }
+
+  let geocodeTimeout = null;
+
+  function handleCityInputChange() {
+    if (!STATE.showWeather) return;
+
+    const cityName = weatherCityInput.value.trim();
+    STATE.weatherCity = cityName;
+    saveState();
+
+    if (geocodeTimeout) clearTimeout(geocodeTimeout);
+
+    if (!cityName) {
+      STATE.weatherCoords = { lat: null, lon: null, resolvedName: "" };
+      STATE.weatherCache = { temp: "", code: null, desc: "", timestamp: 0 };
+      saveState();
+      updateWeatherWidget();
+      updateStatusText("");
+      return;
+    }
+
+    updateStatusText("searching");
+
+    geocodeTimeout = setTimeout(() => {
+      const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=${STATE.language === 'ru' ? 'ru' : 'en'}`;
+
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error('Geocoding API error');
+          return response.json();
+        })
+        .then(data => {
+          if (!STATE.showWeather) return;
+          
+          const results = data.results;
+          if (results && results.length > 0) {
+            const bestMatch = results[0];
+            const lat = bestMatch.latitude;
+            const lon = bestMatch.longitude;
+            
+            const name = bestMatch.name;
+            const countryCode = bestMatch.country_code ? bestMatch.country_code.toUpperCase() : "";
+            const admin1 = bestMatch.admin1 || "";
+            
+            let resolvedName = name;
+            if (admin1 && countryCode) {
+              resolvedName = `${name} (${admin1}, ${countryCode})`;
+            } else if (countryCode) {
+              resolvedName = `${name} (${countryCode})`;
+            }
+
+            STATE.weatherCoords = {
+              lat: lat,
+              lon: lon,
+              resolvedName: resolvedName
+            };
+            STATE.weatherCache = { temp: "", code: null, desc: "", timestamp: 0 };
+            saveState();
+
+            updateStatusText("success", resolvedName);
+            updateWeatherWidget();
+          } else {
+            STATE.weatherCoords = { lat: null, lon: null, resolvedName: "" };
+            STATE.weatherCache = { temp: "", code: null, desc: "", timestamp: 0 };
+            saveState();
+            updateStatusText("notfound");
+            updateWeatherWidget();
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          if (!STATE.showWeather) return;
+          updateStatusText("error");
+        });
+    }, 800);
+  }
+
+  function updateStatusText(status, resolvedName = "") {
+    if (!weatherInputStatus) return;
+    
+    weatherInputStatus.className = "weather-input-status";
+    
+    const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+
+    if (status === "searching") {
+      weatherInputStatus.classList.add("status-searching");
+      weatherInputStatus.textContent = dict.weatherStatusSearching || "Searching...";
+    } else if (status === "success") {
+      weatherInputStatus.classList.add("status-success");
+      weatherInputStatus.textContent = `${dict.weatherStatusFound || "Found"}: ${resolvedName}`;
+    } else if (status === "notfound") {
+      weatherInputStatus.classList.add("status-error");
+      weatherInputStatus.textContent = dict.weatherStatusNotFound || "City not found";
+    } else if (status === "error") {
+      weatherInputStatus.classList.add("status-error");
+      weatherInputStatus.textContent = dict.weatherStatusError || "Error loading weather";
+    } else {
+      weatherInputStatus.textContent = "";
+    }
+  }
+
+  function applyWeatherVisibility() {
+    if (STATE.showWeather) {
+      if (weatherWidget) weatherWidget.style.display = 'flex';
+      if (weatherSubsettings) weatherSubsettings.style.display = 'flex';
+    } else {
+      if (weatherWidget) weatherWidget.style.display = 'none';
+      if (weatherSubsettings) weatherSubsettings.style.display = 'none';
+    }
+  }
+
+  function updateWeatherWidget() {
+    if (!STATE.showWeather) {
+      return;
+    }
+
+    const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+
+    if (!STATE.weatherCoords || STATE.weatherCoords.lat === null || STATE.weatherCoords.lon === null) {
+      if (weatherTemp) weatherTemp.textContent = '--°C';
+      if (weatherIcon) weatherIcon.textContent = '❓';
+      if (weatherDetails) weatherDetails.textContent = dict.weatherCityPlaceholder || 'Enter city';
+      return;
+    }
+
+    const now = Date.now();
+    const cacheAge = now - STATE.weatherCache.timestamp;
+    if (cacheAge < 1800000 && STATE.weatherCache.temp !== "") {
+      renderWeatherFromCache();
+      return;
+    }
+
+    if (weatherDetails) {
+      weatherDetails.textContent = dict.weatherLoading || 'Loading...';
+    }
+
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${STATE.weatherCoords.lat}&longitude=${STATE.weatherCoords.lon}&current_weather=true&timezone=auto`;
+
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error('Weather API error');
+        return response.json();
+      })
+      .then(data => {
+        if (!STATE.showWeather) return;
+        const current = data.current_weather;
+        if (current) {
+          const temp = Math.round(current.temperature) + '°C';
+          const code = current.weathercode;
+          const emoji = getWeatherEmoji(code);
+          const desc = getWeatherDescription(code, STATE.language);
+
+          STATE.weatherCache = {
+            temp: temp,
+            code: code,
+            desc: desc,
+            timestamp: Date.now()
+          };
+          saveState();
+          renderWeatherFromCache();
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        if (weatherDetails) {
+          weatherDetails.textContent = dict.weatherStatusError || 'Error loading weather';
+        }
+      });
+  }
+
+  function renderWeatherFromCache() {
+    if (weatherTemp) weatherTemp.textContent = STATE.weatherCache.temp;
+    if (weatherIcon) weatherIcon.textContent = getWeatherEmoji(STATE.weatherCache.code);
+    if (weatherDetails) {
+      const desc = getWeatherDescription(STATE.weatherCache.code, STATE.language);
+      const cityName = STATE.weatherCoords.resolvedName || STATE.weatherCity;
+      weatherDetails.innerHTML = `${desc}<br>${cityName}`;
+    }
+  }
+
+  function getWeatherEmoji(code) {
+    if (code === 0) return '☀️';
+    if (code === 1) return '🌤️';
+    if (code === 2) return '⛅';
+    if (code === 3) return '☁️';
+    if (code === 45 || code === 48) return '🌫️';
+    if ([51, 53, 55, 56, 57].includes(code)) return '🌧️';
+    if ([61, 63, 65, 66, 67].includes(code)) return '🌧️';
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return '❄️';
+    if ([80, 81, 82].includes(code)) return '🌦️';
+    if ([95, 96, 99].includes(code)) return '⛈️';
+    return '⛅';
+  }
+
+  function getWeatherDescription(code, lang) {
+    const isRu = lang === 'ru';
+    if (code === 0) return isRu ? 'Ясно' : 'Clear';
+    if (code === 1) return isRu ? 'Преимущественно ясно' : 'Mainly clear';
+    if (code === 2) return isRu ? 'Переменная облачность' : 'Partly cloudy';
+    if (code === 3) return isRu ? 'Пасмурно' : 'Overcast';
+    if (code === 45 || code === 48) return isRu ? 'Туман' : 'Fog';
+    if ([51, 53, 55].includes(code)) return isRu ? 'Морось' : 'Drizzle';
+    if ([61, 63, 65].includes(code)) return isRu ? 'Дождь' : 'Rain';
+    if ([66, 67].includes(code)) return isRu ? 'Ледяной дождь' : 'Freezing rain';
+    if ([71, 73, 75].includes(code)) return isRu ? 'Снегопад' : 'Snowfall';
+    if (code === 77) return isRu ? 'Снежная крупа' : 'Snow grains';
+    if ([80, 81, 82].includes(code)) return isRu ? 'Ливень' : 'Rain showers';
+    if ([85, 86].includes(code)) return isRu ? 'Снежный ливень' : 'Snow showers';
+    if ([95, 96, 99].includes(code)) return isRu ? 'Гроза' : 'Thunderstorm';
+    return isRu ? 'Умеренно' : 'Moderate';
+  }
+
   // --- УПРАВЛЕНИЕ КАТЕГОРИЯМИ ---
   const btnAddCategory = document.getElementById('btn-add-category');
   if (btnAddCategory) {
@@ -592,12 +892,14 @@ document.addEventListener('DOMContentLoaded', () => {
     selects.forEach(select => {
       if (select) {
         select.innerHTML = '';
+        const fragment = document.createDocumentFragment();
         STATE.categories.forEach(cat => {
           const opt = document.createElement('option');
           opt.value = cat.id;
           opt.textContent = cat.id === 'default' ? currentDict.defaultCategoryName : cat.name;
-          select.appendChild(opt);
+          fragment.appendChild(opt);
         });
+        select.appendChild(fragment);
       }
     });
   }
@@ -608,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tabsContainer.innerHTML = '';
 
     const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+    const fragment = document.createDocumentFragment();
 
     STATE.categories.forEach((cat, index) => {
       const tab = document.createElement('div');
@@ -701,8 +1004,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      tabsContainer.appendChild(tab);
+      fragment.appendChild(tab);
     });
+
+    tabsContainer.appendChild(fragment);
   }
 
   function renderMainCategories() {
@@ -717,6 +1022,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mainTabsContainer.style.display = 'flex';
     const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+    const fragment = document.createDocumentFragment();
 
     STATE.categories.forEach(cat => {
       const tab = document.createElement('div');
@@ -730,8 +1036,10 @@ document.addEventListener('DOMContentLoaded', () => {
         switchMainCategory(cat.id);
       });
 
-      mainTabsContainer.appendChild(tab);
+      fragment.appendChild(tab);
     });
+
+    mainTabsContainer.appendChild(fragment);
   }
 
   function switchMainCategory(newCategoryId) {
@@ -831,6 +1139,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const searchEngine = data.searchEngine ?? 'duckduckgo';
           const theme = data.theme ?? 'dark';
           const showClock = data.showClock ?? true;
+          const showWeather = data.showWeather ?? false;
+          const weatherCity = data.weatherCity ?? '';
+          const weatherCoords = data.weatherCoords ?? { lat: null, lon: null, resolvedName: '' };
+          const weatherCache = data.weatherCache ?? { temp: '', code: null, desc: '', timestamp: 0 };
 
           const cleanedData = {
             shortcuts,
@@ -845,7 +1157,11 @@ document.addEventListener('DOMContentLoaded', () => {
             language,
             searchEngine,
             theme,
-            showClock
+            showClock,
+            showWeather,
+            weatherCity,
+            weatherCoords,
+            weatherCache
           };
 
           storage.clearAndSet(cleanedData, () => {
@@ -870,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'showClock'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
       STATE.columns = result.columns ?? 10;
@@ -884,6 +1200,10 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.showSeconds = result.showSeconds ?? false;
       STATE.theme = result.theme ?? "dark";
       STATE.showClock = result.showClock ?? true;
+      STATE.showWeather = result.showWeather ?? false;
+      STATE.weatherCity = result.weatherCity ?? "";
+      STATE.weatherCoords = result.weatherCoords ?? { lat: null, lon: null, resolvedName: "" };
+      STATE.weatherCache = result.weatherCache ?? { temp: "", code: null, desc: "", timestamp: 0 };
 
       STATE.shortcuts.forEach(s => {
         if (!s.category) s.category = "default";
@@ -899,17 +1219,25 @@ document.addEventListener('DOMContentLoaded', () => {
       if (showDateCb) showDateCb.checked = STATE.showDate;
       if (timeFormatCb) timeFormatCb.checked = STATE.format12h;
       if (showSecondsCb) showSecondsCb.checked = STATE.showSeconds;
+      if (showWeatherCb) showWeatherCb.checked = STATE.showWeather;
+      if (weatherCityInput) weatherCityInput.value = STATE.weatherCity;
 
       applyBackground();
       applyFavicon();
       applyTheme();
       applyClockVisibility();
+      applyWeatherVisibility();
       applyLanguage(STATE.language);
       updateSearchEngineUI();
       updateClockAndDate();
+      updateWeatherWidget();
       populateCategorySelects();
       renderMainCategories();
       renderShortcuts();
+
+      if (STATE.showWeather && STATE.weatherCoords && STATE.weatherCoords.resolvedName) {
+        updateStatusText("success", STATE.weatherCoords.resolvedName);
+      }
     });
   }
 
@@ -927,7 +1255,11 @@ document.addEventListener('DOMContentLoaded', () => {
       format12h: STATE.format12h,
       showSeconds: STATE.showSeconds,
       theme: STATE.theme,
-      showClock: STATE.showClock
+      showClock: STATE.showClock,
+      showWeather: STATE.showWeather,
+      weatherCity: STATE.weatherCity,
+      weatherCoords: STATE.weatherCoords,
+      weatherCache: STATE.weatherCache
     });
   }
 
@@ -1003,6 +1335,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const containerMaxWidth = (itemWidth * actualColumns) + (gap * (actualColumns - 1));
     container.style.maxWidth = `${containerMaxWidth}px`;
 
+    const fragment = document.createDocumentFragment();
+
     filteredShortcuts.forEach((item) => {
       const card = document.createElement('a');
       card.href = item.url;
@@ -1032,8 +1366,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       card.appendChild(img);
       card.appendChild(span);
-      container.appendChild(card);
+      fragment.appendChild(card);
     });
+
+    container.appendChild(fragment);
   }
 
   const modalList = document.getElementById('modal-shortcuts-list');
@@ -1050,6 +1386,8 @@ document.addEventListener('DOMContentLoaded', () => {
       modalList.innerHTML = `<div style="color: rgba(255,255,255,0.3); font-size: 11px; text-align: center; padding: 12px;">${currentDict.listEmpty}</div>`;
       return;
     }
+
+    const fragment = document.createDocumentFragment();
 
     filteredShortcuts.forEach((item) => {
       const absoluteIndex = STATE.shortcuts.indexOf(item);
@@ -1131,12 +1469,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (file) {
             inlineIconLabel.title = file.name;
             inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-            
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              tempIconBase64 = event.target.result;
-            };
-            reader.readAsDataURL(file);
+            compressImage(file, 128, 128, 0.85, (result) => {
+              tempIconBase64 = result;
+            });
           }
         });
 
@@ -1250,8 +1585,10 @@ document.addEventListener('DOMContentLoaded', () => {
         row.appendChild(actionsWrapper);
       }
 
-      modalList.appendChild(row);
+      fragment.appendChild(row);
     });
+
+    modalList.appendChild(fragment);
   }
 
   loadState();

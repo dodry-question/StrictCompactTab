@@ -15,6 +15,15 @@
     <div id="date-display" class="date-display"></div>
   </div>
 
+  <!-- Блок погоды в верхнем правом углу -->
+  <div id="weather-widget" class="weather-container" style="display: none;">
+    <div class="weather-temp-row">
+      <span id="weather-temp" class="weather-temp">--°C</span>
+      <span id="weather-icon" class="weather-icon">❓</span>
+    </div>
+    <div id="weather-details" class="weather-details">--</div>
+  </div>
+
   <!-- Главный контейнер (сдвинут в верхнюю треть экрана) -->
   <div class="content-wrapper">
     
@@ -200,7 +209,27 @@
             </div>
           </div>
 
-          <!-- 7. Резервное копирование -->
+          <!-- 7. Настройки погоды -->
+          <div class="settings-section">
+            <h3 data-i18n="weatherSettingsTitle">Weather Settings</h3>
+            <div class="settings-toggle-group">
+              <label class="toggle-label">
+                <input type="checkbox" id="show-weather-checkbox">
+                <span data-i18n="showWeatherLabel">Show Weather Widget</span>
+              </label>
+              
+              <!-- Подразделы настроек погоды -->
+              <div id="weather-subsettings" class="settings-toggle-group" style="padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.05); margin-top: 4px; display: none; flex-direction: column; gap: 10px;">
+                <div class="settings-field">
+                  <label for="weather-city-input" data-i18n="weatherCityLabel">City</label>
+                  <input id="weather-city-input" type="text" data-i18n-placeholder="weatherCityPlaceholder" placeholder="Enter city (e.g., Moscow, Moscow Oblast, RU)" class="settings-input">
+                  <div id="weather-input-status" class="weather-input-status"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. Резервное копирование -->
           <div class="settings-section">
             <h3 data-i18n="backupTitle">Backup Configuration</h3>
             <div class="settings-row">

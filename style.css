@@ -52,6 +52,66 @@ body {
   text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
 }
 
+/* Контейнер погоды в верхнем правом углу */
+.weather-container {
+  position: absolute;
+  top: 36px;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  line-height: 1;
+  text-align: right;
+  z-index: 10;
+}
+
+.weather-temp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weather-temp {
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -1px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.weather-icon {
+  font-size: 32px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+.weather-details {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 400;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  line-height: 1.35;
+}
+
+.weather-input-status {
+  font-size: 11px;
+  margin-top: 4px;
+  min-height: 14px;
+  transition: color 0.2s ease;
+}
+
+.weather-input-status.status-searching {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.weather-input-status.status-success {
+  color: #4caf50;
+}
+
+.weather-input-status.status-error {
+  color: #f44336;
+}
+
 /* Сдвиг контента в верхнюю треть экрана */
 .content-wrapper {
   margin-top: 15vh;
@@ -914,6 +974,24 @@ body.theme-light #clock-subsettings {
   border-left-color: rgba(0, 0, 0, 0.08) !important;
 }
 
+body.theme-light .weather-temp {
+  color: #1a202c;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.9), 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+body.theme-light .weather-details {
+  color: #4a5568;
+  text-shadow: 0 1px 5px rgba(255, 255, 255, 0.9), 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+body.theme-light #weather-subsettings {
+  border-left-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.theme-light .weather-input-status.status-searching {
+  color: #718096;
+}
+
 /* Поисковая строка */
 body.theme-light .search-form {
   background-color: rgba(255, 255, 255, 0.95);
@@ -1213,6 +1291,22 @@ body.theme-nord .date-display {
 
 body.theme-nord #clock-subsettings {
   border-left-color: rgba(76, 86, 106, 0.4) !important;
+}
+
+body.theme-nord .weather-temp {
+  color: #eceff4;
+}
+
+body.theme-nord .weather-details {
+  color: #88c0d0;
+}
+
+body.theme-nord #weather-subsettings {
+  border-left-color: rgba(76, 86, 106, 0.4) !important;
+}
+
+body.theme-nord .weather-input-status.status-searching {
+  color: #4c566a;
 }
 
 /* Поисковая строка */
