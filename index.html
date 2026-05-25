@@ -178,17 +178,25 @@
             <h3 data-i18n="clockDateSettingsTitle">Clock and Date Settings</h3>
             <div class="settings-toggle-group">
               <label class="toggle-label">
-                <input type="checkbox" id="show-date-checkbox">
-                <span data-i18n="showDateLabel">Show date and day of the week</span>
+                <input type="checkbox" id="show-clock-checkbox">
+                <span data-i18n="showClockLabel">Show Clock and Date</span>
               </label>
-              <label class="toggle-label">
-                <input type="checkbox" id="time-format-checkbox">
-                <span data-i18n="format12hLabel">12-hour format (AM/PM)</span>
-              </label>
-              <label class="toggle-label">
-                <input type="checkbox" id="show-seconds-checkbox">
-                <span data-i18n="showSecondsLabel">Display seconds</span>
-              </label>
+              
+              <!-- Подразделы настроек часов, видимые только когда часы включены -->
+              <div id="clock-subsettings" class="settings-toggle-group" style="padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.05); margin-top: 4px; display: flex; flex-direction: column; gap: 10px;">
+                <label class="toggle-label">
+                  <input type="checkbox" id="show-date-checkbox">
+                  <span data-i18n="showDateLabel">Show date and day of the week</span>
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="time-format-checkbox">
+                  <span data-i18n="format12hLabel">12-hour format (AM/PM)</span>
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="show-seconds-checkbox">
+                  <span data-i18n="showSecondsLabel">Display seconds</span>
+                </label>
+              </div>
             </div>
           </div>
 

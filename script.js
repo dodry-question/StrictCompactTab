@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
       themeDark: "Dark",
       themeLight: "Light",
       themeNord: "Nord",
+      showClockLabel: "Show Clock and Date",
       
       // Локализация вкладок/категорий
       shortcutCategoryLabel: "Category",
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
       themeDark: "Темная",
       themeLight: "Светлая",
       themeNord: "Nord (Арктическая)",
+      showClockLabel: "Показывать часы и дату",
       
       // Локализация вкладок/категорий
       shortcutCategoryLabel: "Категория",
@@ -181,7 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
     showDate: true,
     format12h: false,
     showSeconds: false,
-    theme: "dark"
+    theme: "dark",
+    showClock: true
   };
 
   let editingIndex = -1;
@@ -454,6 +457,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function applyClockVisibility() {
+    const clockContainer = document.querySelector('.clock-container');
+    const clockSubsettings = document.getElementById('clock-subsettings');
+    
+    if (STATE.showClock) {
+      if (clockContainer) clockContainer.style.display = 'flex';
+      if (clockSubsettings) clockSubsettings.style.display = 'flex';
+    } else {
+      if (clockContainer) clockContainer.style.display = 'none';
+      if (clockSubsettings) clockSubsettings.style.display = 'none';
+    }
+  }
+
   // --- УПРАВЛЕНИЕ ДИНАМИЧЕСКОЙ ИКОНКОЙ ВКЛАДКИ ---
   const faviconFileInput = document.getElementById('favicon-file-input');
   const faviconResetBtn = document.getElementById('favicon-reset-btn');
@@ -515,9 +531,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- УПРАВЛЕНИЕ ТУМБЛЕРАМИ ЧАСОВ И ДАТЫ ---
+  const showClockCb = document.getElementById('show-clock-checkbox');
   const showDateCb = document.getElementById('show-date-checkbox');
   const timeFormatCb = document.getElementById('time-format-checkbox');
   const showSecondsCb = document.getElementById('show-seconds-checkbox');
+
+  if (showClockCb) {
+    showClockCb.addEventListener('change', (e) => {
+      STATE.showClock = e.target.checked;
+      saveState();
+      applyClockVisibility();
+    });
+  }
 
   if (showDateCb) {
     showDateCb.addEventListener('change', (e) => {
@@ -805,6 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const language = data.language ?? 'en';
           const searchEngine = data.searchEngine ?? 'duckduckgo';
           const theme = data.theme ?? 'dark';
+          const showClock = data.showClock ?? true;
 
           const cleanedData = {
             shortcuts,
@@ -818,7 +844,8 @@ document.addEventListener('DOMContentLoaded', () => {
             customFavicon,
             language,
             searchEngine,
-            theme
+            theme,
+            showClock
           };
 
           storage.clearAndSet(cleanedData, () => {
@@ -843,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'showClock'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
       STATE.columns = result.columns ?? 10;
@@ -856,6 +883,7 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.format12h = result.format12h ?? false;
       STATE.showSeconds = result.showSeconds ?? false;
       STATE.theme = result.theme ?? "dark";
+      STATE.showClock = result.showClock ?? true;
 
       STATE.shortcuts.forEach(s => {
         if (!s.category) s.category = "default";
@@ -867,9 +895,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (searchEngineSelect) searchEngineSelect.value = STATE.searchEngine;
       if (themeSelect) themeSelect.value = STATE.theme;
 
+      if (showClockCb) showClockCb.checked = STATE.showClock;
+      if (showDateCb) showDateCb.checked = STATE.showDate;
+      if (timeFormatCb) timeFormatCb.checked = STATE.format12h;
+      if (showSecondsCb) showSecondsCb.checked = STATE.showSeconds;
+
       applyBackground();
       applyFavicon();
       applyTheme();
+      applyClockVisibility();
       applyLanguage(STATE.language);
       updateSearchEngineUI();
       updateClockAndDate();
@@ -892,7 +926,8 @@ document.addEventListener('DOMContentLoaded', () => {
       showDate: STATE.showDate,
       format12h: STATE.format12h,
       showSeconds: STATE.showSeconds,
-      theme: STATE.theme
+      theme: STATE.theme,
+      showClock: STATE.showClock
     });
   }
 
