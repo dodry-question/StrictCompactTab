@@ -34,6 +34,14 @@ body {
   flex-direction: column;
   gap: 6px;
   line-height: 1;
+  padding: 12px 20px;
+  border-radius: 16px;
+  background-color: rgba(10, 10, 10, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .clock {
@@ -894,294 +902,621 @@ body {
    ========================================== */
 
 body.theme-light {
-  background-color: #f4f4f7;
-  color: #1a1a1c;
+  background-color: #f3f4f6;
+  color: #2d3748;
+}
+
+body.theme-light .clock-container {
+  background-color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
 }
 
 body.theme-light .clock {
-  color: rgba(0, 0, 0, 0.9);
+  color: #1a202c;
 }
 
 body.theme-light .date-display {
-  color: rgba(0, 0, 0, 0.55);
+  color: #4a5568;
 }
 
 /* Поисковая строка */
 body.theme-light .search-form {
   background-color: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
 }
 
 body.theme-light .search-form:focus-within {
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   background-color: #ffffff;
 }
 
 body.theme-light .search-input {
-  color: #1a1a1c;
+  color: #1a202c;
 }
 
 body.theme-light .search-input::placeholder {
-  color: rgba(0, 0, 0, 0.35);
+  color: #a0aec0;
 }
 
 body.theme-light .search-btn {
-  color: rgba(0, 0, 0, 0.45);
+  color: #718096;
 }
 
 body.theme-light .search-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: #000;
+  background-color: rgba(0, 0, 0, 0.04);
+  color: #1a202c;
 }
 
 /* Вкладки категорий на главном экране */
 body.theme-light .main-category-tab {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.55);
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #4a5568;
 }
 
 body.theme-light .main-category-tab:hover {
-  color: #000;
+  color: #1a202c;
   background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 body.theme-light .main-category-tab.active {
-  color: #000;
-  background-color: rgba(0, 0, 0, 0.06);
-  border-color: rgba(0, 0, 0, 0.15);
+  color: #1a202c;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Плитки ярлыков быстрого доступа */
 body.theme-light .shortcut-card {
   background-color: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.75);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #2d3748;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
 }
 
 body.theme-light .shortcut-card:hover {
   background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.15);
-  color: #000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a202c;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 /* Кнопка настроек в левом нижнем углу */
 body.theme-light .settings-icon-btn {
-  color: #1a1a1c;
+  color: #2d3748;
 }
 
 /* Модальное окно настроек */
 body.theme-light .modal-content {
   background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #1a1a1c;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #2d3748;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
 }
 
 body.theme-light .modal-header {
-  border-bottom-color: rgba(0, 0, 0, 0.08);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
 }
 
 body.theme-light .modal-close-icon {
-  color: rgba(0, 0, 0, 0.4);
+  color: #a0aec0;
 }
 
 body.theme-light .modal-close-icon:hover {
-  color: #000;
+  color: #1a202c;
 }
 
 body.theme-light .modal-col-left::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 body.theme-light .modal-col-right {
-  border-left-color: rgba(0, 0, 0, 0.08);
+  border-left-color: rgba(0, 0, 0, 0.06);
 }
 
 body.theme-light .settings-section h3 {
-  color: rgba(0, 0, 0, 0.45);
+  color: #718096;
 }
 
 body.theme-light .settings-field label {
-  color: rgba(0, 0, 0, 0.55);
+  color: #4a5568;
 }
 
 body.theme-light .toggle-label {
-  color: rgba(0, 0, 0, 0.75);
+  color: #4a5568;
 }
 
 /* Селекты и инпуты */
 body.theme-light .settings-select, 
 body.theme-light .settings-input {
-  background-color: #f4f4f5;
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #1a1a1c;
+  background-color: #f7fafc;
+  border-color: #e2e8f0;
+  color: #2d3748;
 }
 
 body.theme-light .settings-select:focus, 
 body.theme-light .settings-input:focus {
-  border-color: rgba(0, 0, 0, 0.15);
+  border-color: #cbd5e1;
 }
 
 /* Кнопки в настройках */
 body.theme-light .btn-add,
 body.theme-light .btn-file-label {
-  background-color: #f4f4f5;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.8);
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  color: #4a5568;
 }
 
 body.theme-light .btn-add:hover,
 body.theme-light .btn-file-label:hover {
-  background-color: #e4e4e7;
-  border-color: rgba(0, 0, 0, 0.15);
-  color: #000;
+  background-color: #edf2f7;
+  border-color: #cbd5e1;
+  color: #1a202c;
 }
 
 body.theme-light .btn-secondary {
-  background-color: #f4f4f5;
-  border-color: rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.8);
+  background-color: #f7fafc;
+  border-color: #e2e8f0;
+  color: #4a5568;
 }
 
 body.theme-light .btn-secondary:hover {
-  background-color: #e4e4e7;
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #000;
+  background-color: #edf2f7;
+  border-color: #cbd5e1;
+  color: #1a202c;
 }
 
 body.theme-light .btn-edit {
-  background-color: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.05);
+  color: #4a5568;
 }
 
 body.theme-light .btn-edit:hover {
-  background-color: rgba(0, 0, 0, 0.08);
-  color: #000;
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #1a202c;
 }
 
 /* Список ярлыков в модальном окне */
 body.theme-light .modal-shortcuts-list {
-  border-color: rgba(0, 0, 0, 0.06);
-  background-color: #f8f8f9;
+  border-color: rgba(0, 0, 0, 0.05);
+  background-color: #f7fafc;
 }
 
 body.theme-light .modal-shortcuts-list::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 body.theme-light .modal-shortcut-item {
   background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.03);
 }
 
 body.theme-light .modal-shortcut-name {
-  color: #1a1a1c;
+  color: #1a202c;
 }
 
 body.theme-light .modal-shortcut-url {
-  color: rgba(0, 0, 0, 0.45);
+  color: #718096;
 }
 
 body.theme-light .manage-shortcuts-header-row {
-  background-color: #f4f4f5;
-  border-color: rgba(0, 0, 0, 0.06);
+  background-color: #f7fafc;
+  border-color: rgba(0, 0, 0, 0.05);
 }
 
 body.theme-light .settings-category-tab {
-  background-color: #e4e4e7;
-  border-color: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.6);
+  background-color: #edf2f7;
+  border-color: #e2e8f0;
+  color: #4a5568;
 }
 
 body.theme-light .settings-category-tab:hover {
-  color: #000;
-  background-color: #d4d4d8;
-  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a202c;
+  background-color: #e2e8f0;
+  border-color: #cbd5e1;
 }
 
 body.theme-light .settings-category-tab.active {
-  color: #000;
-  background-color: rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.2);
+  color: #1a202c;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 body.theme-light .btn-add-category {
-  background-color: #e4e4e7;
-  border-color: rgba(0, 0, 0, 0.06);
+  background-color: #edf2f7;
+  border-color: #e2e8f0;
 }
 
 body.theme-light .btn-add-category:hover {
-  border-color: rgba(0, 0, 0, 0.15);
-  background-color: #d4d4d8;
+  border-color: #cbd5e1;
+  background-color: #e2e8f0;
 }
 
 body.theme-light .btn-add-category img {
   filter: none;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 body.theme-light .btn-add-category:hover img {
-  opacity: 1;
+  opacity: 0.8;
 }
 
 body.theme-light .btn-inline-save {
-  background-color: #f4f4f5;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: #1a1a1c;
+  background-color: #edf2f7;
+  border: 1px solid #cbd5e1;
+  color: #2d3748;
 }
 
 body.theme-light .btn-inline-save:hover {
-  background-color: #e4e4e7;
+  background-color: #e2e8f0;
 }
 
 body.theme-light .btn-inline-cancel {
-  border-color: rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.55);
+  border-color: #e2e8f0;
+  color: #718096;
 }
 
 body.theme-light .btn-inline-cancel:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-  color: #000;
+  background-color: rgba(0, 0, 0, 0.03);
+  color: #1a202c;
 }
 
 body.theme-light .btn-square-upload {
-  background-color: #f4f4f5;
-  border-color: rgba(0, 0, 0, 0.08);
+  background-color: #f7fafc;
+  border-color: #e2e8f0;
 }
 
 body.theme-light .btn-square-upload:hover {
-  border-color: rgba(0, 0, 0, 0.15);
-  background-color: #e4e4e7;
+  border-color: #cbd5e1;
+  background-color: #edf2f7;
 }
 
 body.theme-light .btn-square-upload img {
   filter: none;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 body.theme-light .btn-square-upload:hover img {
-  opacity: 1;
+  opacity: 0.8;
 }
 
 body.theme-light .modal-shortcut-item.dragging {
-  border-color: rgba(0, 0, 0, 0.15);
+  border-color: #cbd5e1;
   background-color: rgba(0, 0, 0, 0.01);
 }
 
 body.theme-light .modal-shortcut-item.drag-over {
-  border-top-color: rgba(0, 0, 0, 0.35);
-  background-color: rgba(0, 0, 0, 0.04);
+  border-top-color: #718096;
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 @media (max-width: 850px) {
   body.theme-light .modal-col-right {
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid #e2e8f0;
+  }
+}
+
+/* ==========================================
+   ❄️ ТЕМА ОФОРМЛЕНИЯ NORD / NORD THEME
+   ========================================== */
+
+body.theme-nord {
+  background-color: #2e3440;
+  color: #d8dee9;
+}
+
+body.theme-nord .clock-container {
+  background-color: rgba(46, 52, 64, 0.55);
+  border-color: rgba(76, 86, 106, 0.4);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+}
+
+body.theme-nord .clock {
+  color: #eceff4;
+}
+
+body.theme-nord .date-display {
+  color: #88c0d0;
+}
+
+/* Поисковая строка */
+body.theme-nord .search-form {
+  background-color: rgba(59, 66, 82, 0.95);
+  border-color: rgba(76, 86, 106, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.theme-nord .search-form:focus-within {
+  border-color: #88c0d0;
+  box-shadow: 0 0 12px rgba(136, 192, 208, 0.15);
+  background-color: #3b4252;
+}
+
+body.theme-nord .search-input {
+  color: #eceff4;
+}
+
+body.theme-nord .search-input::placeholder {
+  color: #4c566a;
+}
+
+body.theme-nord .search-btn {
+  color: #81a1c1;
+}
+
+body.theme-nord .search-btn:hover {
+  background-color: rgba(76, 86, 106, 0.4);
+  color: #88c0d0;
+}
+
+/* Вкладки категорий на главном экране */
+body.theme-nord .main-category-tab {
+  background-color: rgba(59, 66, 82, 0.85);
+  border-color: rgba(76, 86, 106, 0.5);
+  color: #d8dee9;
+}
+
+body.theme-nord .main-category-tab:hover {
+  color: #eceff4;
+  background-color: #434c5e;
+  border-color: #81a1c1;
+}
+
+body.theme-nord .main-category-tab.active {
+  color: #eceff4;
+  background-color: #4c566a;
+  border-color: #88c0d0;
+}
+
+/* Плитки ярлыков быстрого доступа */
+body.theme-nord .shortcut-card {
+  background-color: rgba(59, 66, 82, 0.9);
+  border-color: rgba(76, 86, 106, 0.5);
+  color: #d8dee9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+body.theme-nord .shortcut-card:hover {
+  background-color: #434c5e;
+  border-color: #88c0d0;
+  color: #eceff4;
+  box-shadow: 0 4px 12px rgba(136, 192, 208, 0.1);
+}
+
+/* Кнопка настроек в левом нижнем углу */
+body.theme-nord .settings-icon-btn {
+  color: #d8dee9;
+}
+
+/* Модальное окно настроек */
+body.theme-nord .modal-content {
+  background-color: #2e3440;
+  border-color: rgba(76, 86, 106, 0.6);
+  color: #d8dee9;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+body.theme-nord .modal-header {
+  border-bottom-color: rgba(76, 86, 106, 0.6);
+}
+
+body.theme-nord .modal-close-icon {
+  color: #4c566a;
+}
+
+body.theme-nord .modal-close-icon:hover {
+  color: #bf616a;
+}
+
+body.theme-nord .modal-col-left::-webkit-scrollbar-thumb {
+  background: #4c566a;
+}
+
+body.theme-nord .modal-col-right {
+  border-left-color: rgba(76, 86, 106, 0.6);
+}
+
+body.theme-nord .settings-section h3 {
+  color: #81a1c1;
+}
+
+body.theme-nord .settings-field label {
+  color: #88c0d0;
+}
+
+body.theme-nord .toggle-label {
+  color: #d8dee9;
+}
+
+body.theme-nord .toggle-label input[type="checkbox"] {
+  accent-color: #88c0d0;
+}
+
+/* Селекты и инпуты */
+body.theme-nord .settings-select, 
+body.theme-nord .settings-input {
+  background-color: #3b4252;
+  border-color: rgba(76, 86, 106, 0.6);
+  color: #eceff4;
+}
+
+body.theme-nord .settings-select:focus, 
+body.theme-nord .settings-input:focus {
+  border-color: #88c0d0;
+}
+
+/* Кнопки в настройках */
+body.theme-nord .btn-add,
+body.theme-nord .btn-file-label {
+  background-color: #3b4252;
+  border: 1px solid rgba(76, 86, 106, 0.6);
+  color: #d8dee9;
+}
+
+body.theme-nord .btn-add:hover,
+body.theme-nord .btn-file-label:hover {
+  background-color: #434c5e;
+  border-color: #88c0d0;
+  color: #eceff4;
+}
+
+body.theme-nord .btn-secondary {
+  background-color: #3b4252;
+  border-color: rgba(76, 86, 106, 0.6);
+  color: #d8dee9;
+}
+
+body.theme-nord .btn-secondary:hover {
+  background-color: #434c5e;
+  border-color: #81a1c1;
+  color: #eceff4;
+}
+
+body.theme-nord .btn-edit {
+  background-color: rgba(76, 86, 106, 0.2);
+  border-color: rgba(76, 86, 106, 0.4);
+  color: #d8dee9;
+}
+
+body.theme-nord .btn-edit:hover {
+  background-color: #4c566a;
+  color: #eceff4;
+}
+
+body.theme-nord .btn-danger-action,
+body.theme-nord .btn-delete {
+  background-color: rgba(191, 97, 106, 0.1);
+  border-color: rgba(191, 97, 106, 0.3);
+  color: #bf616a;
+}
+
+body.theme-nord .btn-danger-action:hover,
+body.theme-nord .btn-delete:hover {
+  background-color: rgba(191, 97, 106, 0.2);
+  border-color: rgba(191, 97, 106, 0.5);
+  color: #d08770;
+}
+
+/* Список ярлыков в модальном окне */
+body.theme-nord .modal-shortcuts-list {
+  border-color: rgba(76, 86, 106, 0.6);
+  background-color: #2e3440;
+}
+
+body.theme-nord .modal-shortcuts-list::-webkit-scrollbar-thumb {
+  background: #4c566a;
+}
+
+body.theme-nord .modal-shortcut-item {
+  background-color: #3b4252;
+  border-color: rgba(76, 86, 106, 0.4);
+}
+
+body.theme-nord .modal-shortcut-name {
+  color: #eceff4;
+}
+
+body.theme-nord .modal-shortcut-url {
+  color: #81a1c1;
+}
+
+body.theme-nord .manage-shortcuts-header-row {
+  background-color: #3b4252;
+  border-color: rgba(76, 86, 106, 0.6);
+}
+
+body.theme-nord .settings-category-tab {
+  background-color: #434c5e;
+  border-color: rgba(76, 86, 106, 0.5);
+  color: #d8dee9;
+}
+
+body.theme-nord .settings-category-tab:hover {
+  color: #eceff4;
+  background-color: #4c566a;
+  border-color: #81a1c1;
+}
+
+body.theme-nord .settings-category-tab.active {
+  color: #eceff4;
+  background-color: #4c566a;
+  border-color: #88c0d0;
+}
+
+body.theme-nord .btn-add-category {
+  background-color: #434c5e;
+  border-color: rgba(76, 86, 106, 0.5);
+}
+
+body.theme-nord .btn-add-category:hover {
+  border-color: #88c0d0;
+  background-color: #4c566a;
+}
+
+body.theme-nord .btn-add-category img {
+  filter: brightness(0) invert(1);
+  opacity: 0.7;
+}
+
+body.theme-nord .btn-add-category:hover img {
+  opacity: 1;
+}
+
+body.theme-nord .btn-inline-save {
+  background-color: #4c566a;
+  border-color: rgba(76, 86, 106, 0.6);
+  color: #eceff4;
+}
+
+body.theme-nord .btn-inline-save:hover {
+  background-color: #5e81ac;
+}
+
+body.theme-nord .btn-inline-cancel {
+  border-color: rgba(76, 86, 106, 0.4);
+  color: #81a1c1;
+}
+
+body.theme-nord .btn-inline-cancel:hover {
+  background-color: rgba(76, 86, 106, 0.3);
+  color: #eceff4;
+}
+
+body.theme-nord .btn-square-upload {
+  background-color: #3b4252;
+  border-color: rgba(76, 86, 106, 0.5);
+}
+
+body.theme-nord .btn-square-upload:hover {
+  border-color: #88c0d0;
+  background-color: #434c5e;
+}
+
+body.theme-nord .btn-square-upload img {
+  filter: brightness(0) invert(1);
+  opacity: 0.7;
+}
+
+body.theme-nord .btn-square-upload:hover img {
+  opacity: 1;
+}
+
+body.theme-nord .modal-shortcut-item.dragging {
+  border-color: #88c0d0;
+  background-color: rgba(76, 86, 106, 0.2);
+}
+
+body.theme-nord .modal-shortcut-item.drag-over {
+  border-top-color: #88c0d0;
+  background-color: rgba(76, 86, 106, 0.4);
+}
+
+@media (max-width: 850px) {
+  body.theme-nord .modal-col-right {
+    border-top: 1px solid rgba(76, 86, 106, 0.6);
   }
 }

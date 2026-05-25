@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       themeLabel: "Color Theme",
       themeDark: "Dark",
       themeLight: "Light",
+      themeNord: "Nord",
       
       // Локализация вкладок/категорий
       shortcutCategoryLabel: "Category",
@@ -92,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       themeLabel: "Цветовая тема",
       themeDark: "Темная",
       themeLight: "Светлая",
+      themeNord: "Nord (Арктическая)",
       
       // Локализация вкладок/категорий
       shortcutCategoryLabel: "Категория",
@@ -444,10 +446,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function applyTheme() {
+    document.body.classList.remove('theme-light', 'theme-nord');
     if (STATE.theme === 'light') {
       document.body.classList.add('theme-light');
-    } else {
-      document.body.classList.remove('theme-light');
+    } else if (STATE.theme === 'nord') {
+      document.body.classList.add('theme-nord');
     }
   }
 
