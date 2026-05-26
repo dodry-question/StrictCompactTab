@@ -323,6 +323,11 @@ document.addEventListener('DOMContentLoaded', () => {
       editingIndex = -1;
       renderSettingsCategories();
       renderModalShortcutsList();
+      if (STATE.showWeather && STATE.weatherCoords && STATE.weatherCoords.resolvedName) {
+        updateStatusText("success", STATE.weatherCoords.resolvedName);
+      } else {
+        updateStatusText("");
+      }
     });
   }
 
@@ -420,9 +425,9 @@ document.addEventListener('DOMContentLoaded', () => {
           addForm.reset();
           populateCategorySelects();
           
-          const iconLabel = document.querySelector('.add-shortcut-form .btn-square-upload');
+          const iconLabel = document.querySelector('.input-icon-upload-label');
           if (iconLabel) {
-            iconLabel.style.borderColor = '';
+            iconLabel.style.color = '';
             iconLabel.title = TRANSLATIONS[STATE.language].uploadIconTitle;
           }
         };
@@ -442,10 +447,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (newIconInput) {
     newIconInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
-      const iconLabel = document.querySelector('.add-shortcut-form .btn-square-upload');
+      const iconLabel = document.querySelector('.input-icon-upload-label');
       if (file && iconLabel) {
         iconLabel.title = file.name;
-        iconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        iconLabel.style.color = '#4caf50';
       }
     });
   }
@@ -831,7 +836,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (weatherIcon) weatherIcon.textContent = getWeatherEmoji(STATE.weatherCache.code);
     if (weatherDetails) {
       const desc = getWeatherDescription(STATE.weatherCache.code, STATE.language);
-      const cityName = STATE.weatherCoords.resolvedName || STATE.weatherCity;
+      let cityName = STATE.weatherCoords.resolvedName || STATE.weatherCity;
+      if (cityName.includes('(')) {
+        cityName = cityName.split('(')[0].trim();
+      }
       weatherDetails.innerHTML = `${desc}<br>${cityName}`;
     }
   }
@@ -1562,7 +1570,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const editBtn = document.createElement('button');
         editBtn.className = 'btn btn-edit';
-        editBtn.textContent = currentDict.btnEdit;
+        editBtn.title = currentDict.btnEdit;
+        editBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>`;
         editBtn.addEventListener('click', () => {
           editingIndex = absoluteIndex;
           renderModalShortcutsList();
@@ -1570,7 +1582,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-delete';
-        deleteBtn.textContent = currentDict.btnDelete;
+        deleteBtn.title = currentDict.btnDelete;
+        deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line>
+          <line x1="14" y1="11" x2="14" y2="17"></line>
+        </svg>`;
         deleteBtn.addEventListener('click', () => {
           STATE.shortcuts.splice(absoluteIndex, 1);
           saveState();
