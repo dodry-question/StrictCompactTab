@@ -1472,6 +1472,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let tempIconBase64 = item.customIcon;
 
+        const inlineIconResetBtn = document.createElement('button');
+        inlineIconResetBtn.className = 'btn btn-inline-cancel';
+        inlineIconResetBtn.style.color = '#ff6b6b';
+        inlineIconResetBtn.textContent = currentDict.resetBtn;
+        inlineIconResetBtn.style.display = tempIconBase64 ? 'inline-block' : 'none';
+
+        inlineIconResetBtn.addEventListener('click', () => {
+          tempIconBase64 = null;
+          inlineIconLabel.title = currentDict.uploadIconTitle;
+          inlineIconLabel.style.borderColor = '';
+          inlineIconResetBtn.style.display = 'none';
+        });
+
         inlineIconInput.addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (file) {
@@ -1479,12 +1492,14 @@ document.addEventListener('DOMContentLoaded', () => {
             inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
             compressImage(file, 128, 128, 0.85, (result) => {
               tempIconBase64 = result;
+              inlineIconResetBtn.style.display = 'inline-block';
             });
           }
         });
 
         actionsWrapper.appendChild(cancelBtn);
         actionsWrapper.appendChild(saveBtn);
+        actionsWrapper.appendChild(inlineIconResetBtn);
         actionsWrapper.appendChild(inlineIconLabel);
         actionsWrapper.appendChild(inlineIconInput); 
 
