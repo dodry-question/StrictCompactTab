@@ -1,10 +1,20 @@
-# Strict Compact Tab
-
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://mit-license.org/)
-[![Manifest](https://img.shields.io/badge/manifest-V3-blueviolet?style=flat-square)](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json)
-[![Platforms](https://img.shields.io/badge/platforms-Firefox%20%7C%20Chromium-informational?style=flat-square)](#installation)
-
-A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally. It replaces the default start page with a clean, fast interface featuring a search bar, customizable shortcuts, a clock, and local configuration storage [3].
+<table width="100%" style="border: none; border-collapse: collapse; background: transparent;">
+  <tr style="border: none; background: transparent;">
+    <td width="80%" style="border: none; background: transparent; padding-right: 20px; vertical-align: top;">
+      <h1>Strict Compact Tab</h1>
+      <p>A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally. It replaces the default start page with a clean, fast interface featuring a search bar, customizable shortcuts, a clock, and local configuration storage.</p>
+      <br>
+      <p>
+        <a href="https://mit-license.org/"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License"></a>
+        <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json"><img src="https://img.shields.io/badge/manifest-V3-blueviolet?style=flat-square" alt="Manifest"></a>
+        <a href="#installation"><img src="https://img.shields.io/badge/platforms-Firefox%20%7C%20Chromium-informational?style=flat-square" alt="Platforms"></a>
+      </p>
+    </td>
+    <td width="20%" align="right" style="border: none; background: transparent; vertical-align: top;">
+      <img src="assets/favicon.png" width="96" style="border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" alt="Strict Compact Tab Logo">
+    </td>
+  </tr>
+</table>
 
 ---
 
