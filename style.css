@@ -112,9 +112,12 @@ body {
   color: #f44336;
 }
 
-/* Сдвиг контента в верхнюю треть экрана */
-.content-wrapper {
+#search-form {
   margin-top: 15vh;
+}
+
+.shortcuts-wrapper {
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -393,7 +396,7 @@ body {
   border-radius: 16px;
   width: 90%;
   max-width: 880px;
-  height: 620px;
+  height: 640px;
   padding: 32px;
   display: flex;
   flex-direction: column;
@@ -445,6 +448,7 @@ body {
   gap: 24px;
   overflow-y: auto;
   padding-right: 12px;
+  padding-bottom: 20px;
   min-height: 0;
 }
 
@@ -1661,4 +1665,265 @@ body.theme-adaptive .modal-shortcut-item.drag-over {
   body.theme-adaptive .modal-col-right {
     border-top: 1px solid rgba(var(--adapt-outline-rgb), 0.3);
   }
+}
+
+/* ==========================================
+   📐 РАСПОЛОЖЕНИЕ ЭЛЕМЕНТОВ (EDIT LAYOUT)
+   ========================================== */
+
+/* Включает рамку и курсор перемещения для виджетов в режиме редактирования */
+body.layout-edit-mode .draggable-widget {
+  outline: 2px dashed #4caf50;
+  outline-offset: 4px;
+  cursor: move !important;
+  user-select: none !important;
+  -webkit-user-drag: none;
+}
+
+body.layout-edit-mode .draggable-widget * {
+  pointer-events: none !important; /* Отключаем клики внутри виджетов */
+}
+
+/* Полупрозрачное выделение при наведении в режиме редактирования */
+body.layout-edit-mode .draggable-widget:hover {
+  outline-color: #2196f3;
+  background-color: rgba(33, 150, 243, 0.05);
+}
+
+/* Плавающая панель управления макетом */
+.layout-controls-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: rgba(20, 20, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  z-index: 1000000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  animation: layoutControlSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes layoutControlSlideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Стилизация панели управления для разных тем */
+body.theme-light .layout-controls-panel {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+body.theme-adaptive .layout-controls-panel {
+  background-color: rgba(var(--adapt-surface-rgb), 0.9);
+  border-color: rgba(var(--adapt-outline-rgb), 0.3);
+}
+
+/* Стили элементов внутри панели управления */
+.layout-control-group {
+  display: flex;
+  align-items: center;
+}
+
+.layout-control-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+}
+
+body.theme-light .layout-control-label {
+  color: #2d3748;
+}
+
+body.theme-adaptive .layout-control-label {
+  color: var(--adapt-on-surface);
+}
+
+.layout-control-label input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #4caf50;
+}
+
+.layout-grid-select {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #fff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.layout-grid-select:focus {
+  border-color: #4caf50;
+}
+
+body.theme-light .layout-grid-select {
+  background-color: #f7fafc;
+  border-color: #e2e8f0;
+  color: #2d3748;
+}
+
+body.theme-adaptive .layout-grid-select {
+  background-color: rgba(var(--adapt-surface-rgb), 0.5);
+  border-color: rgba(var(--adapt-outline-rgb), 0.5);
+  color: var(--adapt-on-surface);
+}
+
+.layout-control-divider {
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 0 4px;
+  align-self: stretch;
+}
+
+body.theme-light .layout-control-divider {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-adaptive .layout-control-divider {
+  background-color: rgba(var(--adapt-outline-rgb), 0.3);
+}
+
+/* Сетка привязки на фоне */
+body.layout-edit-mode.layout-grid-active::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    /* Центральная вертикальная линия (выделенная нейтральным серым) */
+    linear-gradient(to right, rgba(255, 255, 255, 0.3) 2px, transparent 2px),
+    /* Центральная горизонтальная линия (выделенная нейтральным серым) */
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 2px, transparent 2px),
+    /* Вертикальные линии сетки */
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    /* Горизонтальные линии сетки */
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-position: 
+    center top,
+    left center,
+    center center,
+    center center;
+  background-size: 
+    2px 100%,
+    100% 2px,
+    var(--grid-size, 20px) 100%,
+    100% var(--grid-size, 20px);
+  background-repeat: 
+    no-repeat,
+    no-repeat,
+    repeat,
+    repeat;
+  pointer-events: none;
+  z-index: 1000;
+  animation: layoutGridFadeIn 0.25s ease;
+}
+
+body.theme-light.layout-edit-mode.layout-grid-active::after {
+  background-image: 
+    /* Центральная вертикальная линия (выделенная нейтральным серым) */
+    linear-gradient(to right, rgba(0, 0, 0, 0.25) 2px, transparent 2px),
+    /* Центральная горизонтальная линия (выделенная нейтральным серым) */
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.25) 2px, transparent 2px),
+    /* Вертикальные линии сетки */
+    linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    /* Горизонтальные линии сетки */
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+}
+
+@keyframes layoutGridFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Направляющие линии «примагничивания» (snapping) к центру экрана */
+.guide-line {
+  position: fixed;
+  background-color: rgba(0, 229, 255, 0.8);
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.guide-line-x { /* Вертикальная линия по центру */
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%) scaleX(0.5);
+}
+
+.guide-line-y { /* Горизонтальная линия по центру */
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%) scaleY(0.5);
+}
+
+.guide-line.active {
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 20px rgba(0, 229, 255, 0.4);
+}
+
+.guide-line-x.active {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.guide-line-y.active {
+  transform: translateY(-50%) scaleY(1);
+}
+
+/* Стилизация виджета при магнитной стыковке */
+.draggable-widget.widget-snapped {
+  outline: 2px solid rgba(0, 229, 255, 0.9) !important;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.6) !important;
+  transform: scale(1.02) !important;
+  transition: outline 0.1s ease, box-shadow 0.1s ease, transform 0.1s ease !important;
+}
+
+/* Стили переопределения для светлой темы оформления */
+body.theme-light .guide-line {
+  background-color: rgba(255, 59, 48, 0.9);
+}
+
+body.theme-light .guide-line.active {
+  box-shadow: 0 0 10px rgba(255, 59, 48, 0.8), 0 0 20px rgba(255, 59, 48, 0.4);
+}
+
+body.theme-light .draggable-widget.widget-snapped {
+  outline: 2px solid rgba(255, 59, 48, 0.9) !important;
+  box-shadow: 0 0 20px rgba(255, 59, 48, 0.6) !important;
+}
+
+/* Адаптивная тема использует системные цвета */
+body.theme-adaptive .guide-line {
+  background-color: var(--adapt-primary, rgba(0, 229, 255, 0.9));
+}
+
+body.theme-adaptive .guide-line.active {
+  box-shadow: 0 0 10px var(--adapt-primary, rgba(0, 229, 255, 0.8)), 0 0 20px rgba(var(--adapt-primary-rgb, 0, 229, 255), 0.4);
+}
+
+body.theme-adaptive .draggable-widget.widget-snapped {
+  outline: 2px solid var(--adapt-primary, rgba(0, 229, 255, 0.9)) !important;
+  box-shadow: 0 0 20px rgba(var(--adapt-primary-rgb, 0, 229, 255), 0.6) !important;
 }

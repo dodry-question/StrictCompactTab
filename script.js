@@ -43,6 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
       themeDark: "Dark",
       themeLight: "Light",
       themeAdaptive: "Adaptive",
+      layoutTitle: "Layout",
+      editLayoutBtn: "Edit Layout",
+      resetLayoutBtn: "Reset Layout",
+      gridSnapLabel: "Snap to Grid",
       showClockLabel: "Show Clock and Date",
       weatherSettingsTitle: "Weather Settings",
       showWeatherLabel: "Show Weather Widget",
@@ -104,6 +108,10 @@ document.addEventListener('DOMContentLoaded', () => {
       themeDark: "Темная",
       themeLight: "Светлая",
       themeAdaptive: "Адаптивная",
+      layoutTitle: "Расположение элементов",
+      editLayoutBtn: "Редактировать макет",
+      resetLayoutBtn: "Сбросить макет",
+      gridSnapLabel: "Привязать к сетке",
       showClockLabel: "Показывать часы и дату",
       weatherSettingsTitle: "Настройки погоды",
       showWeatherLabel: "Показывать погоду",
@@ -203,6 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
     showSeconds: false,
     theme: "dark",
     adaptiveThemeData: null,
+    layoutPositions: null,
+    layoutGridSnap: false,
+    layoutGridSize: 20,
     showClock: true,
     showWeather: false,
     weatherCity: "",
@@ -1189,6 +1200,9 @@ document.addEventListener('DOMContentLoaded', () => {
           let theme = data.theme ?? 'dark';
           if (theme === 'nord') theme = 'dark';
           const adaptiveThemeData = data.adaptiveThemeData ?? null;
+          const layoutPositions = data.layoutPositions ?? null;
+          const layoutGridSnap = data.layoutGridSnap ?? false;
+          const layoutGridSize = data.layoutGridSize ?? 20;
           const showClock = data.showClock ?? true;
           const showWeather = data.showWeather ?? false;
           const weatherCity = data.weatherCity ?? '';
@@ -1209,6 +1223,9 @@ document.addEventListener('DOMContentLoaded', () => {
             searchEngine,
             theme,
             adaptiveThemeData,
+            layoutPositions,
+            layoutGridSnap,
+            layoutGridSize,
             showClock,
             showWeather,
             weatherCity,
@@ -1238,7 +1255,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
       STATE.columns = result.columns ?? 10;
@@ -1253,6 +1270,9 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.theme = result.theme ?? "dark";
       if (STATE.theme === 'nord') STATE.theme = 'dark';
       STATE.adaptiveThemeData = result.adaptiveThemeData ?? null;
+      STATE.layoutPositions = result.layoutPositions ?? null;
+      STATE.layoutGridSnap = result.layoutGridSnap ?? false;
+      STATE.layoutGridSize = result.layoutGridSize ?? 20;
       STATE.showClock = result.showClock ?? true;
       STATE.showWeather = result.showWeather ?? false;
       STATE.weatherCity = result.weatherCity ?? "";
@@ -1279,6 +1299,7 @@ document.addEventListener('DOMContentLoaded', () => {
       applyBackground();
       applyFavicon();
       applyTheme();
+      applyLayoutPositions();
       applyClockVisibility();
       applyWeatherVisibility();
       applyLanguage(STATE.language);
@@ -1310,6 +1331,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showSeconds: STATE.showSeconds,
       theme: STATE.theme,
       adaptiveThemeData: STATE.adaptiveThemeData,
+      layoutPositions: STATE.layoutPositions,
+      layoutGridSnap: STATE.layoutGridSnap,
+      layoutGridSize: STATE.layoutGridSize,
       showClock: STATE.showClock,
       showWeather: STATE.showWeather,
       weatherCity: STATE.weatherCity,
@@ -1854,6 +1878,356 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
   };
+
+  // --- РАСПОЛОЖЕНИЕ ЭЛЕМЕНТОВ (LAYOUT DRAG & DROP) ---
+  let activeDragElement = null;
+  let dragOffset = { x: 0, y: 0 };
+  let hasDragged = false;
+  let tempPositions = {};
+  let layoutGridSnap = null;
+  let layoutGridSize = null;
+
+  function getWidgetKey(element) {
+    if (element.id === 'widget-clock') return 'clock';
+    if (element.id === 'weather-widget') return 'weather';
+    if (element.id === 'search-form') return 'search';
+    if (element.id === 'widget-shortcuts') return 'shortcuts';
+    return null;
+  }
+
+  function applyLayoutPositions() {
+    const widgets = document.querySelectorAll('.draggable-widget');
+    widgets.forEach(widget => {
+      const key = getWidgetKey(widget);
+      if (key && STATE.layoutPositions && STATE.layoutPositions[key]) {
+        const pos = STATE.layoutPositions[key];
+        widget.style.position = 'absolute';
+        widget.style.margin = '0';
+        widget.style.right = 'auto';
+        widget.style.bottom = 'auto';
+        widget.style.transform = 'none';
+        widget.style.left = pos.left + '%';
+        widget.style.top = pos.top + '%';
+      } else {
+        widget.style.position = '';
+        widget.style.margin = '';
+        widget.style.right = '';
+        widget.style.bottom = '';
+        widget.style.transform = '';
+        widget.style.left = '';
+        widget.style.top = '';
+      }
+    });
+  }
+
+  function initLayoutDragAndDrop() {
+    // Динамически создаем направляющие линии примагничивания, если их нет в DOM
+    if (!document.getElementById('guide-line-x')) {
+      const guideX = document.createElement('div');
+      guideX.id = 'guide-line-x';
+      guideX.className = 'guide-line guide-line-x';
+      document.body.appendChild(guideX);
+    }
+    if (!document.getElementById('guide-line-y')) {
+      const guideY = document.createElement('div');
+      guideY.id = 'guide-line-y';
+      guideY.className = 'guide-line guide-line-y';
+      document.body.appendChild(guideY);
+    }
+
+    const widgets = document.querySelectorAll('.draggable-widget');
+    
+    widgets.forEach(widget => {
+      widget.addEventListener('mousedown', onDragStart);
+      widget.addEventListener('touchstart', onDragStart, { passive: false });
+    });
+    
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('touchmove', onDragMove, { passive: false });
+    
+    document.addEventListener('mouseup', onDragEnd);
+    document.addEventListener('touchend', onDragEnd);
+  }
+
+  function onDragStart(e) {
+    if (!document.body.classList.contains('layout-edit-mode')) return;
+    
+    const widget = e.currentTarget;
+    activeDragElement = widget;
+    hasDragged = false;
+
+    const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+    
+    const rect = widget.getBoundingClientRect();
+    
+    dragOffset.x = clientX - rect.left;
+    dragOffset.y = clientY - rect.top;
+    
+    widget.style.position = 'absolute';
+    widget.style.margin = '0';
+    widget.style.transform = 'none';
+    widget.style.right = 'auto';
+    widget.style.bottom = 'auto';
+    widget.style.left = rect.left + 'px';
+    widget.style.top = rect.top + 'px';
+  }
+
+  function onDragMove(e) {
+    if (!activeDragElement) return;
+    hasDragged = true;
+
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
+    const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+    
+    let newLeft = clientX - dragOffset.x;
+    let newTop = clientY - dragOffset.y;
+    
+    // Сначала обычная сетка привязки (если активна)
+    if (layoutGridSnap && layoutGridSnap.checked) {
+      const gridSize = parseInt(layoutGridSize.value) || 20;
+      newLeft = Math.round(newLeft / gridSize) * gridSize;
+      newTop = Math.round(newTop / gridSize) * gridSize;
+    }
+    
+    // Получаем оригинальные физические размеры элемента без учета CSS-масштабирования (scale)
+    const widgetWidth = activeDragElement.offsetWidth;
+    const widgetHeight = activeDragElement.offsetHeight;
+    const key = getWidgetKey(activeDragElement);
+    
+    // Если перетаскивается блок ярлыков, фиксируем его горизонтальное положение строго по центру
+    if (key === 'shortcuts') {
+      newLeft = (window.innerWidth - widgetWidth) / 2;
+    }
+    
+    const viewportCenterX = window.innerWidth / 2;
+    const viewportCenterY = window.innerHeight / 2;
+    
+    // Расчет центральной точки перетаскиваемого виджета
+    const widgetCenterX = newLeft + widgetWidth / 2;
+    const widgetCenterY = newTop + widgetHeight / 2;
+    
+    const snapThreshold = 15; // Расстояние притяжения в пикселях (как в PowerPoint/Figma)
+    let snappedX = false;
+    let snappedY = false;
+    
+    // Притягивание к вертикальной оси центра экрана (только для обычных виджетов)
+    if (key !== 'shortcuts' && Math.abs(widgetCenterX - viewportCenterX) < snapThreshold) {
+      newLeft = viewportCenterX - widgetWidth / 2;
+      snappedX = true;
+    }
+    
+    // Притягивание к горизонтальной оси центра экрана
+    if (Math.abs(widgetCenterY - viewportCenterY) < snapThreshold) {
+      newTop = viewportCenterY - widgetHeight / 2;
+      snappedY = true;
+    }
+    
+    // Управление подсветкой осей
+    const guideLineX = document.getElementById('guide-line-x');
+    const guideLineY = document.getElementById('guide-line-y');
+    
+    if (guideLineX) {
+      if (snappedX) {
+        guideLineX.classList.add('active');
+      } else {
+        guideLineX.classList.remove('active');
+      }
+    }
+    
+    if (guideLineY) {
+      if (snappedY) {
+        guideLineY.classList.add('active');
+      } else {
+        guideLineY.classList.remove('active');
+      }
+    }
+    
+    // Дополнительный визуальный эффект на самом элементе при магнитной стыковке
+    if (snappedX || snappedY) {
+      activeDragElement.classList.add('widget-snapped');
+    } else {
+      activeDragElement.classList.remove('widget-snapped');
+    }
+    
+    const minLeft = 0;
+    const minTop = 0;
+    const maxLeft = window.innerWidth - widgetWidth;
+    const maxTop = window.innerHeight - widgetHeight;
+    
+    if (newLeft < minLeft) newLeft = minLeft;
+    if (newLeft > maxLeft) newLeft = maxLeft;
+    if (newTop < minTop) newTop = minTop;
+    if (newTop > maxTop) newTop = maxTop;
+    
+    activeDragElement.style.left = newLeft + 'px';
+    activeDragElement.style.top = newTop + 'px';
+  }
+
+  function onDragEnd() {
+    if (!activeDragElement) return;
+    
+    const key = getWidgetKey(activeDragElement);
+    if (key && hasDragged) {
+      // Используем offsetLeft и offsetTop вместо getBoundingClientRect()
+      // Это полностью исключает смещения, вызванные CSS-эффектом transform: scale(1.02)
+      const layoutLeft = activeDragElement.offsetLeft;
+      const layoutTop = activeDragElement.offsetTop;
+      
+      tempPositions[key] = {
+        left: (layoutLeft / window.innerWidth) * 100,
+        top: (layoutTop / window.innerHeight) * 100
+      };
+    }
+    
+    // Сбрасываем эффекты и скрываем линии
+    activeDragElement.classList.remove('widget-snapped');
+    const guideLineX = document.getElementById('guide-line-x');
+    const guideLineY = document.getElementById('guide-line-y');
+    if (guideLineX) guideLineX.classList.remove('active');
+    if (guideLineY) guideLineY.classList.remove('active');
+    
+    activeDragElement = null;
+  }
+
+  // --- ИНИЦИАЛИЗАЦИЯ КНОПОК РАСПОЛОЖЕНИЯ ---
+  const btnEditLayout = document.getElementById('btn-edit-layout');
+  const btnResetLayout = document.getElementById('btn-reset-layout');
+  const layoutSaveBtn = document.getElementById('layout-save-btn');
+  const layoutCancelBtn = document.getElementById('layout-cancel-btn');
+  const layoutEditControls = document.getElementById('layout-edit-controls');
+  const settingsModal = document.getElementById('settings-modal');
+
+  layoutGridSnap = document.getElementById('layout-grid-snap');
+  layoutGridSize = document.getElementById('layout-grid-size');
+
+  if (layoutGridSnap) {
+    layoutGridSnap.addEventListener('change', () => {
+      const active = layoutGridSnap.checked;
+      if (layoutGridSize) {
+        layoutGridSize.style.display = active ? 'inline-block' : 'none';
+      }
+      if (active) {
+        document.body.classList.add('layout-grid-active');
+        const size = layoutGridSize ? layoutGridSize.value : 20;
+        document.body.style.setProperty('--grid-size', size + 'px');
+      } else {
+        document.body.classList.remove('layout-grid-active');
+        document.body.style.removeProperty('--grid-size');
+      }
+    });
+  }
+
+  if (layoutGridSize) {
+    layoutGridSize.addEventListener('change', () => {
+      const size = layoutGridSize.value;
+      document.body.style.setProperty('--grid-size', size + 'px');
+    });
+  }
+
+  if (btnEditLayout) {
+    btnEditLayout.addEventListener('click', () => {
+      if (settingsModal) settingsModal.classList.remove('active');
+      
+      document.body.classList.add('layout-edit-mode');
+      if (layoutEditControls) layoutEditControls.style.display = 'flex';
+      
+      // Инициализируем настройки сетки из STATE
+      if (layoutGridSnap) {
+        layoutGridSnap.checked = STATE.layoutGridSnap;
+      }
+      if (layoutGridSize) {
+        layoutGridSize.value = STATE.layoutGridSize || 20;
+        layoutGridSize.style.display = STATE.layoutGridSnap ? 'inline-block' : 'none';
+      }
+      if (STATE.layoutGridSnap) {
+        document.body.classList.add('layout-grid-active');
+        document.body.style.setProperty('--grid-size', (STATE.layoutGridSize || 20) + 'px');
+      } else {
+        document.body.classList.remove('layout-grid-active');
+        document.body.style.removeProperty('--grid-size');
+      }
+
+      tempPositions = {};
+      const widgets = document.querySelectorAll('.draggable-widget');
+      widgets.forEach(widget => {
+        const key = getWidgetKey(widget);
+        if (key && STATE.layoutPositions && STATE.layoutPositions[key]) {
+          tempPositions[key] = { ...STATE.layoutPositions[key] };
+        }
+        
+        const rect = widget.getBoundingClientRect();
+        widget.style.position = 'absolute';
+        widget.style.margin = '0';
+        widget.style.transform = 'none';
+        widget.style.right = 'auto';
+        widget.style.bottom = 'auto';
+        widget.style.left = rect.left + 'px';
+        widget.style.top = rect.top + 'px';
+      });
+    });
+  }
+
+  if (layoutSaveBtn) {
+    layoutSaveBtn.addEventListener('click', () => {
+      if (!STATE.layoutPositions) STATE.layoutPositions = {};
+      
+      const widgets = document.querySelectorAll('.draggable-widget');
+      widgets.forEach(widget => {
+        const key = getWidgetKey(widget);
+        if (key && tempPositions[key]) {
+          STATE.layoutPositions[key] = tempPositions[key];
+        }
+      });
+      
+      // Сохраняем состояние сетки
+      if (layoutGridSnap) {
+        STATE.layoutGridSnap = layoutGridSnap.checked;
+      }
+      if (layoutGridSize) {
+        STATE.layoutGridSize = parseInt(layoutGridSize.value) || 20;
+      }
+
+      saveState();
+      
+      document.body.classList.remove('layout-edit-mode');
+      document.body.classList.remove('layout-grid-active');
+      document.body.style.removeProperty('--grid-size');
+      if (layoutEditControls) layoutEditControls.style.display = 'none';
+      applyLayoutPositions();
+    });
+  }
+
+  if (layoutCancelBtn) {
+    layoutCancelBtn.addEventListener('click', () => {
+      document.body.classList.remove('layout-edit-mode');
+      document.body.classList.remove('layout-grid-active');
+      document.body.style.removeProperty('--grid-size');
+      if (layoutEditControls) layoutEditControls.style.display = 'none';
+      applyLayoutPositions();
+    });
+  }
+
+  if (btnResetLayout) {
+    btnResetLayout.addEventListener('click', () => {
+      STATE.layoutPositions = null;
+      STATE.layoutGridSnap = false;
+      STATE.layoutGridSize = 20;
+      saveState();
+      
+      document.body.classList.remove('layout-edit-mode');
+      document.body.classList.remove('layout-grid-active');
+      document.body.style.removeProperty('--grid-size');
+      if (layoutEditControls) layoutEditControls.style.display = 'none';
+      applyLayoutPositions();
+    });
+  }
+
+  initLayoutDragAndDrop();
 
   loadState();
 });
