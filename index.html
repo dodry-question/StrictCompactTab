@@ -4,7 +4,21 @@
   <meta charset="UTF-8">
   <title>Новая вкладка</title>
   <!-- Подключение фавиконки вкладки -->
-  <link class="page-favicon" rel="icon" type="image/png" href="assets/favicon.png">
+  <script>
+    (function() {
+      try {
+        const val = localStorage.getItem('customFavicon');
+        if (val) {
+          const url = JSON.parse(val);
+          if (url) {
+            document.write('<link class="page-favicon" rel="icon" type="image/png" href="' + url + '">');
+            return;
+          }
+        }
+      } catch (e) {}
+      document.write('<link class="page-favicon" rel="icon" type="image/png" href="assets/favicon.png">');
+    })();
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>

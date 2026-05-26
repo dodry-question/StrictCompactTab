@@ -156,6 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     set: (data, callback) => {
+      if (data && data.hasOwnProperty('customFavicon')) {
+        if (data.customFavicon === null) {
+          localStorage.removeItem('customFavicon');
+        } else {
+          localStorage.setItem('customFavicon', JSON.stringify(data.customFavicon));
+        }
+      }
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.set(data, callback);
       } else {
@@ -182,6 +189,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     clearAndSet: (data, callback) => {
+      if (data && data.hasOwnProperty('customFavicon')) {
+        if (data.customFavicon === null) {
+          localStorage.removeItem('customFavicon');
+        } else {
+          localStorage.setItem('customFavicon', JSON.stringify(data.customFavicon));
+        }
+      } else {
+        localStorage.removeItem('customFavicon');
+      }
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.clear(() => {
           chrome.storage.local.set(data, callback);
