@@ -1301,6 +1301,11 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.size = result.size ?? "small";
       STATE.customBackground = result.customBackground ?? null;
       STATE.customFavicon = result.customFavicon ?? null;
+      if (STATE.customFavicon === null) {
+        localStorage.removeItem('customFavicon');
+      } else {
+        localStorage.setItem('customFavicon', JSON.stringify(STATE.customFavicon));
+      }
       STATE.language = result.language ?? "en";
       STATE.searchEngine = result.searchEngine ?? "duckduckgo";
       STATE.showDate = result.showDate ?? true;
