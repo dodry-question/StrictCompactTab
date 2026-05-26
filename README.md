@@ -23,8 +23,17 @@ A lightweight, privacy-focused, zero-dependency new tab page designed to run ent
 * **Responsive Settings Layout**: The settings panel is fully responsive. On narrow screens or smaller viewports, the dual-column layout dynamically rearranges into a single vertical layout to prevent element clipping and ensure readability.
 * **Adjustable Clock and Date**: Master toggle to display or hide the clock/date widget on the page (hiding it also hides sub-settings to clean up settings panel). Toggle the display of the current day of the week, choose between 12-hour (AM/PM) and 24-hour formats, and toggle the seconds counter.
 * **Confidential Weather Widget**: A private weather display located in the top-right corner of the page. It requires manual city input to prevent geo-tracking or IP leakage (note that when enabled, the browser sends queries directly to the keyless Open-Meteo API to retrieve weather updates; if the toggle is disabled, no network queries are ever initiated). Features automatic duplicate city resolution feedback (showing region and country details).
-* **Complete Privacy**: All configurations, shortcut lists, custom wallpapers, and favicons are stored strictly on your local machine using the storage API. No telemetry, tracking, or external server connections are used (except for the optional weather widget, which only connects to Open-Meteo when manually enabled; if the weather widget is turned off, no network queries are initiated, ensuring absolute local execution).
+* **Complete Privacy**: All configurations, shortcut lists, custom wallpapers, and favicons are stored strictly on your local machine using the storage API. The adaptive theme algorithm works 100% offline using a locally bundled version of Google's color utilities. No telemetry, tracking, or external server connections are used (except for the optional weather widget).
 * **JSON Backup and Restore**: Export your entire setup (including categories and shortcuts) to a single JSON configuration file or import previous backups with safe fallback values and page reload handling.
+
+---
+
+## Privacy & Security
+
+This extension is built on **offline-first** principles:
+* **Local Wallpaper Analysis**: Adaptive theme colors are calculated in your browser using the HTML5 Canvas API and `@material/material-color-utilities`. Your wallpapers are never uploaded to any server.
+* **Strict Content Security Policy (CSP)**: The extension uses a strict CSP that blocks all external network requests. The only allowed exceptions are the Open-Meteo APIs (which are only queried if the weather widget is manually enabled).
+* **Zero Telemetry**: No usage stats, search history, or personal data are collected, stored, or transmitted.
 
 ---
 

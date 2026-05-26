@@ -12,6 +12,9 @@
     "storage",
     "unlimitedStorage"
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com;"
+  },
   "icons": {
     "16": "assets/favicon.png",
     "32": "assets/favicon.png",
