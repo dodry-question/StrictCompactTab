@@ -5,9 +5,10 @@
 <h1 align="center">Strict Compact Tab</h1>
 
 <p align="center">
-  <a href="https://mit-license.org/"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License"></a>
-  <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json"><img src="https://img.shields.io/badge/manifest-V3-blueviolet?style=flat-square" alt="Manifest"></a>
-  <a href="#installation"><img src="https://img.shields.io/badge/platforms-Firefox%20%7C%20Chromium-informational?style=flat-square" alt="Platforms"></a>
+  <a href="https://github.com/dodry-question/StrictCompactTab/releases"><img src="https://img.shields.io/badge/version-v1.8.3-eaeaea?style=flat&logo=github&logoColor=181717" alt="Version"></a>
+  <img src="https://img.shields.io/badge/manifest-MV3-d2e9e9?style=flat" alt="Manifest">
+  <img src="https://img.shields.io/badge/privacy-100%25-c9e4de?style=flat" alt="Privacy">
+  <a href="https://mit-license.org/"><img src="https://img.shields.io/badge/license-MIT-f7d6c8?style=flat" alt="License"></a>
 </p>
 
 <p align="center">
