@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Strict Compact Tab",
-  "version": "1.8.7",
+  "version": "1.8.8",
   "description": "A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally.",
   "author": "dodry-question",
   "homepage_url": "https://github.com/dodry-question/my-new-tab",
@@ -20,8 +20,8 @@
     "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com;"
   },
   "icons": {
-    "16": "assets/favicon.png",
-    "32": "assets/favicon.png",
+    "16": "assets/icon16_trans.png",
+    "32": "assets/icon32_trans.png",
     "48": "assets/favicon.png",
     "128": "assets/favicon.png"
   },
