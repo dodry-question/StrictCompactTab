@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showWeatherLabel: "Show Weather Widget",
       weatherCityLabel: "City Name",
       weatherCityPlaceholder: "Enter city (e.g. Moscow, Moscow Oblast, RU)",
+      weatherNoCity: "No city set",
       weatherStatusSearching: "Searching...",
       weatherStatusFound: "Found",
       weatherStatusNotFound: "City not found",
@@ -118,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showWeatherLabel: "Показывать погоду",
       weatherCityLabel: "Город",
       weatherCityPlaceholder: "Введите город (например, Москва, Московская обл., RU)",
+      weatherNoCity: "Город не задан",
       weatherStatusSearching: "Поиск...",
       weatherStatusFound: "Найдено",
       weatherStatusNotFound: "Город не найден",
@@ -859,7 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!STATE.weatherCoords || STATE.weatherCoords.lat === null || STATE.weatherCoords.lon === null) {
       if (weatherTemp) weatherTemp.textContent = '--°C';
       if (weatherIcon) weatherIcon.textContent = '❓';
-      if (weatherDetails) weatherDetails.textContent = dict.weatherCityPlaceholder || 'Enter city';
+      if (weatherDetails) weatherDetails.textContent = dict.weatherNoCity || 'No city set';
       return;
     }
 
