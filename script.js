@@ -65,7 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
       addCategoryPrompt: "Enter new category name:",
       renameCategoryPrompt: "Rename category to:",
       deleteCategoryConfirm: "Are you sure you want to delete this category? All its shortcuts will be moved to General.",
-      searchEngineLabel: "Search Engine"
+      searchEngineLabel: "Search Engine",
+      iosModeLabel: "iOS Widget Mode (Square tiles)"
     },
     ru: {
       searchPlaceholder: "Искать в интернете...",
@@ -130,7 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
       addCategoryPrompt: "Введите название новой категории:",
       renameCategoryPrompt: "Переименовать категорию в:",
       deleteCategoryConfirm: "Вы уверены, что хотите удалить эту категорию? Все её ярлыки будут перенесены в Общую.",
-      searchEngineLabel: "Поисковая система"
+      searchEngineLabel: "Поисковая система",
+      iosModeLabel: "Режим виджетов iOS (Квадратные плитки)"
     }
   };
 
@@ -684,6 +686,21 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.format12h = e.target.checked;
       saveState();
       updateClockAndDate();
+    });
+  }
+
+  const layoutIosModeCb = document.getElementById('layout-ios-mode');
+  if (layoutIosModeCb) {
+    layoutIosModeCb.addEventListener('change', (e) => {
+      STATE.layoutIosMode = e.target.checked;
+      saveState();
+      if (STATE.layoutIosMode) {
+        document.body.classList.add('mode-ios');
+      } else {
+        document.body.classList.remove('mode-ios');
+      }
+      applyLayoutPositions();
+      renderShortcuts();
     });
   }
 
@@ -1255,7 +1272,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
       STATE.columns = result.columns ?? 10;
@@ -1273,6 +1290,7 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.layoutPositions = result.layoutPositions ?? null;
       STATE.layoutGridSnap = result.layoutGridSnap ?? false;
       STATE.layoutGridSize = result.layoutGridSize ?? 20;
+      STATE.layoutIosMode = result.layoutIosMode ?? false;
       STATE.showClock = result.showClock ?? true;
       STATE.showWeather = result.showWeather ?? false;
       STATE.weatherCity = result.weatherCity ?? "";
@@ -1295,10 +1313,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (showSecondsCb) showSecondsCb.checked = STATE.showSeconds;
       if (showWeatherCb) showWeatherCb.checked = STATE.showWeather;
       if (weatherCityInput) weatherCityInput.value = STATE.weatherCity;
+      if (layoutIosModeCb) layoutIosModeCb.checked = STATE.layoutIosMode;
+
+      if (STATE.layoutIosMode) {
+        document.body.classList.add('mode-ios');
+      } else {
+        document.body.classList.remove('mode-ios');
+      }
 
       applyBackground();
       applyFavicon();
       applyTheme();
+      document.body.style.setProperty('--grid-size', STATE.layoutGridSize + 'px');
       applyLayoutPositions();
       applyClockVisibility();
       applyWeatherVisibility();
@@ -1334,6 +1360,7 @@ document.addEventListener('DOMContentLoaded', () => {
       layoutPositions: STATE.layoutPositions,
       layoutGridSnap: STATE.layoutGridSnap,
       layoutGridSize: STATE.layoutGridSize,
+      layoutIosMode: STATE.layoutIosMode,
       showClock: STATE.showClock,
       showWeather: STATE.showWeather,
       weatherCity: STATE.weatherCity,
@@ -1411,8 +1438,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxColumns = STATE.columns;
     const actualColumns = Math.min(filteredShortcuts.length, maxColumns);
     
-    const containerMaxWidth = (itemWidth * actualColumns) + (gap * (actualColumns - 1));
-    container.style.maxWidth = `${containerMaxWidth}px`;
+    if (document.body.classList.contains('mode-ios')) {
+      container.style.maxWidth = '100%';
+    } else {
+      // Добавляем запас (+20px): 16px для компенсации padding (8px с каждой стороны) контейнера и +4px для погрешностей субпиксельного рендеринга на масштабированных экранах.
+      // Это гарантирует, что последний ярлык в ряду никогда не перенесется на следующую строку.
+      const containerMaxWidth = (itemWidth * actualColumns) + (gap * (actualColumns - 1)) + 20;
+      container.style.maxWidth = `${containerMaxWidth}px`;
+    }
 
     const fragment = document.createDocumentFragment();
 
@@ -1886,6 +1919,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let tempPositions = {};
   let layoutGridSnap = null;
   let layoutGridSize = null;
+  
+  let activeResizeElement = null;
+  let resizeStartCoords = { x: 0, y: 0 };
+  let resizeStartDimensions = { w: 0, h: 0 };
 
   function getWidgetKey(element) {
     if (element.id === 'widget-clock') return 'clock';
@@ -1896,6 +1933,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function applyLayoutPositions() {
+    const isIos = document.body.classList.contains('mode-ios');
     const widgets = document.querySelectorAll('.draggable-widget');
     widgets.forEach(widget => {
       const key = getWidgetKey(widget);
@@ -1908,6 +1946,30 @@ document.addEventListener('DOMContentLoaded', () => {
         widget.style.transform = 'none';
         widget.style.left = pos.left + '%';
         widget.style.top = pos.top + '%';
+        
+        if (isIos) {
+          const defaultSizes = {
+            clock: { w: 8, h: 8 },
+            weather: { w: 6, h: 6 },
+            search: { w: 8, h: 8 },
+            shortcuts: { w: 16, h: 16 }
+          };
+          const wCells = pos.widthCells || defaultSizes[key].w;
+          const hCells = pos.heightCells || defaultSizes[key].h;
+          
+          widget.style.width = `calc(${wCells} * var(--grid-size, 20px))`;
+          widget.style.height = `calc(${hCells} * var(--grid-size, 20px))`;
+          
+          if (wCells >= hCells * 1.4) {
+            widget.classList.add('widget-wide');
+          } else {
+            widget.classList.remove('widget-wide');
+          }
+        } else {
+          widget.style.width = '';
+          widget.style.height = '';
+          widget.classList.remove('widget-wide');
+        }
       } else {
         widget.style.position = '';
         widget.style.margin = '';
@@ -1916,6 +1978,9 @@ document.addEventListener('DOMContentLoaded', () => {
         widget.style.transform = '';
         widget.style.left = '';
         widget.style.top = '';
+        widget.style.width = '';
+        widget.style.height = '';
+        widget.classList.remove('widget-wide');
       }
     });
   }
@@ -1942,11 +2007,35 @@ document.addEventListener('DOMContentLoaded', () => {
       widget.addEventListener('touchstart', onDragStart, { passive: false });
     });
     
-    document.addEventListener('mousemove', onDragMove);
-    document.addEventListener('touchmove', onDragMove, { passive: false });
+    document.addEventListener('mousemove', (e) => {
+      if (activeResizeElement) {
+        onResizeMove(e);
+      } else {
+        onDragMove(e);
+      }
+    });
+    document.addEventListener('touchmove', (e) => {
+      if (activeResizeElement) {
+        onResizeMove(e);
+      } else {
+        onDragMove(e);
+      }
+    }, { passive: false });
     
-    document.addEventListener('mouseup', onDragEnd);
-    document.addEventListener('touchend', onDragEnd);
+    document.addEventListener('mouseup', () => {
+      if (activeResizeElement) {
+        onResizeEnd();
+      } else {
+        onDragEnd();
+      }
+    });
+    document.addEventListener('touchend', () => {
+      if (activeResizeElement) {
+        onResizeEnd();
+      } else {
+        onDragEnd();
+      }
+    });
   }
 
   function onDragStart(e) {
@@ -1999,31 +2088,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const widgetHeight = activeDragElement.offsetHeight;
     const key = getWidgetKey(activeDragElement);
     
-    // Если перетаскивается блок ярлыков, фиксируем его горизонтальное положение строго по центру
-    if (key === 'shortcuts') {
+    // Если перетаскивается блок ярлыков в классическом режиме, фиксируем его горизонтальное положение строго по центру.
+    // В режиме iOS разрешаем свободное перемещение по горизонтали.
+    if (key === 'shortcuts' && !document.body.classList.contains('mode-ios')) {
       newLeft = (window.innerWidth - widgetWidth) / 2;
     }
     
     const viewportCenterX = window.innerWidth / 2;
     const viewportCenterY = window.innerHeight / 2;
     
-    // Расчет центральной точки перетаскиваемого виджета
-    const widgetCenterX = newLeft + widgetWidth / 2;
-    const widgetCenterY = newTop + widgetHeight / 2;
-    
     const snapThreshold = 15; // Расстояние притяжения в пикселях (как в PowerPoint/Figma)
     let snappedX = false;
     let snappedY = false;
     
-    // Притягивание к вертикальной оси центра экрана (только для обычных виджетов)
-    if (key !== 'shortcuts' && Math.abs(widgetCenterX - viewportCenterX) < snapThreshold) {
-      newLeft = viewportCenterX - widgetWidth / 2;
-      snappedX = true;
+    // 1. Притягивание к вертикальной оси центра экрана (для всех виджетов, кроме ярлыков в классическом режиме)
+    // Магнитится по 3 точкам: левый край, центр, правый край к центральной вертикали
+    if (key !== 'shortcuts' || document.body.classList.contains('mode-ios')) {
+      const distCenterX = Math.abs((newLeft + widgetWidth / 2) - viewportCenterX);
+      const distLeftX = Math.abs(newLeft - viewportCenterX);
+      const distRightX = Math.abs((newLeft + widgetWidth) - viewportCenterX);
+      
+      const minDistX = Math.min(distCenterX, distLeftX, distRightX);
+      
+      if (minDistX < snapThreshold) {
+        if (minDistX === distCenterX) {
+          newLeft = viewportCenterX - widgetWidth / 2; // Примагнитить по центру
+        } else if (minDistX === distLeftX) {
+          newLeft = viewportCenterX; // Разместить справа от оси (левый край на оси)
+        } else {
+          newLeft = viewportCenterX - widgetWidth; // Разместить слева от оси (правый край на оси)
+        }
+        snappedX = true;
+      }
     }
     
-    // Притягивание к горизонтальной оси центра экрана
-    if (Math.abs(widgetCenterY - viewportCenterY) < snapThreshold) {
-      newTop = viewportCenterY - widgetHeight / 2;
+    // 2. Притягивание к горизонтальной оси центра экрана (для всех виджетов, включая ярлыки)
+    // Магнитится по 3 точкам: верхний край, центр, нижний край к центральной горизонтали
+    const distCenterY = Math.abs((newTop + widgetHeight / 2) - viewportCenterY);
+    const distTopY = Math.abs(newTop - viewportCenterY);
+    const distBottomY = Math.abs((newTop + widgetHeight) - viewportCenterY);
+    
+    const minDistY = Math.min(distCenterY, distTopY, distBottomY);
+    
+    if (minDistY < snapThreshold) {
+      if (minDistY === distCenterY) {
+        newTop = viewportCenterY - widgetHeight / 2; // Примагнитить по центру
+      } else if (minDistY === distTopY) {
+        newTop = viewportCenterY; // Разместить под осью (верхний край на оси)
+      } else {
+        newTop = viewportCenterY - widgetHeight; // Разместить над осью (нижний край на оси)
+      }
       snappedY = true;
     }
     
@@ -2078,10 +2192,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const layoutLeft = activeDragElement.offsetLeft;
       const layoutTop = activeDragElement.offsetTop;
       
-      tempPositions[key] = {
-        left: (layoutLeft / window.innerWidth) * 100,
-        top: (layoutTop / window.innerHeight) * 100
-      };
+      if (!tempPositions[key]) {
+        tempPositions[key] = {};
+      }
+      tempPositions[key].left = (layoutLeft / window.innerWidth) * 100;
+      tempPositions[key].top = (layoutTop / window.innerHeight) * 100;
     }
     
     // Сбрасываем эффекты и скрываем линии
@@ -2092,6 +2207,105 @@ document.addEventListener('DOMContentLoaded', () => {
     if (guideLineY) guideLineY.classList.remove('active');
     
     activeDragElement = null;
+  }
+
+  function onResizeStart(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!document.body.classList.contains('layout-edit-mode')) return;
+
+    const handle = e.currentTarget;
+    const widget = handle.parentElement;
+    activeResizeElement = widget;
+
+    const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+    resizeStartCoords.x = clientX;
+    resizeStartCoords.y = clientY;
+    resizeStartDimensions.w = widget.offsetWidth;
+    resizeStartDimensions.h = widget.offsetHeight;
+  }
+
+  function onResizeMove(e) {
+    if (!activeResizeElement) return;
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
+    const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+    const deltaX = clientX - resizeStartCoords.x;
+    const deltaY = clientY - resizeStartCoords.y;
+
+    let newWidth = resizeStartDimensions.w + deltaX;
+    let newHeight = resizeStartDimensions.h + deltaY;
+
+    const gridSize = parseInt(layoutGridSize.value) || 20;
+
+    // Сетка привязки при изменении размеров
+    if (layoutGridSnap && layoutGridSnap.checked) {
+      newWidth = Math.round(newWidth / gridSize) * gridSize;
+      newHeight = Math.round(newHeight / gridSize) * gridSize;
+    }
+
+    const key = getWidgetKey(activeResizeElement);
+    
+    // Безопасные минимальные границы в сетке
+    const defaultMinCells = {
+      clock: { w: 4, h: 4 },
+      weather: { w: 4, h: 4 },
+      search: { w: 6, h: 3 },
+      shortcuts: { w: 6, h: 6 }
+    };
+    
+    const minCells = defaultMinCells[key] || { w: 4, h: 4 };
+    const minWidth = minCells.w * gridSize;
+    const minHeight = minCells.h * gridSize;
+
+    if (newWidth < minWidth) newWidth = minWidth;
+    if (newHeight < minHeight) newHeight = minHeight;
+
+    activeResizeElement.style.width = newWidth + 'px';
+    activeResizeElement.style.height = newHeight + 'px';
+
+    const wCells = Math.round(newWidth / gridSize);
+    const hCells = Math.round(newHeight / gridSize);
+
+    // Добавляем класс широкого виджета для перестроения контента
+    if (wCells >= hCells * 1.4) {
+      activeResizeElement.classList.add('widget-wide');
+    } else {
+      activeResizeElement.classList.remove('widget-wide');
+    }
+
+    if (key) {
+      if (!tempPositions[key]) {
+        // Если временных координат еще нет, инициализируем
+        const leftPct = (activeResizeElement.offsetLeft / window.innerWidth) * 100;
+        const topPct = (activeResizeElement.offsetTop / window.innerHeight) * 100;
+        tempPositions[key] = { left: leftPct, top: topPct };
+      }
+      const prevW = tempPositions[key].widthCells;
+      tempPositions[key].widthCells = wCells;
+      tempPositions[key].heightCells = hCells;
+
+      // Оптимизация: перерисовываем ярлыки только если число колонок в сетке изменилось
+      if (key === 'shortcuts' && prevW !== wCells) {
+        renderShortcuts();
+      }
+    }
+  }
+
+  function onResizeEnd() {
+    if (!activeResizeElement) return;
+    activeResizeElement = null;
+  }
+
+  function removeResizeHandles() {
+    const handles = document.querySelectorAll('.widget-resize-handle');
+    handles.forEach(h => h.remove());
   }
 
   // --- ИНИЦИАЛИЗАЦИЯ КНОПОК РАСПОЛОЖЕНИЯ ---
@@ -2154,13 +2368,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
       tempPositions = {};
       const widgets = document.querySelectorAll('.draggable-widget');
-      widgets.forEach(widget => {
+      
+      // Сначала измеряем координаты ВСЕХ элементов, пока они находятся в естественном потоке!
+      // Это полностью предотвращает схлопывание высоты страницы и преждевременный сдвиг последующих элементов.
+      const rects = Array.from(widgets).map(w => w.getBoundingClientRect());
+      
+      widgets.forEach((widget, index) => {
         const key = getWidgetKey(widget);
-        if (key && STATE.layoutPositions && STATE.layoutPositions[key]) {
-          tempPositions[key] = { ...STATE.layoutPositions[key] };
+        const rect = rects[index];
+        
+        if (key) {
+          if (STATE.layoutPositions && STATE.layoutPositions[key]) {
+            tempPositions[key] = { ...STATE.layoutPositions[key] };
+          } else {
+            // Если сохраненного положения еще нет, инициализируем его на основе текущих экранных координат
+            tempPositions[key] = {
+              left: (rect.left / window.innerWidth) * 100,
+              top: (rect.top / window.innerHeight) * 100
+            };
+          }
         }
         
-        const rect = widget.getBoundingClientRect();
         widget.style.position = 'absolute';
         widget.style.margin = '0';
         widget.style.transform = 'none';
@@ -2168,6 +2396,19 @@ document.addEventListener('DOMContentLoaded', () => {
         widget.style.bottom = 'auto';
         widget.style.left = rect.left + 'px';
         widget.style.top = rect.top + 'px';
+
+        // Добавляем ручки изменения размера в режиме iOS
+        if (document.body.classList.contains('mode-ios')) {
+          const oldHandle = widget.querySelector('.widget-resize-handle');
+          if (oldHandle) oldHandle.remove();
+          
+          const handle = document.createElement('div');
+          handle.className = 'widget-resize-handle';
+          widget.appendChild(handle);
+          
+          handle.addEventListener('mousedown', onResizeStart);
+          handle.addEventListener('touchstart', onResizeStart, { passive: false });
+        }
       });
     });
   }
@@ -2196,8 +2437,9 @@ document.addEventListener('DOMContentLoaded', () => {
       
       document.body.classList.remove('layout-edit-mode');
       document.body.classList.remove('layout-grid-active');
-      document.body.style.removeProperty('--grid-size');
+      document.body.style.setProperty('--grid-size', STATE.layoutGridSize + 'px');
       if (layoutEditControls) layoutEditControls.style.display = 'none';
+      removeResizeHandles();
       applyLayoutPositions();
     });
   }
@@ -2206,8 +2448,9 @@ document.addEventListener('DOMContentLoaded', () => {
     layoutCancelBtn.addEventListener('click', () => {
       document.body.classList.remove('layout-edit-mode');
       document.body.classList.remove('layout-grid-active');
-      document.body.style.removeProperty('--grid-size');
+      document.body.style.setProperty('--grid-size', STATE.layoutGridSize + 'px');
       if (layoutEditControls) layoutEditControls.style.display = 'none';
+      removeResizeHandles();
       applyLayoutPositions();
     });
   }
@@ -2221,8 +2464,9 @@ document.addEventListener('DOMContentLoaded', () => {
       
       document.body.classList.remove('layout-edit-mode');
       document.body.classList.remove('layout-grid-active');
-      document.body.style.removeProperty('--grid-size');
+      document.body.style.setProperty('--grid-size', '20px');
       if (layoutEditControls) layoutEditControls.style.display = 'none';
+      removeResizeHandles();
       applyLayoutPositions();
     });
   }

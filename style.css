@@ -1,7 +1,24 @@
-* {
-  box-sizing: border-box;
+*, *::before, *::after {
+  box-sizing: border-box !important;
   margin: 0;
   padding: 0;
+}
+
+/* Сброс дефолтных внешних отступов */
+.widget, .card, p, span, h1, h2, h3, h4, a,
+.clock, .date-display, .weather-temp, .weather-icon, .weather-details, .weather-input-status, .shortcut-label {
+  margin: 0 !important;
+}
+
+/* Ограничение высоты строк (line-height) */
+.widget-text, .card-title, p, span,
+.clock, .date-display, .weather-temp, .weather-details, .weather-input-status, .shortcut-label {
+  line-height: 1.15 !important;
+}
+
+/* Принудительное ограничение переполнения (overflow fail-safe) */
+.clock-container, .weather-container, .search-form, .shortcut-card, .widget, .card {
+  overflow: hidden !important;
 }
 
 html, body {
@@ -25,141 +42,175 @@ body {
   position: relative;
 }
 
-/* Контейнер времени и даты */
-.clock-container {
+/* ==========================================
+   📐 КЛАССИЧЕСКИЙ РЕЖИМ (DEFAULT CLASSIC LAYOUT)
+   ========================================== */
+
+/* 1. Контейнер времени и даты */
+body:not(.mode-ios) .clock-container {
   position: absolute;
   top: 36px;
   left: 40px;
+  width: 200px;
+  height: 110px; /* Увеличиваем высоту до 110px для исключения обрезания */
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 4px; /* Делаем надпись чуть ближе к часам */
   line-height: 1;
+  background: none;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
-.clock {
+body:not(.mode-ios) .clock {
   font-size: 72px;
   font-weight: 500;
   letter-spacing: -2px;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.date-display {
+body:not(.mode-ios) .date-display {
   font-size: 16px;
   color: rgba(255, 255, 255, 0.45);
   font-weight: 400;
   padding-left: 4px;
   text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  max-height: 100%;
 }
 
-/* Контейнер погоды в верхнем правом углу */
-.weather-container {
+/* 2. Контейнер погоды */
+body:not(.mode-ios) .weather-container {
   position: absolute;
   top: 36px;
   right: 40px;
+  width: 140px;
+  height: 80px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: center;
   gap: 6px;
   line-height: 1;
   text-align: right;
   z-index: 10;
+  background: none;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
-.weather-temp-row {
+body:not(.mode-ios) .weather-temp-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.weather-temp {
+body:not(.mode-ios) .weather-temp {
   font-size: 32px;
   font-weight: 500;
   letter-spacing: -1px;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.weather-icon {
+body:not(.mode-ios) .weather-icon {
   font-size: 32px;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.weather-details {
+body:not(.mode-ios) .weather-details {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.45);
   font-weight: 400;
   text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
   line-height: 1.35;
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.weather-input-status {
+body:not(.mode-ios) .weather-input-status {
   font-size: 11px;
   margin-top: 4px;
   min-height: 14px;
   transition: color 0.2s ease;
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.weather-input-status.status-searching {
+body:not(.mode-ios) .weather-input-status.status-searching {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.weather-input-status.status-success {
+body:not(.mode-ios) .weather-input-status.status-success {
   color: #4caf50;
 }
 
-.weather-input-status.status-error {
+body:not(.mode-ios) .weather-input-status.status-error {
   color: #f44336;
 }
 
-#search-form {
+/* 3. Поисковая строка */
+body:not(.mode-ios) .search-form {
   margin-top: 15vh;
-}
-
-.shortcuts-wrapper {
-  margin-top: 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-  width: 100%;
-  padding: 0 40px;
-  z-index: 10;
-}
-
-/* Изящная поисковая строка */
-.search-form {
-  width: 100%;
-  max-width: 580px;
-  height: 44px;
+  width: 580px;
+  height: 40px;
   background-color: rgba(14, 14, 14, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 22px;
+  border-radius: 20px;
   padding: 0 16px;
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   transition: border-color 0.3s cubic-bezier(0.25, 1, 0.5, 1),
               box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1),
               background-color 0.3s ease;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
-.search-form:focus-within {
+body:not(.mode-ios) .search-form:focus-within {
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.03);
   background-color: rgba(18, 18, 18, 0.95);
 }
 
-/* Стабильный логотип поисковой системы */
-.search-engine-logo {
+body:not(.mode-ios) .search-engine-logo {
   width: auto;
   max-width: 44px;
   height: 22px;
   object-fit: contain;
   flex-shrink: 0;
   margin-right: 12px;
+  max-height: 100%;
 }
 
-.search-input {
+body:not(.mode-ios) .search-input {
   flex: 1;
   background: none;
   border: none;
@@ -167,13 +218,17 @@ body {
   color: #fff;
   font-size: 15px;
   height: 100%;
+  text-align: left;
+  padding: 0;
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.search-input::placeholder {
+body:not(.mode-ios) .search-input::placeholder {
   color: rgba(255, 255, 255, 0.3);
 }
 
-.search-btn {
+body:not(.mode-ios) .search-btn {
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.5);
@@ -187,11 +242,257 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
   margin-left: 8px;
   flex-shrink: 0;
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.search-btn:hover {
+body:not(.mode-ios) .search-btn:hover {
   background-color: rgba(255, 255, 255, 0.06);
   color: #fff;
+}
+
+/* 4. Контейнер ярлыков быстрого доступа */
+body:not(.mode-ios) .shortcuts-wrapper {
+  margin-top: 32px;
+  width: 100%;
+  padding: 0 40px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: visible;
+  z-index: 10;
+  box-sizing: border-box !important;
+}
+
+
+/* ==========================================
+   📱 РЕЖИМ ВИДЖЕТОВ iOS (iOS WIDGET MODE)
+   ========================================== */
+
+/* 1. Контейнер времени и даты (Строго квадратный: 8х8 клеток) */
+body.mode-ios .clock-container {
+  position: absolute;
+  top: calc(2 * var(--grid-size, 20px));
+  left: calc(2 * var(--grid-size, 20px));
+  width: calc(8 * var(--grid-size, 20px));
+  height: calc(8 * var(--grid-size, 20px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  line-height: 1.1;
+  background-color: rgba(14, 14, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+body.mode-ios .clock {
+  font-size: calc(2.2 * var(--grid-size, 20px));
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+body.mode-ios .date-display {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+/* 2. Контейнер погоды (Строго квадратный: 6х6 клеток) */
+body.mode-ios .weather-container {
+  position: absolute;
+  top: calc(2 * var(--grid-size, 20px));
+  right: calc(2 * var(--grid-size, 20px));
+  width: calc(6 * var(--grid-size, 20px));
+  height: calc(6 * var(--grid-size, 20px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.2;
+  text-align: center;
+  background-color: rgba(14, 14, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+body.mode-ios .weather-temp-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+body.mode-ios .weather-temp {
+  font-size: calc(1.4 * var(--grid-size, 20px));
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+body.mode-ios .weather-icon {
+  font-size: calc(1.8 * var(--grid-size, 20px));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+body.mode-ios .weather-details {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+body.mode-ios .weather-input-status {
+  font-size: 10px;
+  margin-top: 2px;
+  min-height: 12px;
+  transition: color 0.2s ease;
+}
+
+body.mode-ios .weather-input-status.status-searching {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+body.mode-ios .weather-input-status.status-success {
+  color: #4caf50;
+}
+
+body.mode-ios .weather-input-status.status-error {
+  color: #f44336;
+}
+
+/* 3. Поисковая строка (Строго квадратная: 8х8 клеток) */
+body.mode-ios .search-form {
+  position: absolute;
+  top: calc(2 * var(--grid-size, 20px));
+  left: calc(50% - calc(4 * var(--grid-size, 20px)));
+  width: calc(8 * var(--grid-size, 20px));
+  height: calc(8 * var(--grid-size, 20px));
+  background-color: rgba(14, 14, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              background-color 0.3s ease;
+}
+
+body.mode-ios .search-form:focus-within {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 40px 0 rgba(255, 255, 255, 0.04);
+  background-color: rgba(18, 18, 18, 0.55);
+}
+
+body.mode-ios .search-engine-logo {
+  height: calc(1.8 * var(--grid-size, 20px));
+  max-width: 80%;
+  object-fit: contain;
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+body.mode-ios .search-input {
+  width: 100%;
+  height: 38px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  padding: 0 12px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+body.mode-ios .search-input:focus {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.mode-ios .search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+body.mode-ios .search-btn {
+  width: 100%;
+  height: 38px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  margin-left: 0;
+  flex-shrink: 0;
+}
+
+body.mode-ios .search-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* 4. Панель вкладок и ярлыков (Строго квадратная: 16х16 клеток) */
+body.mode-ios .shortcuts-wrapper {
+  position: absolute;
+  top: calc(12 * var(--grid-size, 20px));
+  left: calc(50% - calc(8 * var(--grid-size, 20px)));
+  width: calc(16 * var(--grid-size, 20px));
+  height: calc(16 * var(--grid-size, 20px));
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(14, 14, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px;
+  gap: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  overflow: hidden;
+  z-index: 10;
 }
 
 /* Выборочная инверсия логотипа в белый цвет */
@@ -233,20 +534,55 @@ body {
   border-color: rgba(255, 255, 255, 0.3);
   font-weight: 500;
 }
-
 /* Сетка ярлыков быстрого доступа */
 .shortcuts-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-content: flex-start;
   gap: 16px;
   width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px; /* Безопасный внутренний отступ (padding) для предотвращения прижатия содержимого к границам */
   transition: opacity 0.15s ease, transform 0.15s ease;
   opacity: 1;
   transform: scale(1);
 }
 
-/* Класс для плавного скрытия контейнера */
+.shortcuts-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shortcuts-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shortcuts-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.shortcuts-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+body.theme-light .shortcuts-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+body.theme-light .shortcuts-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.1);
+}
+
+body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.2);
+}/* Класс для плавного скрытия контейнера */
 .shortcuts-container.fade-out {
   opacity: 0;
   transform: scale(0.98);
@@ -265,6 +601,8 @@ body {
   transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), 
               background-color 0.2s ease, 
               border-color 0.2s ease;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
 .shortcut-card:hover {
@@ -276,13 +614,15 @@ body {
 
 .shortcut-card.size-small {
   width: 85px;
-  height: 85px;
+  aspect-ratio: 1 / 1;
   border-radius: 14px;
+  gap: 6px;
 }
 .shortcut-card.size-small .shortcut-icon {
   width: 32px;
   height: 32px;
-  margin-bottom: 8px;
+  max-width: 100%;
+  max-height: 100%;
 }
 .shortcut-card.size-small .shortcut-label {
   font-size: 11px;
@@ -291,13 +631,15 @@ body {
 
 .shortcut-card.size-medium {
   width: 98px;
-  height: 98px;
+  aspect-ratio: 1 / 1;
   border-radius: 16px;
+  gap: 8px;
 }
 .shortcut-card.size-medium .shortcut-icon {
   width: 38px;
   height: 38px;
-  margin-bottom: 10px;
+  max-width: 100%;
+  max-height: 100%;
 }
 .shortcut-card.size-medium .shortcut-label {
   font-size: 12px;
@@ -306,13 +648,15 @@ body {
 
 .shortcut-card.size-large {
   width: 110px;
-  height: 110px;
+  aspect-ratio: 1 / 1;
   border-radius: 18px;
+  gap: 10px;
 }
 .shortcut-card.size-large .shortcut-icon {
   width: 44px;
   height: 44px;
-  margin-bottom: 12px;
+  max-width: 100%;
+  max-height: 100%;
 }
 .shortcut-card.size-large .shortcut-label {
   font-size: 13px;
@@ -1690,6 +2034,65 @@ body.layout-edit-mode .draggable-widget:hover {
   background-color: rgba(33, 150, 243, 0.05);
 }
 
+/* Ручка изменения размера виджета в режиме iOS */
+.widget-resize-handle {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  cursor: se-resize;
+  z-index: 1000;
+  background-image: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.4) 40%, rgba(255, 255, 255, 0.4) 50%, transparent 50%, transparent 60%, rgba(255, 255, 255, 0.4) 60%, rgba(255, 255, 255, 0.4) 70%, transparent 70%);
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.widget-resize-handle:hover {
+  transform: scale(1.2);
+  background-image: linear-gradient(135deg, transparent 40%, var(--adapt-primary, #00e5ff) 40%, var(--adapt-primary, #00e5ff) 50%, transparent 50%, transparent 60%, var(--adapt-primary, #00e5ff) 60%, var(--adapt-primary, #00e5ff) 70%, transparent 70%);
+}
+
+body.layout-edit-mode .draggable-widget .widget-resize-handle {
+  pointer-events: auto !important;
+}
+
+/* Адаптивные стили для широких версий виджетов в режиме iOS */
+body.mode-ios .search-form.widget-wide {
+  flex-direction: row !important;
+  padding: 0 16px !important;
+  gap: 12px !important;
+  justify-content: space-between !important;
+}
+
+body.mode-ios .search-form.widget-wide .search-engine-logo {
+  margin-bottom: 0 !important;
+}
+
+body.mode-ios .search-form.widget-wide .search-input {
+  width: auto !important;
+  flex: 1 !important;
+  text-align: left !important;
+}
+
+body.mode-ios .search-form.widget-wide .search-btn {
+  width: 38px !important;
+  margin-left: 0 !important;
+}
+
+body.mode-ios .weather-container.widget-wide {
+  flex-direction: row !important;
+  padding: 16px 20px !important;
+  gap: 16px !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+}
+
+body.mode-ios .weather-container.widget-wide .weather-temp-row {
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+
 /* Плавающая панель управления макетом */
 .layout-controls-panel {
   position: fixed;
@@ -1926,4 +2329,107 @@ body.theme-adaptive .guide-line.active {
 body.theme-adaptive .draggable-widget.widget-snapped {
   outline: 2px solid var(--adapt-primary, rgba(0, 229, 255, 0.9)) !important;
   box-shadow: 0 0 20px rgba(var(--adapt-primary-rgb, 0, 229, 255), 0.6) !important;
+}
+
+/* --- Стилизация плит под светлую и адаптивную темы --- */
+
+body.theme-light.mode-ios .clock-container,
+body.theme-light.mode-ios .weather-container,
+body.theme-light.mode-ios .search-form,
+body.theme-light.mode-ios .shortcuts-wrapper {
+  background-color: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08) !important;
+}
+
+body.theme-light.mode-ios .clock {
+  color: rgba(0, 0, 0, 0.85) !important;
+  text-shadow: none !important;
+}
+
+body.theme-light.mode-ios .date-display,
+body.theme-light.mode-ios .weather-details {
+  color: rgba(0, 0, 0, 0.6) !important;
+  text-shadow: none !important;
+}
+
+body.theme-light.mode-ios .weather-temp {
+  color: rgba(0, 0, 0, 0.85) !important;
+  text-shadow: none !important;
+}
+
+body.theme-light.mode-ios .search-input {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  color: #000 !important;
+}
+
+body.theme-light.mode-ios .search-input:focus {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+body.theme-light.mode-ios .search-input::placeholder {
+  color: rgba(0, 0, 0, 0.4) !important;
+}
+
+body.theme-light.mode-ios .search-btn {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+body.theme-light.mode-ios .search-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  color: #000 !important;
+}
+
+/* Переопределения для адаптивной темы */
+body.theme-adaptive.mode-ios .clock-container,
+body.theme-adaptive.mode-ios .weather-container,
+body.theme-adaptive.mode-ios .search-form,
+body.theme-adaptive.mode-ios .shortcuts-wrapper {
+  background-color: rgba(var(--adapt-surface-rgb), 0.45) !important;
+  border: 1px solid rgba(var(--adapt-outline-rgb), 0.15) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-adaptive.mode-ios .clock {
+  color: var(--adapt-on-surface) !important;
+  text-shadow: 0 2px 10px rgba(var(--adapt-surface-rgb), 0.8) !important;
+}
+
+body.theme-adaptive.mode-ios .date-display,
+body.theme-adaptive.mode-ios .weather-details {
+  color: var(--adapt-secondary) !important;
+  text-shadow: none !important;
+}
+
+body.theme-adaptive.mode-ios .weather-temp {
+  color: var(--adapt-on-surface) !important;
+  text-shadow: 0 2px 10px rgba(var(--adapt-surface-rgb), 0.8) !important;
+}
+
+body.theme-adaptive.mode-ios .search-input {
+  background-color: rgba(var(--adapt-surface-variant-rgb, 255, 255, 255), 0.08) !important;
+  border: 1px solid rgba(var(--adapt-outline-rgb), 0.15) !important;
+  color: var(--adapt-on-surface) !important;
+}
+
+body.theme-adaptive.mode-ios .search-input:focus {
+  background-color: rgba(var(--adapt-surface-variant-rgb, 255, 255, 255), 0.15) !important;
+  border-color: var(--adapt-primary) !important;
+}
+
+body.theme-adaptive.mode-ios .search-btn {
+  background-color: rgba(var(--adapt-surface-variant-rgb, 255, 255, 255), 0.08) !important;
+  border: 1px solid rgba(var(--adapt-outline-rgb), 0.15) !important;
+  color: var(--adapt-on-surface) !important;
+}
+
+body.theme-adaptive.mode-ios .search-btn:hover {
+  background-color: var(--adapt-primary) !important;
+  border-color: var(--adapt-primary) !important;
+  color: var(--adapt-on-primary) !important;
 }
