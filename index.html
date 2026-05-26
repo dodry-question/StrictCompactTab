@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Новая вкладка</title>
   <!-- Подключение фавиконки вкладки -->
-  <link class="page-favicon" rel="icon" type="image/png" href="assets/favicon.png">
+  <link class="page-favicon" rel="icon" type="image/png" href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
   <script>
     (function() {
       try {
@@ -13,9 +13,11 @@
           const url = JSON.parse(val);
           if (url) {
             document.querySelector('.page-favicon').href = url;
+            return;
           }
         }
       } catch (e) {}
+      document.querySelector('.page-favicon').href = 'assets/favicon.png';
     })();
   </script>
   <link rel="stylesheet" href="style.css">
