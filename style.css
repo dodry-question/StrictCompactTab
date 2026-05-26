@@ -21,6 +21,17 @@
   overflow: hidden !important;
 }
 
+/* Эстетичный суффикс AM/PM с уменьшенным размером */
+.clock-ampm {
+  font-size: 0.35em !important;
+  font-weight: 450 !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  margin-left: 8px !important;
+  text-transform: uppercase;
+  vertical-align: baseline;
+  display: inline-block;
+}
+
 html, body {
   width: 100vw;
   height: 100vh;
@@ -51,7 +62,8 @@ body:not(.mode-ios) .clock-container {
   position: absolute;
   top: 36px;
   left: 40px;
-  width: 200px;
+  width: auto; /* Авто-ширина вместо жестких 200px для поддержки секунд и AM/PM */
+  max-width: 450px;
   height: 110px; /* Увеличиваем высоту до 110px для исключения обрезания */
   display: flex;
   flex-direction: column;
@@ -77,6 +89,7 @@ body:not(.mode-ios) .clock {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
   max-width: 100%;
   max-height: 100%;
+  white-space: nowrap; /* Предотвращает перенос AM/PM или секунд на новую строку */
 }
 
 body:not(.mode-ios) .date-display {
@@ -306,6 +319,7 @@ body.mode-ios .clock {
   letter-spacing: -1.5px;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  white-space: nowrap; /* Исключает переносы секунд или AM/PM */
 }
 
 body.mode-ios .date-display {

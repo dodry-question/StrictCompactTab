@@ -265,10 +265,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (STATE.showSeconds) {
       timeString += `:${seconds}`;
     }
-    timeString += ampm;
 
     if (clockElement) {
-      clockElement.textContent = timeString;
+      if (ampm) {
+        // Оборачиваем AM/PM в span с уменьшенным шрифтом для красивого вида и исключения наложений
+        clockElement.innerHTML = `${timeString}<span class="clock-ampm">${ampm.trim()}</span>`;
+      } else {
+        clockElement.textContent = timeString;
+      }
     }
 
     if (dateElement) {
