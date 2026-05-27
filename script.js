@@ -1562,8 +1562,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (editingIndex === absoluteIndex) {
         row.setAttribute('draggable', false);
 
+        let tempIconBase64 = item.customIcon;
+
         const editContainer = document.createElement('div');
         editContainer.className = 'modal-shortcut-edit-container';
+        if (tempIconBase64) {
+          editContainer.classList.add('has-custom-icon');
+        }
 
         const fieldsWrapper = document.createElement('div');
         fieldsWrapper.className = 'inline-edit-fields';
@@ -1626,19 +1631,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         inlineIconLabel.appendChild(uploadImg);
 
-        let tempIconBase64 = item.customIcon;
-
         const inlineIconResetBtn = document.createElement('button');
-        inlineIconResetBtn.className = 'btn btn-inline-cancel';
+        inlineIconResetBtn.className = 'btn btn-inline-cancel btn-inline-reset';
         inlineIconResetBtn.style.color = '#ff6b6b';
         inlineIconResetBtn.textContent = currentDict.resetBtn;
-        inlineIconResetBtn.style.display = tempIconBase64 ? 'inline-block' : 'none';
 
         inlineIconResetBtn.addEventListener('click', () => {
           tempIconBase64 = null;
           inlineIconLabel.title = currentDict.uploadIconTitle;
           inlineIconLabel.style.borderColor = '';
-          inlineIconResetBtn.style.display = 'none';
+          editContainer.classList.remove('has-custom-icon');
         });
 
         inlineIconInput.addEventListener('change', (e) => {
@@ -1648,7 +1650,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
             compressImage(file, 128, 128, 0.85, (result) => {
               tempIconBase64 = result;
-              inlineIconResetBtn.style.display = 'inline-block';
+              editContainer.classList.add('has-custom-icon');
             });
           }
         });

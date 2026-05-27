@@ -1422,6 +1422,16 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   color: #fff;
 }
 
+/* Кнопка сброса скрыта по умолчанию */
+.btn-inline-reset {
+  display: none !important;
+}
+
+/* Кнопка показывается только тогда, когда у контейнера есть класс has-custom-icon */
+.modal-shortcut-edit-container.has-custom-icon .btn-inline-reset {
+  display: inline-flex !important;
+}
+
 /* Стили для drag & drop сортировки */
 .modal-shortcut-item[draggable="true"] {
   cursor: grab;
