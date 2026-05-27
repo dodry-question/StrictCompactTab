@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Strict Compact Tab",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally.",
   "author": "dodry-question",
   "homepage_url": "https://github.com/dodry-question/my-new-tab",
