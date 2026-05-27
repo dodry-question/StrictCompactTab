@@ -1392,6 +1392,11 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  height: 36px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .btn-inline-save:hover {
   background-color: #2b6cb0;
@@ -1406,6 +1411,11 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+  height: 36px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .btn-inline-cancel:hover {
   background-color: rgba(255, 255, 255, 0.05);
@@ -1480,17 +1490,19 @@ body.theme-light .input-icon-upload-label:hover {
 }
 
 .btn-square-upload {
-  width: 38px;
-  height: 38px;
+  width: 36px !important;
+  height: 36px !important;
   background-color: #161617;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease;
   flex-shrink: 0;
+  box-sizing: border-box !important;
+  padding: 0 !important;
 }
 
 .btn-square-upload:hover {
@@ -1710,21 +1722,39 @@ body.theme-light .toggle-label {
 /* Селекты и инпуты */
 body.theme-light .settings-select, 
 body.theme-light .settings-input {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-color: transparent;
-  color: #2d3748;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  color: #1a1a1a !important;
 }
 
 body.theme-light .settings-select:hover, 
 body.theme-light .settings-input:hover {
-  background-color: rgba(0, 0, 0, 0.08);
+  background-color: #f7fafc !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
 }
 
 body.theme-light .settings-select:focus, 
 body.theme-light .settings-input:focus {
-  background-color: #fff;
-  border-color: #357ae8;
-  box-shadow: 0 0 0 3px rgba(53, 122, 232, 0.12);
+  background-color: #ffffff !important;
+  border-color: #357ae8 !important;
+  box-shadow: 0 0 0 3px rgba(53, 122, 232, 0.15) !important;
+}
+
+body.theme-light .settings-select::placeholder,
+body.theme-light .settings-input::placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+  opacity: 1 !important;
+}
+
+/* Оболочка редактирования ярлыка */
+body.theme-light .modal-shortcut-edit-container {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+body.theme-adaptive .modal-shortcut-edit-container {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.02) !important;
+  border: 1px solid rgba(var(--adapt-outline-rgb), 0.2) !important;
 }
 
 body.theme-light .add-shortcut-form {
