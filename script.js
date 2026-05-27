@@ -67,7 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renameCategoryPrompt: "Rename category to:",
       deleteCategoryConfirm: "Are you sure you want to delete this category? All its shortcuts will be moved to General.",
       searchEngineLabel: "Search Engine",
-      iosModeLabel: "iOS Widget Mode (Square tiles)"
+      iosModeLabel: "iOS Widget Mode (Square tiles)",
+      stealthModeLabel: "Stealth Mode (Ultra-minimalism)"
     },
     ru: {
       searchPlaceholder: "Искать в интернете...",
@@ -134,7 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renameCategoryPrompt: "Переименовать категорию в:",
       deleteCategoryConfirm: "Вы уверены, что хотите удалить эту категорию? Все её ярлыки будут перенесены в Общую.",
       searchEngineLabel: "Поисковая система",
-      iosModeLabel: "Режим виджетов iOS (Квадратные плитки)"
+      iosModeLabel: "Режим виджетов iOS (Квадратные плитки)",
+      stealthModeLabel: "Стелс-режим (Ультра-минимализм)"
     }
   };
 
@@ -726,6 +728,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const layoutStealthModeCb = document.getElementById('layout-stealth-mode');
+  if (layoutStealthModeCb) {
+    layoutStealthModeCb.addEventListener('change', (e) => {
+      STATE.layoutStealthMode = e.target.checked;
+      saveState();
+      if (STATE.layoutStealthMode) {
+        document.body.classList.add('stealth-mode');
+      } else {
+        document.body.classList.remove('stealth-mode');
+      }
+    });
+  }
+
   if (showSecondsCb) {
     showSecondsCb.addEventListener('change', (e) => {
       STATE.showSeconds = e.target.checked;
@@ -1294,7 +1309,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
       STATE.columns = result.columns ?? 10;
@@ -1318,6 +1333,7 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.layoutGridSnap = result.layoutGridSnap ?? false;
       STATE.layoutGridSize = result.layoutGridSize ?? 20;
       STATE.layoutIosMode = result.layoutIosMode ?? false;
+      STATE.layoutStealthMode = result.layoutStealthMode ?? false;
       STATE.showClock = result.showClock ?? true;
       STATE.showWeather = result.showWeather ?? false;
       STATE.weatherCity = result.weatherCity ?? "";
@@ -1341,11 +1357,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (showWeatherCb) showWeatherCb.checked = STATE.showWeather;
       if (weatherCityInput) weatherCityInput.value = STATE.weatherCity;
       if (layoutIosModeCb) layoutIosModeCb.checked = STATE.layoutIosMode;
+      const layoutStealthModeCb = document.getElementById('layout-stealth-mode');
+      if (layoutStealthModeCb) layoutStealthModeCb.checked = STATE.layoutStealthMode;
 
       if (STATE.layoutIosMode) {
         document.body.classList.add('mode-ios');
       } else {
         document.body.classList.remove('mode-ios');
+      }
+
+      if (STATE.layoutStealthMode) {
+        document.body.classList.add('stealth-mode');
+      } else {
+        document.body.classList.remove('stealth-mode');
       }
 
       applyBackground();
@@ -1388,6 +1412,7 @@ document.addEventListener('DOMContentLoaded', () => {
       layoutGridSnap: STATE.layoutGridSnap,
       layoutGridSize: STATE.layoutGridSize,
       layoutIosMode: STATE.layoutIosMode,
+      layoutStealthMode: STATE.layoutStealthMode,
       showClock: STATE.showClock,
       showWeather: STATE.showWeather,
       weatherCity: STATE.weatherCity,

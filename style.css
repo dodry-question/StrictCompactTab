@@ -1,3 +1,11 @@
+:root {
+  --primary-color: #357ae8;
+  --primary-color-rgb: 53, 122, 232;
+  --adaptive-color: var(--adapt-primary, var(--primary-color));
+  --adaptive-color-rgb: var(--adapt-primary-rgb, var(--primary-color-rgb));
+  --adaptive-color-hover: var(--adapt-primary, #2b6cb0);
+}
+
 *, *::before, *::after {
   box-sizing: border-box !important;
   margin: 0;
@@ -736,36 +744,58 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   opacity: 1 !important;
 }
 
-/* Модальное окно настроек */
+/* Модальное окно настроек (Left Sidebar) */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.75);
-  display: none;
-  align-items: center;
-  justify-content: center;
+  background-color: rgba(6, 6, 8, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
   z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
 .modal-overlay.active {
-  display: flex;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .modal-content {
-  background-color: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  width: 90%;
-  max-width: 880px;
-  height: 640px;
-  padding: 32px;
+  background: rgba(15, 15, 16, 0.8);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0;
+  width: 45vw;
+  min-width: 780px;
+  max-width: 900px;
+  height: 100vh;
+  padding: 32px 24px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+  box-shadow: 15px 0 40px rgba(0, 0, 0, 0.5);
+  
+  /* Sliding transform animation */
+  transform: translateX(-100%);
+  will-change: transform;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateX(0);
 }
 
 .modal-header {
@@ -780,6 +810,7 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
 .modal-header h2 {
   font-size: 18px;
   font-weight: 500;
+  color: #fff;
 }
 
 .modal-close-icon {
@@ -798,7 +829,7 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
 
 .modal-body {
   display: flex;
-  gap: 32px;
+  gap: 0; /* Gaps handled by column paddings */
   flex: 1;
   min-height: 0;
 }
@@ -809,11 +840,12 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   min-width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   overflow-y: auto;
-  padding-right: 12px;
+  padding-right: 24px;
   padding-bottom: 20px;
   min-height: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .modal-col-left::-webkit-scrollbar {
@@ -831,27 +863,37 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
-  padding-left: 32px;
+  border-left: none;
+  padding-left: 24px;
 }
 
 .settings-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .settings-section.full-height {
   height: 100%;
   min-height: 0;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .settings-section h3 {
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.75);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
 }
 
 .settings-row {
@@ -874,7 +916,20 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
 
 .settings-field label {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Semantic helper classes replacing HTML inline styles */
+.settings-field.ios-mode-field {
+  margin-top: 10px;
+}
+
+.settings-toggle-group.settings-subsettings {
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 6px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* Контейнер для селектора поисковой системы с превью-иконкой */
@@ -900,82 +955,84 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
 .manage-shortcuts-header-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  background-color: #080808;
+  background-color: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 8px;
-  padding: 6px 10px;
-  margin-bottom: 8px;
-  flex-shrink: 0;
+  border-radius: 9999px;
+  padding: 3px 4px 3px 8px;
+  margin-bottom: 12px;
+  min-height: 32px;
+  box-sizing: border-box;
 }
 
 .settings-categories-tabs {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   overflow-x: auto;
   flex: 1;
 }
 
 .settings-categories-tabs::-webkit-scrollbar {
-  height: 3px;
-}
-.settings-categories-tabs::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  display: none; /* Hide scrollbars for pill tracker */
 }
 
 .settings-category-tab {
-  background-color: #111112;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  padding: 4px 10px;
+  background-color: transparent;
+  border: none;
+  border-radius: 9999px;
+  padding: 4px 12px;
   font-size: 11px;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .settings-category-tab:hover {
   color: #fff;
-  background-color: #1a1a1c;
-  border-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .settings-category-tab.active {
   color: #fff;
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.25);
+  background-color: var(--adaptive-color);
+  box-shadow: 0 2px 4px rgba(var(--adaptive-color-rgb), 0.25);
 }
 
 /* Кнопка добавления категории */
 .btn-add-category {
-  width: 28px;
-  height: 28px;
-  background-color: #161617;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition: all 0.2s ease;
   flex-shrink: 0;
+  margin-right: 2px;
 }
 
 .btn-add-category:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background-color: #1c1c1e;
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.btn-add-category:active {
+  transform: scale(0.95);
 }
 
 .btn-add-category img {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   object-fit: contain;
-  opacity: 0.5;
+  opacity: 0.7;
   filter: brightness(0) invert(1);
-  transition: opacity 0.15s;
+  transition: all 0.2s ease;
 }
 
 .btn-add-category:hover img {
@@ -995,104 +1052,142 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   gap: 10px;
   cursor: pointer;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #ffffff;
 }
 
 .toggle-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #357ae8;
+  accent-color: var(--adaptive-color);
   cursor: pointer;
 }
 
 /* Формы, Инпуты и Селекты */
 .settings-select, .settings-input {
-  background-color: #161617;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: rgba(0, 0, 0, 0.45);
+  border: 1px solid transparent;
   color: #fff;
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
   outline: none;
   font-size: 13px;
   width: 100%;
-  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-select:hover, .settings-input:hover {
+  background-color: rgba(0, 0, 0, 0.55);
 }
 
 .settings-select:focus, .settings-input:focus {
-  border-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(0, 0, 0, 0.65);
+  border-color: var(--adaptive-color);
+  box-shadow: 0 0 0 3px rgba(var(--adaptive-color-rgb), 0.15);
 }
 
+/* Обособленная, компактная форма добавления ярлыка */
 .add-shortcut-form {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+}
+
+.add-shortcut-form .settings-input,
+.add-shortcut-form .settings-select {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
 }
 
 /* Кнопки */
 .btn {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid transparent;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   outline: none;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-add {
-  background-color: #242426;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
+  background-color: var(--adaptive-color);
+  border: none;
+  color: #ffffff;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(var(--adaptive-color-rgb), 0.2);
+  width: 100%;
 }
 .btn-add:hover {
-  background-color: #2e2e31;
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background-color: var(--adaptive-color-hover);
+  opacity: 0.95;
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 8px rgba(var(--adaptive-color-rgb), 0.35);
+}
+.btn-add:active {
+  transform: translateY(0);
 }
 
 .btn-file-label {
   display: inline-block;
-  background-color: #242426;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.9);
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 .btn-file-label:hover {
-  background-color: #2e2e31;
+  background-color: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.15);
   color: #fff;
 }
 
 .btn-danger-action {
-  background-color: rgba(244, 67, 54, 0.06);
-  border: 1px solid rgba(244, 67, 54, 0.15);
-  color: #ff6b6b;
+  background-color: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 .btn-danger-action:hover {
-  background-color: rgba(244, 67, 54, 0.12);
-  border-color: rgba(244, 67, 54, 0.3);
-  color: #ff8787;
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ff6b6b;
 }
 
 .btn-secondary {
-  background-color: #161617;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.85);
   text-align: center;
   flex: 1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 .btn-secondary:hover {
-  background-color: #242426;
-  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
   color: #fff;
 }
 
 .btn-delete {
-  background-color: rgba(244, 67, 54, 0.08);
-  border: 1px solid rgba(244, 67, 54, 0.15);
-  color: #ff6b6b;
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.4);
   width: 28px;
   height: 28px;
   padding: 0;
@@ -1101,18 +1196,18 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   justify-content: center;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 .btn-delete:hover {
-  background-color: #f44336;
-  border-color: #f44336;
-  color: #ffffff;
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
 }
 
 .btn-edit {
-  background-color: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.7);
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.4);
   width: 28px;
   height: 28px;
   padding: 0;
@@ -1121,11 +1216,11 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   justify-content: center;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 .btn-edit:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 
@@ -1133,13 +1228,13 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
 .modal-shortcuts-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0; /* clean rows separated by line border */
   flex: 1;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 8px;
-  padding: 10px;
-  background-color: #080808;
+  border: none; /* remove heavy borders */
+  border-radius: 0;
+  padding: 0 8px;
+  background-color: transparent;
   min-height: 0;
 }
 
@@ -1147,7 +1242,7 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   width: 6px;
 }
 .modal-shortcuts-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 3px;
 }
 
@@ -1155,12 +1250,62 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background-color: #111112;
+  padding: 10px 8px;
+  border-radius: 0;
+  background-color: transparent; /* fully flat/borderless */
   gap: 16px;
-  border: 1px solid transparent;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.2s ease;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.modal-shortcut-info,
+.modal-shortcut-actions {
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.modal-shortcut-item:last-child {
+  border-bottom: none;
+}
+
+.modal-shortcut-item:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Элегантный CSS-гриппер ⋮⋮ для перетаскивания */
+.modal-shortcut-item::before {
+  content: "⋮⋮";
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.modal-shortcut-item:hover::before {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.modal-shortcut-item:active::before {
+  cursor: grabbing;
+}
+
+/* Скрываем гриппер в режиме inline-редактирования */
+.modal-shortcut-item:has(.modal-shortcut-edit-container)::before {
+  display: none;
 }
 
 .modal-shortcut-info {
@@ -1194,7 +1339,7 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   flex-shrink: 0;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-shortcut-item:hover .modal-shortcut-actions {
@@ -1206,8 +1351,13 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
 .modal-shortcut-edit-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .inline-edit-fields {
@@ -1218,39 +1368,47 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
 }
 
 .inline-input {
-  height: 34px;
+  height: 32px;
   padding: 6px 10px;
   font-size: 12px;
+  border-radius: 6px;
+  box-sizing: border-box;
 }
 
 .inline-edit-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 6px;
 }
 
 .btn-inline-save {
-  background-color: #242426;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--primary-color, #357ae8);
+  border: none;
   color: #fff;
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 .btn-inline-save:hover {
-  background-color: #2e2e31;
+  background-color: #2b6cb0;
 }
 
 .btn-inline-cancel {
   background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.6);
-  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 6px 12px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 .btn-inline-cancel:hover {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(255, 255, 255, 0.05);
   color: #fff;
 }
 
@@ -1261,13 +1419,13 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
 
 .modal-shortcut-item.dragging {
   opacity: 0.35;
-  border: 1px dashed rgba(255, 255, 255, 0.3);
-  background-color: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.01);
 }
 
 .modal-shortcut-item.drag-over {
-  border-top: 2px solid rgba(255, 255, 255, 0.45);
-  background-color: rgba(255, 255, 255, 0.04);
+  border-top: 2px solid var(--primary-color, #357ae8);
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 /* Стили компактных кнопок загрузки иконок */
@@ -1353,12 +1511,15 @@ body.theme-light .input-icon-upload-label:hover {
   opacity: 1;
 }
 
-/* --- ИСПРАВЛЕНИЕ АДАПТИВНОСТИ ДЛЯ НАСТРОЕК (Медиазапросы) --- */
 @media (max-width: 850px) {
   .modal-content {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
     height: auto;
     max-height: 90vh;
     overflow-y: auto;
+    border-right: none !important;
   }
   .modal-body {
     flex-direction: column;
@@ -1370,6 +1531,9 @@ body.theme-light .input-icon-upload-label:hover {
     overflow-y: visible;
     height: auto;
     padding-right: 0;
+  }
+  .modal-col-left {
+    border-right: none;
   }
   .modal-col-right {
     border-left: none;
@@ -1490,83 +1654,118 @@ body.theme-light .settings-icon-btn {
   color: #2d3748;
 }
 
-/* Модальное окно настроек */
+/* Модальное окно настроек (Left Sidebar) */
 body.theme-light .modal-content {
-  background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-  color: #2d3748;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+  color: #1a1a1a;
+  box-shadow: 15px 0 40px rgba(0, 0, 0, 0.08);
 }
 
 body.theme-light .modal-header {
   border-bottom-color: rgba(0, 0, 0, 0.06);
 }
 
+body.theme-light .modal-header h2 {
+  color: #1a1a1a;
+}
+
 body.theme-light .modal-close-icon {
-  color: #a0aec0;
-}
-
-body.theme-light .modal-close-icon:hover {
-  color: #1a202c;
-}
-
-body.theme-light .modal-col-left::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-body.theme-light .modal-col-right {
-  border-left-color: rgba(0, 0, 0, 0.06);
-}
-
-body.theme-light .settings-section h3 {
   color: #718096;
 }
 
+body.theme-light .modal-close-icon:hover {
+  color: #1a1a1a;
+}
+
+body.theme-light .modal-col-left::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .modal-col-left {
+  border-right-color: rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .settings-section {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+
+body.theme-light .settings-section h3 {
+  color: #2d3748;
+}
+
 body.theme-light .settings-field label {
-  color: #4a5568;
+  color: #1a1a1a;
 }
 
 body.theme-light .toggle-label {
-  color: #4a5568;
+  color: #1a1a1a;
 }
 
 /* Селекты и инпуты */
 body.theme-light .settings-select, 
 body.theme-light .settings-input {
-  background-color: #f7fafc;
-  border-color: #e2e8f0;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: transparent;
   color: #2d3748;
+}
+
+body.theme-light .settings-select:hover, 
+body.theme-light .settings-input:hover {
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 body.theme-light .settings-select:focus, 
 body.theme-light .settings-input:focus {
-  border-color: #cbd5e1;
+  background-color: #fff;
+  border-color: #357ae8;
+  box-shadow: 0 0 0 3px rgba(53, 122, 232, 0.12);
+}
+
+body.theme-light .add-shortcut-form {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Кнопки в настройках */
-body.theme-light .btn-add,
+body.theme-light .btn-add {
+  background-color: #357ae8;
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 4px rgba(53, 122, 232, 0.2);
+}
+
+body.theme-light .btn-add:hover {
+  background-color: #2b6cb0;
+  box-shadow: 0 4px 8px rgba(53, 122, 232, 0.35);
+}
+
 body.theme-light .btn-file-label {
-  background-color: #f7fafc;
-  border: 1px solid #e2e8f0;
+  background-color: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   color: #4a5568;
 }
 
-body.theme-light .btn-add:hover,
 body.theme-light .btn-file-label:hover {
-  background-color: #edf2f7;
-  border-color: #cbd5e1;
+  background-color: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.12);
   color: #1a202c;
 }
 
 body.theme-light .btn-secondary {
-  background-color: #f7fafc;
-  border-color: #e2e8f0;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.05);
   color: #4a5568;
 }
 
 body.theme-light .btn-secondary:hover {
-  background-color: #edf2f7;
-  border-color: #cbd5e1;
+  background-color: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.1);
   color: #1a202c;
 }
 
@@ -1583,8 +1782,8 @@ body.theme-light .btn-edit:hover {
 
 /* Список ярлыков в модальном окне */
 body.theme-light .modal-shortcuts-list {
-  border-color: rgba(0, 0, 0, 0.05);
-  background-color: #f7fafc;
+  border: none;
+  background-color: transparent;
 }
 
 body.theme-light .modal-shortcuts-list::-webkit-scrollbar-thumb {
@@ -1592,83 +1791,101 @@ body.theme-light .modal-shortcuts-list::-webkit-scrollbar-thumb {
 }
 
 body.theme-light .modal-shortcut-item {
-  background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.03);
+  background-color: transparent;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+body.theme-light .modal-shortcut-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.theme-light .modal-shortcut-item::before {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+body.theme-light .modal-shortcut-item:hover::before {
+  color: rgba(0, 0, 0, 0.45);
 }
 
 body.theme-light .modal-shortcut-name {
-  color: #1a202c;
+  color: #1a1a1a;
+  font-weight: 500;
 }
 
 body.theme-light .modal-shortcut-url {
-  color: #718096;
+  color: #555555;
 }
 
 body.theme-light .manage-shortcuts-header-row {
-  background-color: #f7fafc;
+  background-color: rgba(0, 0, 0, 0.03);
   border-color: rgba(0, 0, 0, 0.05);
 }
 
 body.theme-light .settings-category-tab {
-  background-color: #edf2f7;
-  border-color: #e2e8f0;
-  color: #4a5568;
+  background-color: transparent;
+  border-color: transparent;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 body.theme-light .settings-category-tab:hover {
-  color: #1a202c;
-  background-color: #e2e8f0;
-  border-color: #cbd5e1;
+  color: #000;
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 body.theme-light .settings-category-tab.active {
-  color: #1a202c;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.12);
+  color: #000;
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 body.theme-light .btn-add-category {
-  background-color: #edf2f7;
-  border-color: #e2e8f0;
+  background-color: rgba(0, 0, 0, 0.04);
+  border: none;
 }
 
 body.theme-light .btn-add-category:hover {
-  border-color: #cbd5e1;
-  background-color: #e2e8f0;
+  background-color: rgba(0, 0, 0, 0.08);
+  transform: scale(1.05);
+}
+
+body.theme-light .btn-add-category:active {
+  transform: scale(0.95);
 }
 
 body.theme-light .btn-add-category img {
   filter: none;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 body.theme-light .btn-add-category:hover img {
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 body.theme-light .btn-inline-save {
-  background-color: #edf2f7;
-  border: 1px solid #cbd5e1;
-  color: #2d3748;
+  background-color: #357ae8;
+  border: none;
+  color: #fff;
 }
 
 body.theme-light .btn-inline-save:hover {
-  background-color: #e2e8f0;
+  background-color: #2b6cb0;
 }
 
 body.theme-light .btn-inline-cancel {
-  border-color: #e2e8f0;
-  color: #718096;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #4a5568;
 }
 
 body.theme-light .btn-inline-cancel:hover {
-  background-color: rgba(0, 0, 0, 0.03);
+  background-color: rgba(0, 0, 0, 0.04);
   color: #1a202c;
 }
 
 body.theme-light .btn-square-upload {
-  background-color: #f7fafc;
-  border-color: #e2e8f0;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
 }
 
 body.theme-light .btn-square-upload:hover {
@@ -1813,10 +2030,15 @@ body.theme-adaptive .settings-icon-btn {
 
 /* Модальное окно настроек */
 body.theme-adaptive .modal-content {
-  background-color: var(--adapt-surface);
-  border-color: rgba(var(--adapt-outline-rgb), 0.5);
+  background: rgba(var(--adapt-surface-rgb), 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(var(--adapt-outline-rgb), 0.4);
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
   color: var(--adapt-on-surface);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 15px 0 40px rgba(0, 0, 0, 0.4);
 }
 
 body.theme-adaptive .modal-header {
@@ -1835,16 +2057,20 @@ body.theme-adaptive .modal-col-left::-webkit-scrollbar-thumb {
   background: rgba(var(--adapt-outline-rgb), 0.5);
 }
 
-body.theme-adaptive .modal-col-right {
-  border-left-color: rgba(var(--adapt-outline-rgb), 0.3);
+body.theme-adaptive .modal-col-left {
+  border-right-color: rgba(var(--adapt-outline-rgb), 0.3);
+}
+
+body.theme-adaptive .settings-section {
+  border-bottom-color: rgba(var(--adapt-outline-rgb), 0.2);
 }
 
 body.theme-adaptive .settings-section h3 {
-  color: var(--adapt-primary);
+  color: rgba(var(--adapt-on-surface-rgb), 0.8);
 }
 
 body.theme-adaptive .settings-field label {
-  color: var(--adapt-primary);
+  color: rgba(var(--adapt-on-surface-rgb), 0.8);
 }
 
 body.theme-adaptive .toggle-label {
@@ -1858,68 +2084,101 @@ body.theme-adaptive .toggle-label input[type="checkbox"] {
 /* Селекты и инпуты */
 body.theme-adaptive .settings-select, 
 body.theme-adaptive .settings-input {
-  background-color: rgba(var(--adapt-surface-rgb), 0.5);
-  border-color: rgba(var(--adapt-outline-rgb), 0.5);
+  background-color: rgba(0, 0, 0, 0.45);
+  border-color: transparent;
   color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .settings-select:hover, 
+body.theme-adaptive .settings-input:hover {
+  background-color: rgba(0, 0, 0, 0.55);
 }
 
 body.theme-adaptive .settings-select:focus, 
 body.theme-adaptive .settings-input:focus {
+  background-color: rgba(0, 0, 0, 0.65);
   border-color: var(--adapt-primary);
+  box-shadow: 0 0 0 3px rgba(var(--adapt-primary-rgb), 0.2);
+}
+
+body.theme-adaptive .add-shortcut-form {
+  background: rgba(var(--adapt-on-surface-rgb), 0.03);
+  border-color: rgba(var(--adapt-outline-rgb), 0.2);
 }
 
 /* Кнопки в настройках */
-body.theme-adaptive .btn-add,
+body.theme-adaptive .btn-add {
+  background-color: var(--adapt-primary);
+  color: var(--adapt-on-primary);
+  border: none;
+  box-shadow: 0 2px 4px rgba(var(--adapt-primary-rgb), 0.25);
+}
+
+body.theme-adaptive .btn-add:hover {
+  background-color: var(--adapt-primary);
+  opacity: 0.9;
+  box-shadow: 0 4px 8px rgba(var(--adapt-primary-rgb), 0.4);
+}
+
 body.theme-adaptive .btn-file-label {
-  background-color: rgba(var(--adapt-surface-rgb), 0.5);
-  border: 1px solid rgba(var(--adapt-outline-rgb), 0.5);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.04);
+  border: 1px solid rgba(var(--adapt-outline-rgb), 0.3);
   color: var(--adapt-on-surface);
 }
 
-body.theme-adaptive .btn-add:hover,
 body.theme-adaptive .btn-file-label:hover {
-  background-color: rgba(var(--adapt-surface-rgb), 0.8);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
   border-color: var(--adapt-primary);
+  color: var(--adapt-on-surface);
 }
 
 body.theme-adaptive .btn-secondary {
-  background-color: rgba(var(--adapt-surface-rgb), 0.5);
-  border-color: rgba(var(--adapt-outline-rgb), 0.5);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.03);
+  border-color: rgba(var(--adapt-outline-rgb), 0.25);
   color: var(--adapt-on-surface);
 }
 
 body.theme-adaptive .btn-secondary:hover {
-  background-color: rgba(var(--adapt-surface-rgb), 0.8);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
   border-color: var(--adapt-primary);
-}
-
-body.theme-adaptive .btn-edit {
-  background-color: rgba(var(--adapt-outline-rgb), 0.2);
-  border-color: rgba(var(--adapt-outline-rgb), 0.4);
   color: var(--adapt-on-surface);
 }
 
-body.theme-adaptive .btn-edit:hover {
-  background-color: rgba(var(--adapt-outline-rgb), 0.4);
-}
-
-body.theme-adaptive .btn-danger-action,
+body.theme-adaptive .btn-edit,
 body.theme-adaptive .btn-delete {
-  background-color: rgba(var(--adapt-outline-rgb), 0.1);
-  border-color: rgba(var(--adapt-outline-rgb), 0.3);
-  color: var(--adapt-primary);
+  background-color: transparent;
+  border-color: transparent;
+  color: rgba(var(--adapt-on-surface-rgb), 0.4);
 }
 
-body.theme-adaptive .btn-danger-action:hover,
+body.theme-adaptive .btn-edit:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+  border-color: rgba(var(--adapt-outline-rgb), 0.3);
+  color: var(--adapt-on-surface);
+}
+
 body.theme-adaptive .btn-delete:hover {
-  background-color: rgba(var(--adapt-outline-rgb), 0.3);
-  border-color: var(--adapt-primary);
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+body.theme-adaptive .btn-danger-action {
+  background-color: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+body.theme-adaptive .btn-danger-action:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #ff6b6b;
 }
 
 /* Список ярлыков в модальном окне */
 body.theme-adaptive .modal-shortcuts-list {
-  border-color: rgba(var(--adapt-outline-rgb), 0.4);
-  background-color: var(--adapt-surface);
+  border: none;
+  background-color: transparent;
 }
 
 body.theme-adaptive .modal-shortcuts-list::-webkit-scrollbar-thumb {
@@ -1927,8 +2186,23 @@ body.theme-adaptive .modal-shortcuts-list::-webkit-scrollbar-thumb {
 }
 
 body.theme-adaptive .modal-shortcut-item {
-  background-color: rgba(var(--adapt-surface-rgb), 0.5);
-  border-color: rgba(var(--adapt-outline-rgb), 0.3);
+  background-color: transparent;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid rgba(var(--adapt-outline-rgb), 0.25) !important;
+}
+
+body.theme-adaptive .modal-shortcut-item:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.03);
+}
+
+body.theme-adaptive .modal-shortcut-item::before {
+  color: rgba(var(--adapt-on-surface-rgb), 0.25);
+}
+
+body.theme-adaptive .modal-shortcut-item:hover::before {
+  color: rgba(var(--adapt-on-surface-rgb), 0.45);
 }
 
 body.theme-adaptive .modal-shortcut-name {
@@ -1936,39 +2210,43 @@ body.theme-adaptive .modal-shortcut-name {
 }
 
 body.theme-adaptive .modal-shortcut-url {
-  color: var(--adapt-primary);
+  color: rgba(var(--adapt-on-surface-rgb), 0.5);
 }
 
 body.theme-adaptive .manage-shortcuts-header-row {
-  background-color: rgba(var(--adapt-surface-rgb), 0.5);
-  border-color: rgba(var(--adapt-outline-rgb), 0.3);
+  background-color: rgba(0, 0, 0, 0.25);
+  border-color: rgba(var(--adapt-outline-rgb), 0.2);
 }
 
 body.theme-adaptive .settings-category-tab {
-  background-color: rgba(var(--adapt-surface-rgb), 0.4);
-  border-color: rgba(var(--adapt-outline-rgb), 0.4);
-  color: var(--adapt-on-surface);
+  background-color: transparent;
+  border-color: transparent;
+  color: rgba(var(--adapt-on-surface-rgb), 0.6);
 }
 
 body.theme-adaptive .settings-category-tab:hover {
-  background-color: rgba(var(--adapt-surface-rgb), 0.7);
-  border-color: var(--adapt-primary);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.06);
+  color: var(--adapt-on-surface);
 }
 
 body.theme-adaptive .settings-category-tab.active {
   color: var(--adapt-on-primary);
   background-color: var(--adapt-primary);
-  border-color: var(--adapt-primary);
+  border-color: transparent;
 }
 
 body.theme-adaptive .btn-add-category {
-  background-color: rgba(var(--adapt-surface-rgb), 0.4);
-  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+  background-color: rgba(var(--adapt-outline-rgb), 0.2);
+  border: none;
 }
 
 body.theme-adaptive .btn-add-category:hover {
-  border-color: var(--adapt-primary);
-  background-color: rgba(var(--adapt-surface-rgb), 0.7);
+  background-color: rgba(var(--adapt-outline-rgb), 0.35);
+  transform: scale(1.05);
+}
+
+body.theme-adaptive .btn-add-category:active {
+  transform: scale(0.95);
 }
 
 body.theme-adaptive .btn-add-category img {
@@ -1976,9 +2254,13 @@ body.theme-adaptive .btn-add-category img {
   opacity: 0.7;
 }
 
+body.theme-adaptive .btn-add-category:hover img {
+  opacity: 1;
+}
+
 body.theme-adaptive .btn-inline-save {
   background-color: var(--adapt-primary);
-  border-color: var(--adapt-primary);
+  border: none;
   color: var(--adapt-on-primary);
 }
 
@@ -1988,22 +2270,23 @@ body.theme-adaptive .btn-inline-save:hover {
 }
 
 body.theme-adaptive .btn-inline-cancel {
-  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+  border-color: rgba(var(--adapt-outline-rgb), 0.3);
   color: var(--adapt-on-surface);
 }
 
 body.theme-adaptive .btn-inline-cancel:hover {
-  background-color: rgba(var(--adapt-outline-rgb), 0.2);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+  color: var(--adapt-on-surface);
 }
 
 body.theme-adaptive .btn-square-upload {
-  background-color: rgba(var(--adapt-surface-rgb), 0.4);
-  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.04);
+  border-color: rgba(var(--adapt-outline-rgb), 0.3);
 }
 
 body.theme-adaptive .btn-square-upload:hover {
   border-color: var(--adapt-primary);
-  background-color: rgba(var(--adapt-surface-rgb), 0.7);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
 }
 
 body.theme-adaptive .btn-square-upload img {
@@ -2453,3 +2736,95 @@ body.theme-adaptive.mode-ios .search-btn:hover {
   border-color: var(--adapt-primary) !important;
   color: var(--adapt-on-primary) !important;
 }
+
+/* ==========================================
+   🕵️‍♂️ СТЕЛС-РЕЖИМ (STEALTH MODE / ULTRA-MINIMALISM)
+   ========================================== */
+
+/* 1. Ярлыки быстрого доступа */
+body.stealth-mode .shortcut-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 2. Монохромный эффект и прозрачность для иконок */
+body.stealth-mode .shortcut-icon {
+  filter: grayscale(100%) opacity(0.85) !important;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+body.stealth-mode .shortcut-card:hover .shortcut-icon {
+  filter: grayscale(0%) opacity(1) !important;
+  transform: translateY(-2px);
+}
+
+/* 3. Текст подписей ярлыков */
+body.stealth-mode .shortcut-label {
+  opacity: 0.25 !important;
+  transition: opacity 0.3s ease, color 0.3s ease !important;
+}
+
+body.stealth-mode .shortcut-card:hover .shortcut-label {
+  opacity: 1 !important;
+  color: #fff !important;
+}
+
+body.theme-light.stealth-mode .shortcut-card:hover .shortcut-label {
+  color: #000 !important;
+}
+
+body.theme-adaptive.stealth-mode .shortcut-card:hover .shortcut-label {
+  color: var(--adapt-on-surface) !important;
+}
+
+/* 4. Виджеты Часов и Погоды */
+body.stealth-mode .clock-container,
+body.stealth-mode .weather-container,
+body.stealth-mode .weather-forecast,
+body.stealth-mode .search-form {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.3s ease, background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease !important;
+}
+
+body.stealth-mode .clock-container:hover,
+body.stealth-mode .weather-container:hover,
+body.stealth-mode .weather-forecast:hover,
+body.stealth-mode .search-form:hover {
+  opacity: 1 !important;
+}
+
+/* ==========================================
+   🚨 ПРИНУДИТЕЛЬНЫЙ СБРОС ВЕРТИКАЛЬНОЙ ЛИНИИ-БАГА
+   ========================================== */
+.modal-shortcut-item,
+.modal-shortcut-info,
+.modal-shortcut-actions,
+.modal-shortcut-item::before,
+.modal-shortcut-item::after,
+.modal-shortcut-info::before,
+.modal-shortcut-info::after,
+.modal-shortcut-actions::before,
+.modal-shortcut-actions::after {
+  border-left: none !important;
+  border-right: none !important;
+  border-left-width: 0 !important;
+  border-right-width: 0 !important;
+}
+
+.modal-shortcut-info::after,
+.modal-shortcut-info::before,
+.modal-shortcut-actions::after,
+.modal-shortcut-actions::before,
+.modal-shortcut-item::after {
+  content: none !important;
+  border: none !important;
+}
+
