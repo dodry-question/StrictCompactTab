@@ -1512,9 +1512,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- ПРОВЕРКА ОБНОВЛЕНИЙ ВЕРСИИ ---
   function isNewerVersion(current, latest) {
-    const parse = v => v.replace(/^v/, '').split('.').map(Number);
+    const parse = v => v.replace(/^v/, '').replace(/[^0-9.]/g, '').split('.').map(Number);
     const currParts = parse(current);
     const latParts = parse(latest);
     for (let i = 0; i < Math.max(currParts.length, latParts.length); i++) {

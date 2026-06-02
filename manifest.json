@@ -12,12 +12,14 @@
     "storage",
     "unlimitedStorage"
   ],
+
   "host_permissions": [
     "https://api.open-meteo.com/*",
-    "https://geocoding-api.open-meteo.com/*"
+    "https://geocoding-api.open-meteo.com/*",
+    "https://api.github.com/*"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com;"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.github.com;"
   },
   "icons": {
     "16": "assets/icon16_trans.png",
