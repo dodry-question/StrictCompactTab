@@ -78,7 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
       chooseLogoBtn: "Choose Logo",
       logoLoadedStatus: "Logo selected",
       weatherOpenMeteoConfirm: "Would you like to view the detailed weather forecast for the selected city?",
-      weatherNoCityAlert: "Weather city is not set. Please configure a city in settings."
+      weatherNoCityAlert: "Weather city is not set. Please configure a city in settings.",
+      checkUpdatesLabel: "Check for updates (GitHub)",
+      updateAvailable: "New version available: ",
+      updateDownload: "Download"
     },
     ru: {
       searchPlaceholder: "Искать в интернете...",
@@ -156,7 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
       chooseLogoBtn: "Выбрать лого",
       logoLoadedStatus: "Логотип выбран",
       weatherOpenMeteoConfirm: "Хотите посмотреть подробный прогноз погоды для выбранного города?",
-      weatherNoCityAlert: "Город для погоды не задан. Пожалуйста, настройте его в параметрах."
+      weatherNoCityAlert: "Город для погоды не задан. Пожалуйста, настройте его в параметрах.",
+      checkUpdatesLabel: "Проверять обновления (GitHub)",
+      updateAvailable: "Доступна новая версия: ",
+      updateDownload: "Скачать"
     }
   };
 
@@ -172,7 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         queryKeys.forEach(key => {
           const value = localStorage.getItem(key);
-          result[key] = value ? JSON.parse(value) : null;
+          if (value) {
+            try {
+              result[key] = JSON.parse(value);
+            } catch (e) {
+              result[key] = value;
+            }
+          } else {
+            result[key] = null;
+          }
         });
         callback(isArray ? result : result[keys]);
       }
@@ -182,14 +196,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.customFavicon === null) {
           localStorage.removeItem('customFavicon');
         } else {
-          localStorage.setItem('customFavicon', JSON.stringify(data.customFavicon));
+          const favVal = data.customFavicon;
+          localStorage.setItem('customFavicon', (typeof favVal === 'object' && favVal !== null) ? JSON.stringify(favVal) : favVal);
         }
       }
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.set(data, callback);
       } else {
         Object.keys(data).forEach(key => {
-          localStorage.setItem(key, JSON.stringify(data[key]));
+          const val = data[key];
+          if (val === null || val === undefined) {
+            localStorage.removeItem(key);
+          } else if (typeof val === 'object' && val !== null) {
+            localStorage.setItem(key, JSON.stringify(val));
+          } else {
+            localStorage.setItem(key, val);
+          }
         });
         if (callback) callback();
       }
@@ -215,7 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.customFavicon === null) {
           localStorage.removeItem('customFavicon');
         } else {
-          localStorage.setItem('customFavicon', JSON.stringify(data.customFavicon));
+          const favVal = data.customFavicon;
+          localStorage.setItem('customFavicon', (typeof favVal === 'object' && favVal !== null) ? JSON.stringify(favVal) : favVal);
         }
       } else {
         localStorage.removeItem('customFavicon');
@@ -227,7 +250,14 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         localStorage.clear();
         Object.keys(data).forEach(key => {
-          localStorage.setItem(key, JSON.stringify(data[key]));
+          const val = data[key];
+          if (val === null || val === undefined) {
+            localStorage.removeItem(key);
+          } else if (typeof val === 'object' && val !== null) {
+            localStorage.setItem(key, JSON.stringify(val));
+          } else {
+            localStorage.setItem(key, val);
+          }
         });
         if (callback) callback();
       }
@@ -261,7 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
     weatherCity: "",
     weatherCoords: { lat: null, lon: null, resolvedName: "" },
     weatherCache: { temp: "", code: null, desc: "", timestamp: 0 },
-    customSearchEngines: []
+    customSearchEngines: [],
+    checkUpdates: false
   };
 
   let editingIndex = -1;
@@ -396,19 +427,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const cityName = STATE.weatherCoords.resolvedName || STATE.weatherCity;
         const lat = STATE.weatherCoords.lat;
         const lon = STATE.weatherCoords.lon;
+        const lang = STATE.language === 'ru' ? 'ru' : 'en';
         
-        if (STATE.language === 'ru') {
-          if (lat && lon) {
-            url = `https://yandex.ru/pogoda/?lat=${lat}&lon=${lon}`;
-          } else {
-            url = `https://yandex.ru/search/?text=погода+${encodeURIComponent(cityName)}`;
-          }
+        // Используем wttr.in (открытый, некоммерческий и приватный сервис, не отслеживающий данные)
+        if (lat && lon) {
+          url = `https://wttr.in/${lat},${lon}?lang=${lang}`;
         } else {
-          if (lat && lon) {
-            url = `https://weather.com/weather/today/l/${lat},${lon}`;
-          } else {
-            url = `https://www.google.com/search?q=weather+${encodeURIComponent(cityName)}`;
-          }
+          url = `https://wttr.in/${encodeURIComponent(cityName)}?lang=${lang}`;
         }
         window.open(url, '_blank');
       }
@@ -793,6 +818,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
+
   const layoutStealthModeCb = document.getElementById('layout-stealth-mode');
   if (layoutStealthModeCb) {
     layoutStealthModeCb.addEventListener('change', (e) => {
@@ -802,6 +829,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('stealth-mode');
       } else {
         document.body.classList.remove('stealth-mode');
+      }
+    });
+  }
+
+  const checkUpdatesCb = document.getElementById('check-updates-checkbox');
+  if (checkUpdatesCb) {
+    checkUpdatesCb.addEventListener('change', (e) => {
+      STATE.checkUpdates = e.target.checked;
+      saveState();
+      if (STATE.checkUpdates) {
+        checkForUpdates();
+      } else {
+        const notification = document.getElementById('update-notification');
+        if (notification) notification.style.display = 'none';
       }
     });
   }
@@ -1265,29 +1306,39 @@ document.addEventListener('DOMContentLoaded', () => {
     switchMainCategory(STATE.categories[nextIndex].id);
   }, { passive: true });
 
+  // --- Вспомогательная функция для проверки браузера Brave ---
+  async function isBraveBrowser() {
+    // Первичная проверка через API Brave
+    if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
+      try {
+        return await navigator.brave.isBrave();
+      } catch (e) {}
+    }
+    // Запасная проверка через Client Hints (navigator.userAgentData)
+    if (navigator.userAgentData && typeof navigator.userAgentData.getHighEntropyValues === 'function') {
+      try {
+        const hints = await navigator.userAgentData.getHighEntropyValues(['brands']);
+        return hints.brands.some(brand => brand.brand === 'Brave');
+      } catch (e) {}
+    }
+    return false;
+  }
+
   // --- ЭКСПОРТ И ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
   if (btnExport) {
     btnExport.addEventListener('click', () => {
-      storage.getAll((allData) => {
+      storage.getAll(async (allData) => {
         const dataStr = JSON.stringify(allData, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         
-        const triggerDownload = (fileName) => {
-          const linkElement = document.createElement('a');
-          linkElement.setAttribute('href', dataUri);
-          linkElement.setAttribute('download', fileName);
-          linkElement.click();
-        };
-
-        if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
-          navigator.brave.isBrave().then(isBrave => {
-            triggerDownload(isBrave ? 'brave_new_tab_backup.json' : 'strict_compact_tab_backup.json');
-          }).catch(() => {
-            triggerDownload('strict_compact_tab_backup.json');
-          });
-        } else {
-          triggerDownload('strict_compact_tab_backup.json');
-        }
+        // Ожидаем результат проверки на Brave
+        const isBrave = await isBraveBrowser();
+        const exportFileName = isBrave ? 'brave_new_tab_backup.json' : 'strict_compact_tab_backup.json';
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileName);
+        linkElement.click();
       });
     });
   }
@@ -1307,57 +1358,84 @@ document.addEventListener('DOMContentLoaded', () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          const cleanText = event.target.result.trim().replace(/^\ufeff/, '');
+          // Очистка от BOM-символов (\uFEFF) и лишних пробелов
+          const cleanText = event.target.result.trim().replace(/^\uFEFF/, '');
           const data = JSON.parse(cleanText);
 
-          if (!data || typeof data !== 'object') {
-            throw new Error("Invalid backup format");
+          if (!data) {
+            throw new Error("Invalid backup format: parsed data is null or empty");
           }
 
           let shortcuts = [];
           let categories = [{ id: "default", name: "General" }];
+          let columns = 10;
+          let size = 'small';
+          let format12h = false;
+          let showSeconds = false;
+          let showDate = true;
+          let theme = 'dark';
+          let adaptiveThemeData = null;
+          let layoutPositions = null;
+          let layoutGridSnap = false;
+          let layoutGridSize = 20;
+          let showClock = true;
+          let showWeather = false;
+          let weatherCity = '';
+          let weatherCoords = { lat: null, lon: null, resolvedName: '' };
+          let weatherCache = { temp: '', code: null, desc: '', timestamp: 0 };
+          let customBackground = null;
+          let customFavicon = null;
+          let language = 'en';
+          let searchEngine = 'duckduckgo';
+          let customSearchEngines = [];
+          let checkUpdates = false;
 
+          // Если импортируется плоский массив ярлыков (старый формат)
           if (Array.isArray(data)) {
             shortcuts = data;
-          } else {
+          } else if (typeof data === 'object') {
+            // Если импортируется сложный объект настроек (новый формат)
             shortcuts = Array.isArray(data.shortcuts) ? data.shortcuts : DEFAULT_SHORTCUTS;
             categories = Array.isArray(data.categories) ? data.categories : [{ id: "default", name: "General" }];
-          }
-          
-          shortcuts.forEach(s => {
-            if (s && typeof s === 'object') {
-              if (!s.category) s.category = "default";
+            columns = data.columns ?? 10;
+            size = data.size ?? 'small';
+            
+            if (data.format12h !== undefined && data.format12h !== null) {
+              format12h = data.format12h;
+            } else if (data.timeFormat === '12h') {
+              format12h = true;
             }
-          });
 
-          const columns = data.columns ?? 10;
-          const size = data.size ?? 'small';
-          
-          let format12h = false;
-          if (data.format12h !== undefined && data.format12h !== null) {
-            format12h = data.format12h;
-          } else if (data.timeFormat === '12h') {
-            format12h = true;
+            showSeconds = data.showSeconds ?? false;
+            showDate = data.showDate ?? true;
+            theme = data.theme ?? 'dark';
+            if (theme === 'nord') theme = 'dark';
+            adaptiveThemeData = data.adaptiveThemeData ?? null;
+            layoutPositions = data.layoutPositions ?? null;
+            layoutGridSnap = data.layoutGridSnap ?? false;
+            layoutGridSize = data.layoutGridSize ?? 20;
+            showClock = data.showClock ?? true;
+            showWeather = data.showWeather ?? false;
+            weatherCity = data.weatherCity ?? '';
+            weatherCoords = data.weatherCoords ?? { lat: null, lon: null, resolvedName: '' };
+            weatherCache = data.weatherCache ?? { temp: '', code: null, desc: '', timestamp: 0 };
+            customBackground = data.customBackground ?? null;
+            customFavicon = data.customFavicon ?? null;
+            language = data.language ?? 'en';
+            searchEngine = data.searchEngine ?? 'duckduckgo';
+            customSearchEngines = data.customSearchEngines ?? [];
+            checkUpdates = data.checkUpdates ?? false;
+          } else {
+            throw new Error("Invalid backup format: data must be an object or array");
           }
 
-          const showSeconds = data.showSeconds ?? false;
-          const showDate = data.showDate ?? true;
-          let theme = data.theme ?? 'dark';
-          if (theme === 'nord') theme = 'dark';
-          const adaptiveThemeData = data.adaptiveThemeData ?? null;
-          const layoutPositions = data.layoutPositions ?? null;
-          const layoutGridSnap = data.layoutGridSnap ?? false;
-          const layoutGridSize = data.layoutGridSize ?? 20;
-          const showClock = data.showClock ?? true;
-          const showWeather = data.showWeather ?? false;
-          const weatherCity = data.weatherCity ?? '';
-          const weatherCoords = data.weatherCoords ?? { lat: null, lon: null, resolvedName: '' };
-          const weatherCache = data.weatherCache ?? { temp: '', code: null, desc: '', timestamp: 0 };
-          const customBackground = data.customBackground ?? null;
-          const customFavicon = data.customFavicon ?? null;
-          const language = data.language ?? 'en';
-          const searchEngine = data.searchEngine ?? 'duckduckgo';
-          const customSearchEngines = data.customSearchEngines ?? [];
+          // Обязательная фильтрация ярлыков (отсеиваем null и не-объекты)
+          shortcuts = shortcuts.filter(s => s && typeof s === 'object');
+          
+          // Проверяем наличие категории для каждого ярлыка
+          shortcuts.forEach(s => {
+            if (!s.category) s.category = "default";
+          });
 
           const cleanedData = {
             shortcuts,
@@ -1381,10 +1459,14 @@ document.addEventListener('DOMContentLoaded', () => {
             weatherCity,
             weatherCoords,
             weatherCache,
-            customSearchEngines
+            customSearchEngines,
+            checkUpdates
           };
 
+          // Сохраняем в localStorage / Chrome Storage
           storage.clearAndSet(cleanedData, () => {
+            const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;
+            alert(dict.importSuccess || "Import successful!");
             window.location.reload();
           });
 
@@ -1406,10 +1488,72 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- ПРОВЕРКА ОБНОВЛЕНИЙ ВЕРСИИ ---
+  function isNewerVersion(current, latest) {
+    const parse = v => v.replace(/^v/, '').split('.').map(Number);
+    const currParts = parse(current);
+    const latParts = parse(latest);
+    for (let i = 0; i < Math.max(currParts.length, latParts.length); i++) {
+      const c = currParts[i] || 0;
+      const l = latParts[i] || 0;
+      if (l > c) return true;
+      if (c > l) return false;
+    }
+    return false;
+  }
+
+  function checkForUpdates() {
+    if (!STATE.checkUpdates) return;
+    
+    const now = Date.now();
+    const lastCheck = localStorage.getItem('lastUpdateCheck') || 0;
+    const cachedVersion = localStorage.getItem('cachedLatestVersion');
+    
+    // Кэш на 1 час для предотвращения лимитов запросов GitHub API
+    if (now - lastCheck < 3600000 && cachedVersion) {
+      handleUpdateResult(cachedVersion);
+      return;
+    }
+    
+    fetch('https://api.github.com/repos/dodry-question/my-new-tab/releases/latest')
+      .then(res => {
+        if (!res.ok) throw new Error("GitHub API error");
+        return res.json();
+      })
+      .then(data => {
+        if (data && data.tag_name) {
+          localStorage.setItem('lastUpdateCheck', now);
+          localStorage.setItem('cachedLatestVersion', data.tag_name);
+          handleUpdateResult(data.tag_name);
+        }
+      })
+      .catch(err => console.error("Error checking updates:", err));
+  }
+
+  function handleUpdateResult(latestVersion) {
+    const currentVersion = '1.10.2';
+    if (isNewerVersion(currentVersion, latestVersion)) {
+      const notification = document.getElementById('update-notification');
+      const updateText = document.getElementById('update-text');
+      const updateLink = document.getElementById('update-link');
+      if (notification && updateText) {
+        const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;
+        updateText.textContent = (dict.updateAvailable || "New version available: ") + latestVersion;
+        if (updateLink) {
+          updateLink.textContent = dict.updateDownload || "Download";
+        }
+        notification.style.display = 'flex';
+      }
+    } else {
+      const notification = document.getElementById('update-notification');
+      if (notification) notification.style.display = 'none';
+    }
+  }
+
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.customSearchEngines = result.customSearchEngines ?? [];
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
@@ -1440,6 +1584,7 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.weatherCity = result.weatherCity ?? "";
       STATE.weatherCoords = result.weatherCoords ?? { lat: null, lon: null, resolvedName: "" };
       STATE.weatherCache = result.weatherCache ?? { temp: "", code: null, desc: "", timestamp: 0 };
+      STATE.checkUpdates = result.checkUpdates ?? false;
 
       STATE.shortcuts.forEach(s => {
         if (!s.category) s.category = "default";
@@ -1460,6 +1605,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (layoutIosModeCb) layoutIosModeCb.checked = STATE.layoutIosMode;
       const layoutStealthModeCb = document.getElementById('layout-stealth-mode');
       if (layoutStealthModeCb) layoutStealthModeCb.checked = STATE.layoutStealthMode;
+      const checkUpdatesCb = document.getElementById('check-updates-checkbox');
+      if (checkUpdatesCb) checkUpdatesCb.checked = STATE.checkUpdates;
 
       if (STATE.layoutIosMode) {
         document.body.classList.add('mode-ios');
@@ -1492,6 +1639,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (STATE.showWeather && STATE.weatherCoords && STATE.weatherCoords.resolvedName) {
         updateStatusText("success", STATE.weatherCoords.resolvedName);
       }
+
+      // Запуск проверки версий (только если галочка активна)
+      if (STATE.checkUpdates) {
+        checkForUpdates();
+      }
     });
   }
 
@@ -1520,7 +1672,8 @@ document.addEventListener('DOMContentLoaded', () => {
       weatherCity: STATE.weatherCity,
       weatherCoords: STATE.weatherCoords,
       weatherCache: STATE.weatherCache,
-      customSearchEngines: STATE.customSearchEngines
+      customSearchEngines: STATE.customSearchEngines,
+      checkUpdates: STATE.checkUpdates
     });
   }
 

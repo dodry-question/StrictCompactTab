@@ -73,7 +73,10 @@
   <div id="settings-modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 data-i18n="settingsTitle">Screen Settings</h2>
+        <div style="display: flex; align-items: baseline; gap: 8px;">
+          <h2 data-i18n="settingsTitle" style="margin: 0;">Screen Settings</h2>
+          <span class="settings-version" style="font-size: 0.75rem; opacity: 0.5; font-weight: normal; font-family: monospace;">v1.10.2</span>
+        </div>
         <button id="settings-close-btn" class="modal-close-icon">&times;</button>
       </div>
 
@@ -151,6 +154,14 @@
               </label>
             </div>
 
+            <!-- Проверка обновлений (GitHub) -->
+            <div class="settings-field update-check-field">
+              <label class="toggle-label">
+                <input type="checkbox" id="check-updates-checkbox">
+                <span data-i18n="checkUpdatesLabel">Check for updates (GitHub)</span>
+              </label>
+            </div>
+
             <!-- Выбор языка интерфейса -->
             <div class="settings-field">
               <label id="label-language" for="language-select">Language / Язык</label>
@@ -161,7 +172,7 @@
             </div>
 
             <!-- Выбор поисковой системы -->
-            <div class="settings-field">
+            <div class="settings-field" style="margin-bottom: 8px;">
               <label id="label-search-engine" for="search-engine-select" data-i18n="searchEngineLabel">Search Engine</label>
               <div class="select-with-icon-wrapper">
                 <img id="settings-search-logo" class="settings-search-logo" src="assets/search_duckduckgo.png" alt="">
@@ -174,6 +185,29 @@
                   <option value="qwant">Qwant</option>
                   <option value="startpage">Startpage</option>
                 </select>
+              </div>
+            </div>
+
+            <!-- Раздел управления своими поисковиками -->
+            <div class="custom-engines-section" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+              <button type="button" id="btn-toggle-custom-engines" class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px;" data-i18n="manageCustomEnginesBtn">Manage Engines</button>
+              <div id="custom-engines-panel" class="custom-engines-panel" style="display: none; flex-direction: column; gap: 8px; border: 1px solid var(--border-color, #444); padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.02);">
+                <div id="custom-engines-list" class="custom-engines-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;"></div>
+                
+                <form id="add-custom-engine-form" class="add-custom-engine-form" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px; border-top: 1px dashed var(--border-color, #444); padding-top: 8px;">
+                  <div style="font-weight: 600; font-size: 0.85rem;" data-i18n="addCustomEngineTitle">Add Custom Engine</div>
+                  <input id="custom-engine-name" type="text" data-i18n-placeholder="customEngineNamePlaceholder" placeholder="Engine Name" class="settings-input" required autocomplete="off">
+                  <input id="custom-engine-query" type="text" data-i18n-placeholder="customEngineQueryPlaceholder" placeholder="Query URL" class="settings-input" required autocomplete="off">
+                  
+                  <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                    <label class="btn btn-file-label" style="font-size: 0.75rem; padding: 4px 8px; margin: 0; cursor: pointer;">
+                      <span data-i18n="chooseLogoBtn">Choose Logo</span>
+                      <input id="custom-engine-logo-file" type="file" accept="image/*" style="display: none;">
+                    </label>
+                    <span id="custom-engine-logo-status" style="font-size: 0.75rem; opacity: 0.7; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                  </div>
+                  <button type="submit" class="btn btn-add" style="padding: 6px; font-size: 0.8rem; width: 100%;" data-i18n="addBtn">Add</button>
+                </form>
               </div>
             </div>
           </div>
@@ -323,6 +357,12 @@
     <div class="layout-control-divider"></div>
     <button id="layout-save-btn" class="btn btn-add" data-i18n="saveBtn">Save</button>
     <button id="layout-cancel-btn" class="btn btn-secondary" data-i18n="btnCancel">Cancel</button>
+  </div>
+
+  <!-- Уведомление о новой версии расширения -->
+  <div id="update-notification" class="update-notification" style="display: none;">
+    <span id="update-text">New version available: 1.10.2</span>
+    <a id="update-link" href="https://github.com/dodry-question/my-new-tab/releases" target="_blank" data-i18n="updateDownload">Download</a>
   </div>
 
   <script src="assets/material-color-utilities.min.js"></script>

@@ -2868,3 +2868,45 @@ body.stealth-mode .search-form:hover {
   border: none !important;
 }
 
+/* --- Стили для уведомления об обновлениях --- */
+.update-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: var(--text-color, #fff);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.update-notification:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.update-notification a {
+  color: #357ae8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.update-notification a:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
