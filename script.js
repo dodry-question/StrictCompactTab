@@ -68,7 +68,17 @@ document.addEventListener('DOMContentLoaded', () => {
       deleteCategoryConfirm: "Are you sure you want to delete this category? All its shortcuts will be moved to General.",
       searchEngineLabel: "Search Engine",
       iosModeLabel: "iOS Widget Mode (Square tiles)",
-      stealthModeLabel: "Stealth Mode (Ultra-minimalism)"
+      stealthModeLabel: "Stealth Mode (Ultra-minimalism)",
+      
+      // Свои поисковики
+      manageCustomEnginesBtn: "Custom Engines",
+      addCustomEngineTitle: "Add Custom Search Engine",
+      customEngineNamePlaceholder: "Engine Name",
+      customEngineQueryPlaceholder: "Query URL (e.g. https://domain.com/search?q=)",
+      chooseLogoBtn: "Choose Logo",
+      logoLoadedStatus: "Logo selected",
+      weatherOpenMeteoConfirm: "Would you like to view the detailed weather forecast for the selected city?",
+      weatherNoCityAlert: "Weather city is not set. Please configure a city in settings."
     },
     ru: {
       searchPlaceholder: "Искать в интернете...",
@@ -136,7 +146,17 @@ document.addEventListener('DOMContentLoaded', () => {
       deleteCategoryConfirm: "Вы уверены, что хотите удалить эту категорию? Все её ярлыки будут перенесены в Общую.",
       searchEngineLabel: "Поисковая система",
       iosModeLabel: "Режим виджетов iOS (Квадратные плитки)",
-      stealthModeLabel: "Стелс-режим (Ультра-минимализм)"
+      stealthModeLabel: "Стелс-режим (Ультра-минимализм)",
+      
+      // Свои поисковики
+      manageCustomEnginesBtn: "Свои поисковики",
+      addCustomEngineTitle: "Добавить свой поисковик",
+      customEngineNamePlaceholder: "Название поисковика",
+      customEngineQueryPlaceholder: "Ссылка для запроса (напр. https://domain.com/search?q=)",
+      chooseLogoBtn: "Выбрать лого",
+      logoLoadedStatus: "Логотип выбран",
+      weatherOpenMeteoConfirm: "Хотите посмотреть подробный прогноз погоды для выбранного города?",
+      weatherNoCityAlert: "Город для погоды не задан. Пожалуйста, настройте его в параметрах."
     }
   };
 
@@ -240,7 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
     showWeather: false,
     weatherCity: "",
     weatherCoords: { lat: null, lon: null, resolvedName: "" },
-    weatherCache: { temp: "", code: null, desc: "", timestamp: 0 }
+    weatherCache: { temp: "", code: null, desc: "", timestamp: 0 },
+    customSearchEngines: []
   };
 
   let editingIndex = -1;
@@ -344,8 +365,52 @@ document.addEventListener('DOMContentLoaded', () => {
           bing: "https://www.bing.com/search?q=",
           startpage: "https://www.startpage.com/do/search?q="
         };
-        const baseUrl = engines[STATE.searchEngine] || engines.duckduckgo;
+        let baseUrl = engines[STATE.searchEngine];
+        if (!baseUrl && STATE.searchEngine && STATE.searchEngine.startsWith('custom_')) {
+          const customEng = STATE.customSearchEngines ? STATE.customSearchEngines.find(eng => eng.id === STATE.searchEngine) : null;
+          if (customEng) {
+            baseUrl = customEng.queryUrl;
+          }
+        }
+        if (!baseUrl) {
+          baseUrl = engines.duckduckgo;
+        }
         window.location.href = baseUrl + encodeURIComponent(query);
+      }
+    });
+  }
+
+  // --- НАЖАТИЕ НА ВИДЖЕТ ПОГОДЫ ---
+  if (weatherWidget) {
+    weatherWidget.addEventListener('click', (e) => {
+      if (document.body.classList.contains('layout-edit-mode')) return;
+      const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+      
+      if (!STATE.weatherCity) {
+        alert(dict.weatherNoCityAlert);
+        return;
+      }
+      
+      if (confirm(dict.weatherOpenMeteoConfirm)) {
+        let url;
+        const cityName = STATE.weatherCoords.resolvedName || STATE.weatherCity;
+        const lat = STATE.weatherCoords.lat;
+        const lon = STATE.weatherCoords.lon;
+        
+        if (STATE.language === 'ru') {
+          if (lat && lon) {
+            url = `https://yandex.ru/pogoda/?lat=${lat}&lon=${lon}`;
+          } else {
+            url = `https://yandex.ru/search/?text=погода+${encodeURIComponent(cityName)}`;
+          }
+        } else {
+          if (lat && lon) {
+            url = `https://weather.com/weather/today/l/${lat},${lon}`;
+          } else {
+            url = `https://www.google.com/search?q=weather+${encodeURIComponent(cityName)}`;
+          }
+        }
+        window.open(url, '_blank');
       }
     });
   }
@@ -1206,11 +1271,23 @@ document.addEventListener('DOMContentLoaded', () => {
       storage.getAll((allData) => {
         const dataStr = JSON.stringify(allData, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        const exportFileName = 'brave_new_tab_backup.json';
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileName);
-        linkElement.click();
+        
+        const triggerDownload = (fileName) => {
+          const linkElement = document.createElement('a');
+          linkElement.setAttribute('href', dataUri);
+          linkElement.setAttribute('download', fileName);
+          linkElement.click();
+        };
+
+        if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
+          navigator.brave.isBrave().then(isBrave => {
+            triggerDownload(isBrave ? 'brave_new_tab_backup.json' : 'strict_compact_tab_backup.json');
+          }).catch(() => {
+            triggerDownload('strict_compact_tab_backup.json');
+          });
+        } else {
+          triggerDownload('strict_compact_tab_backup.json');
+        }
       });
     });
   }
@@ -1230,13 +1307,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          const data = JSON.parse(event.target.result);
+          const cleanText = event.target.result.trim().replace(/^\ufeff/, '');
+          const data = JSON.parse(cleanText);
 
-          const shortcuts = Array.isArray(data.shortcuts) ? data.shortcuts : DEFAULT_SHORTCUTS;
-          const categories = Array.isArray(data.categories) ? data.categories : [{ id: "default", name: "General" }];
+          if (!data || typeof data !== 'object') {
+            throw new Error("Invalid backup format");
+          }
+
+          let shortcuts = [];
+          let categories = [{ id: "default", name: "General" }];
+
+          if (Array.isArray(data)) {
+            shortcuts = data;
+          } else {
+            shortcuts = Array.isArray(data.shortcuts) ? data.shortcuts : DEFAULT_SHORTCUTS;
+            categories = Array.isArray(data.categories) ? data.categories : [{ id: "default", name: "General" }];
+          }
           
           shortcuts.forEach(s => {
-            if (!s.category) s.category = "default";
+            if (s && typeof s === 'object') {
+              if (!s.category) s.category = "default";
+            }
           });
 
           const columns = data.columns ?? 10;
@@ -1262,6 +1353,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const weatherCity = data.weatherCity ?? '';
           const weatherCoords = data.weatherCoords ?? { lat: null, lon: null, resolvedName: '' };
           const weatherCache = data.weatherCache ?? { temp: '', code: null, desc: '', timestamp: 0 };
+          const customBackground = data.customBackground ?? null;
+          const customFavicon = data.customFavicon ?? null;
+          const language = data.language ?? 'en';
+          const searchEngine = data.searchEngine ?? 'duckduckgo';
+          const customSearchEngines = data.customSearchEngines ?? [];
 
           const cleanedData = {
             shortcuts,
@@ -1284,7 +1380,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showWeather,
             weatherCity,
             weatherCoords,
-            weatherCache
+            weatherCache,
+            customSearchEngines
           };
 
           storage.clearAndSet(cleanedData, () => {
@@ -1292,13 +1389,16 @@ document.addEventListener('DOMContentLoaded', () => {
           });
 
         } catch (err) {
-          alert(TRANSLATIONS[STATE.language].importError);
+          console.error("Import error details:", err);
+          const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;
+          alert(dict.importError);
           importFileInput.value = '';
         }
       };
 
       reader.onerror = () => {
-        alert(TRANSLATIONS[STATE.language].importReadError);
+        const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;
+        alert(dict.importReadError);
         importFileInput.value = '';
       };
 
@@ -1309,8 +1409,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
+      STATE.customSearchEngines = result.customSearchEngines ?? [];
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
       STATE.columns = result.columns ?? 10;
       STATE.size = result.size ?? "small";
@@ -1380,6 +1481,7 @@ document.addEventListener('DOMContentLoaded', () => {
       applyClockVisibility();
       applyWeatherVisibility();
       applyLanguage(STATE.language);
+      populateSearchEnginesSelect();
       updateSearchEngineUI();
       updateClockAndDate();
       updateWeatherWidget();
@@ -1417,7 +1519,8 @@ document.addEventListener('DOMContentLoaded', () => {
       showWeather: STATE.showWeather,
       weatherCity: STATE.weatherCity,
       weatherCoords: STATE.weatherCoords,
-      weatherCache: STATE.weatherCache
+      weatherCache: STATE.weatherCache,
+      customSearchEngines: STATE.customSearchEngines
     });
   }
 
@@ -1426,9 +1529,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (select) {
       select.value = STATE.searchEngine;
     }
+    
+    let logoSrc = 'assets/search_' + STATE.searchEngine + '.png';
+    let isCustom = false;
+    let customLogo = null;
+    
+    if (STATE.searchEngine && STATE.searchEngine.startsWith('custom_')) {
+      const customEng = STATE.customSearchEngines ? STATE.customSearchEngines.find(e => e.id === STATE.searchEngine) : null;
+      if (customEng) {
+        isCustom = true;
+        customLogo = customEng.logo || 'assets/favicon.png';
+      }
+    }
+
     const logo = document.getElementById('search-engine-logo');
     if (logo) {
-      logo.src = 'assets/search_' + STATE.searchEngine + '.png';
+      logo.src = isCustom ? customLogo : logoSrc;
       if (STATE.searchEngine === 'brave') {
         logo.classList.add('inverted');
       } else {
@@ -1437,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const settingsSearchLogo = document.getElementById('settings-search-logo');
     if (settingsSearchLogo) {
-      settingsSearchLogo.src = 'assets/search_' + STATE.searchEngine + '.png';
+      settingsSearchLogo.src = isCustom ? customLogo : logoSrc;
       if (STATE.searchEngine === 'brave') {
         settingsSearchLogo.classList.add('inverted');
       } else {
@@ -2525,7 +2641,208 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЬСКИМИ ПОИСКОВИКАМИ ---
+  function populateSearchEnginesSelect() {
+    const select = document.getElementById('search-engine-select');
+    if (!select) return;
+    
+    const currentVal = STATE.searchEngine;
+    select.innerHTML = '';
+    
+    const defaultEngines = [
+      { id: 'duckduckgo', name: 'DuckDuckGo' },
+      { id: 'yandex', name: 'Yandex' },
+      { id: 'google', name: 'Google' },
+      { id: 'brave', name: 'Brave' },
+      { id: 'bing', name: 'Bing' },
+      { id: 'qwant', name: 'Qwant' },
+      { id: 'startpage', name: 'Startpage' }
+    ];
+    
+    defaultEngines.forEach(eng => {
+      const opt = document.createElement('option');
+      opt.value = eng.id;
+      opt.textContent = eng.name;
+      select.appendChild(opt);
+    });
+    
+    if (STATE.customSearchEngines && Array.isArray(STATE.customSearchEngines)) {
+      STATE.customSearchEngines.forEach(eng => {
+        const opt = document.createElement('option');
+        opt.value = eng.id;
+        opt.textContent = eng.name;
+        select.appendChild(opt);
+      });
+    }
+    
+    select.value = currentVal;
+    
+    if (select.selectedIndex === -1) {
+      select.value = 'duckduckgo';
+      STATE.searchEngine = 'duckduckgo';
+      saveState();
+    }
+  }
+
+  function renderCustomSearchEngines() {
+    const list = document.getElementById('custom-engines-list');
+    if (!list) return;
+    list.innerHTML = '';
+    
+    if (!STATE.customSearchEngines || STATE.customSearchEngines.length === 0) {
+      const emptyMsg = document.createElement('div');
+      emptyMsg.style.fontSize = '0.8rem';
+      emptyMsg.style.opacity = '0.6';
+      emptyMsg.style.padding = '4px 0';
+      emptyMsg.textContent = STATE.language === 'ru' ? 'Нет пользовательских поисковиков' : 'No custom search engines';
+      list.appendChild(emptyMsg);
+      return;
+    }
+    
+    STATE.customSearchEngines.forEach(eng => {
+      const item = document.createElement('div');
+      item.className = 'custom-engine-item';
+      item.style.display = 'flex';
+      item.style.alignItems = 'center';
+      item.style.justifyContent = 'space-between';
+      item.style.padding = '6px';
+      item.style.borderBottom = '1px solid var(--border-color, #444)';
+      item.style.gap = '8px';
+      
+      const leftPart = document.createElement('div');
+      leftPart.style.display = 'flex';
+      leftPart.style.alignItems = 'center';
+      leftPart.style.gap = '8px';
+      leftPart.style.overflow = 'hidden';
+      
+      const logoImg = document.createElement('img');
+      logoImg.src = eng.logo || 'assets/favicon.png';
+      logoImg.style.width = '16px';
+      logoImg.style.height = '16px';
+      logoImg.style.objectFit = 'contain';
+      
+      const details = document.createElement('div');
+      details.style.overflow = 'hidden';
+      details.style.textOverflow = 'ellipsis';
+      details.style.whiteSpace = 'nowrap';
+      
+      const name = document.createElement('div');
+      name.style.fontWeight = '600';
+      name.style.fontSize = '0.8rem';
+      name.textContent = eng.name;
+      
+      const url = document.createElement('div');
+      url.style.fontSize = '0.7rem';
+      url.style.opacity = '0.5';
+      url.style.overflow = 'hidden';
+      url.style.textOverflow = 'ellipsis';
+      url.textContent = eng.queryUrl;
+      
+      details.appendChild(name);
+      details.appendChild(url);
+      leftPart.appendChild(logoImg);
+      leftPart.appendChild(details);
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'btn btn-danger-action';
+      deleteBtn.style.padding = '2px 6px';
+      deleteBtn.style.fontSize = '0.75rem';
+      deleteBtn.textContent = STATE.language === 'ru' ? 'Удалить' : 'Delete';
+      deleteBtn.addEventListener('click', () => {
+        if (STATE.searchEngine === eng.id) {
+          STATE.searchEngine = 'duckduckgo';
+        }
+        STATE.customSearchEngines = STATE.customSearchEngines.filter(e => e.id !== eng.id);
+        saveState();
+        populateSearchEnginesSelect();
+        updateSearchEngineUI();
+        renderCustomSearchEngines();
+      });
+      
+      item.appendChild(leftPart);
+      item.appendChild(deleteBtn);
+      list.appendChild(item);
+    });
+  }
+
+  function initCustomSearchEngines() {
+    const toggleBtn = document.getElementById('btn-toggle-custom-engines');
+    const panel = document.getElementById('custom-engines-panel');
+    const form = document.getElementById('add-custom-engine-form');
+    const nameInput = document.getElementById('custom-engine-name');
+    const queryInput = document.getElementById('custom-engine-query');
+    const fileInput = document.getElementById('custom-engine-logo-file');
+    const statusText = document.getElementById('custom-engine-logo-status');
+    
+    if (toggleBtn && panel) {
+      toggleBtn.addEventListener('click', () => {
+        if (panel.style.display === 'none') {
+          panel.style.display = 'flex';
+          renderCustomSearchEngines();
+        } else {
+          panel.style.display = 'none';
+        }
+      });
+    }
+    
+    if (fileInput && statusText) {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          statusText.textContent = TRANSLATIONS[STATE.language].logoLoadedStatus || 'Selected';
+          statusText.style.color = '#4caf50';
+        } else {
+          statusText.textContent = '';
+        }
+      });
+    }
+    
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = nameInput.value.trim();
+        let queryUrl = queryInput.value.trim();
+        
+        if (name && queryUrl) {
+          if (!/^https?:\/\//i.test(queryUrl)) {
+            queryUrl = 'https://' + queryUrl;
+          }
+          
+          const newId = 'custom_' + Date.now();
+          
+          const saveEngine = (logo) => {
+            if (!STATE.customSearchEngines) STATE.customSearchEngines = [];
+            STATE.customSearchEngines.push({
+              id: newId,
+              name,
+              queryUrl,
+              logo
+            });
+            saveState();
+            populateSearchEnginesSelect();
+            renderCustomSearchEngines();
+            
+            form.reset();
+            if (statusText) statusText.textContent = '';
+          };
+          
+          const file = fileInput ? fileInput.files[0] : null;
+          if (file) {
+            compressImage(file, 64, 64, 0.85, (result) => {
+              saveEngine(result);
+            });
+          } else {
+            saveEngine(null);
+          }
+        }
+      });
+    }
+  }
+
   initLayoutDragAndDrop();
+
+  initCustomSearchEngines();
 
   loadState();
 });
