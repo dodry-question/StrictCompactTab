@@ -22,15 +22,16 @@
     "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.github.com;"
   },
   "icons": {
-    "16": "assets/icon16_trans.png",
-    "32": "assets/icon32_trans.png",
-    "48": "assets/favicon.png",
-    "128": "assets/favicon.png"
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
   },
   "browser_specific_settings": {
     "gecko": {
       "id": "strict-compact-tab@dodry-question",
-      "strict_min_version": "109.0"
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": [ "none" ]
+      }
     }
   }
 }

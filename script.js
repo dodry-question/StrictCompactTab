@@ -343,7 +343,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clockElement) {
       if (ampm) {
         // Оборачиваем AM/PM в span с уменьшенным шрифтом для красивого вида и исключения наложений
-        clockElement.innerHTML = `${timeString}<span class="clock-ampm">${ampm.trim()}</span>`;
+        clockElement.textContent = timeString;
+        const ampmSpan = document.createElement('span');
+        ampmSpan.className = 'clock-ampm';
+        ampmSpan.textContent = ampm.trim();
+        clockElement.appendChild(ampmSpan);
       } else {
         clockElement.textContent = timeString;
       }
@@ -1077,7 +1081,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (cityName.includes('(')) {
         cityName = cityName.split('(')[0].trim();
       }
-      weatherDetails.innerHTML = `${desc}<br>${cityName}`;
+      weatherDetails.textContent = '';
+      weatherDetails.appendChild(document.createTextNode(desc));
+      weatherDetails.appendChild(document.createElement('br'));
+      weatherDetails.appendChild(document.createTextNode(cityName));
     }
   }
 
@@ -1846,14 +1853,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderModalShortcutsList() {
     if (!modalList) return;
-    modalList.innerHTML = '';
+    modalList.textContent = '';
 
     const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
 
     const filteredShortcuts = STATE.shortcuts.filter(s => s.category === STATE.activeSettingsCategory);
 
     if (filteredShortcuts.length === 0) {
-      modalList.innerHTML = `<div style="color: rgba(255,255,255,0.3); font-size: 11px; text-align: center; padding: 12px;">${currentDict.listEmpty}</div>`;
+      const emptyDiv = document.createElement('div');
+      emptyDiv.style.color = 'rgba(255,255,255,0.3)';
+      emptyDiv.style.fontSize = '11px';
+      emptyDiv.style.textAlign = 'center';
+      emptyDiv.style.padding = '12px';
+      emptyDiv.textContent = currentDict.listEmpty;
+      modalList.appendChild(emptyDiv);
       return;
     }
 

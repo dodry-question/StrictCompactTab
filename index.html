@@ -5,21 +5,7 @@
   <title>Новая вкладка</title>
   <!-- Подключение фавиконки вкладки -->
   <link class="page-favicon" rel="icon" type="image/png" href="assets/icon16_trans.png">
-  <script>
-    (function() {
-      try {
-        const val = localStorage.getItem('customFavicon');
-        if (val) {
-          const url = JSON.parse(val);
-          if (url) {
-            document.querySelector('.page-favicon').href = url;
-            return;
-          }
-        }
-      } catch (e) {}
-      document.querySelector('.page-favicon').href = 'assets/favicon.png';
-    })();
-  </script>
+  <script src="favicon-loader.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
