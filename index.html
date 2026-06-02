@@ -36,10 +36,8 @@
     </button>
   </form>
 
-  <!-- Горизонтальная панель вкладок-категорий и сетка ярлыков -->
+  <!-- Сетка ярлыков быстрого доступа -->
   <div id="widget-shortcuts" class="shortcuts-wrapper draggable-widget">
-    <!-- Горизонтальная панель вкладок-категорий (рендерится только если категорий >= 2) -->
-    <div id="main-categories-container" class="main-categories-container"></div>
 
     <!-- Сетка ярлыков быстрого доступа -->
     <div id="shortcuts-container" class="shortcuts-container"></div>
@@ -61,7 +59,7 @@
       <div class="modal-header">
         <div style="display: flex; align-items: baseline; gap: 8px;">
           <h2 data-i18n="settingsTitle" style="margin: 0;">Screen Settings</h2>
-          <span class="settings-version" style="font-size: 0.75rem; opacity: 0.5; font-weight: normal; font-family: monospace;">v1.10.4</span>
+          <span class="settings-version" style="font-size: 0.75rem; opacity: 0.5; font-weight: normal; font-family: monospace;">v1.10.5</span>
         </div>
         <button id="settings-close-btn" class="modal-close-icon">&times;</button>
       </div>
@@ -88,10 +86,10 @@
                 </label>
               </div>
               
-              <!-- Выбор категории при добавлении ярлыка -->
+              <!-- Выбор папки при добавлении ярлыка -->
               <div class="settings-field">
-                <label for="new-shortcut-category" data-i18n="shortcutCategoryLabel">Category</label>
-                <select id="new-shortcut-category" class="settings-select"></select>
+                <label for="new-shortcut-folder" data-i18n="shortcutCategoryLabel">Folder</label>
+                <select id="new-shortcut-folder" class="settings-select"></select>
               </div>
 
               <button type="submit" class="btn btn-add" data-i18n="addBtn">Add</button>
@@ -318,11 +316,11 @@
           <div class="settings-section full-height">
             <h3 data-i18n="manageShortcutsTitle">Manage Shortcuts</h3>
             
-            <!-- Ряд управления категориями в настройках -->
+            <!-- Ряд управления папками в настройках -->
             <div class="manage-shortcuts-header-row">
-              <div id="settings-categories-tabs" class="settings-categories-tabs"></div>
-              <button id="btn-add-category" class="btn-add-category" data-i18n-title="addCategoryTitle" title="Add Category">
-                <img src="assets/add-category-icon.png" alt="Add Category">
+              <div id="settings-folders-tabs" class="settings-categories-tabs"></div>
+              <button id="btn-add-folder" class="btn-add-category" data-i18n-title="addCategoryTitle" title="Add Folder">
+                <img src="assets/add-category-icon.png" alt="Add Folder">
               </button>
             </div>
 
@@ -357,8 +355,19 @@
 
   <!-- Уведомление о новой версии расширения -->
   <div id="update-notification" class="update-notification" style="display: none;">
-    <span id="update-text">New version available: 1.10.4</span>
+    <span id="update-text">New version available: 1.10.5</span>
     <a id="update-link" href="https://github.com/dodry-question/my-new-tab/releases" target="_blank" data-i18n="updateDownload">Download</a>
+  </div>
+
+  <!-- Модальное окно открытой папки -->
+  <div id="folder-modal" class="folder-modal-overlay">
+    <div class="folder-modal-content">
+      <div class="folder-modal-header">
+        <h3 id="folder-modal-title">Folder Name</h3>
+        <button id="folder-modal-close" class="modal-close-icon">&times;</button>
+      </div>
+      <div id="folder-shortcuts-container" class="shortcuts-container"></div>
+    </div>
   </div>
 
   <script src="assets/material-color-utilities.min.js"></script>

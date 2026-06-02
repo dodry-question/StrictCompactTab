@@ -59,13 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
       weatherStatusError: "Error loading weather",
       weatherLoading: "Loading...",
       
-      // Локализация вкладок/категорий
-      shortcutCategoryLabel: "Category",
-      addCategoryTitle: "Add Category",
+      // Локализация вкладок/папок
+      shortcutCategoryLabel: "Folder",
+      addCategoryTitle: "Add Folder",
       defaultCategoryName: "General",
-      addCategoryPrompt: "Enter new category name:",
-      renameCategoryPrompt: "Rename category to:",
-      deleteCategoryConfirm: "Are you sure you want to delete this category? All its shortcuts will be moved to General.",
+      addCategoryPrompt: "Enter new folder name:",
+      renameCategoryPrompt: "Rename folder to:",
+      deleteCategoryConfirm: "Are you sure you want to delete this folder?",
+      deleteShortcutsConfirm: "Would you also like to delete all shortcuts inside this folder? (Click Cancel to keep them and move to General)",
       searchEngineLabel: "Search Engine",
       iosModeLabel: "iOS Widget Mode (Square tiles)",
       stealthModeLabel: "Stealth Mode (Ultra-minimalism)",
@@ -141,13 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
       weatherStatusError: "Ошибка загрузки погоды",
       weatherLoading: "Загрузка...",
       
-      // Локализация вкладок/категорий
-      shortcutCategoryLabel: "Категория",
-      addCategoryTitle: "Добавить категорию",
+      // Локализация вкладок/папок
+      shortcutCategoryLabel: "Папка",
+      addCategoryTitle: "Добавить папку",
       defaultCategoryName: "Общая",
-      addCategoryPrompt: "Введите название новой категории:",
-      renameCategoryPrompt: "Переименовать категорию в:",
-      deleteCategoryConfirm: "Вы уверены, что хотите удалить эту категорию? Все её ярлыки будут перенесены в Общую.",
+      addCategoryPrompt: "Введите название новой папки:",
+      renameCategoryPrompt: "Переименовать папку в:",
+      deleteCategoryConfirm: "Вы уверены, что хотите удалить эту папку?",
+      deleteShortcutsConfirm: "Хотите также удалить все ярлыки внутри этой папки? (Нажмите Отмена, чтобы сохранить их и перенести в Общую)",
       searchEngineLabel: "Поисковая система",
       iosModeLabel: "Режим виджетов iOS (Квадратные плитки)",
       stealthModeLabel: "Стелс-режим (Ультра-минимализм)",
@@ -271,9 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const STATE = {
     shortcuts: [],
-    categories: [{ id: "default", name: "General" }],
-    activeCategory: "default",
-    activeSettingsCategory: "default",
+    folders: [{ id: "default", name: "General" }],
+    activeFolder: "default",
+    activeSettingsFolder: "default",
     columns: 10,
     size: "small",
     customBackground: null,
@@ -455,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openBtn.addEventListener('click', () => {
       modal.classList.add('active');
       editingIndex = -1;
-      renderSettingsCategories();
+      renderSettingsFolders();
       renderModalShortcutsList();
       if (STATE.showWeather && STATE.weatherCoords && STATE.weatherCoords.resolvedName) {
         updateStatusText("success", STATE.weatherCoords.resolvedName);
@@ -501,9 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
       saveState();
       applyLanguage(STATE.language);
       updateClockAndDate();
-      populateCategorySelects();
-      renderSettingsCategories();
-      renderMainCategories();
+      populateFolderSelects();
+      renderSettingsFolders();
       renderModalShortcutsList();
       
       if (STATE.showWeather) {
@@ -551,14 +552,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const addForm = document.getElementById('add-shortcut-form');
   const newNameInput = document.getElementById('new-shortcut-name');
   const newUrlInput = document.getElementById('new-shortcut-url');
-  const newCategorySelect = document.getElementById('new-shortcut-category');
+  const newCategorySelect = document.getElementById('new-shortcut-folder');
 
   if (addForm) {
     addForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = newNameInput.value.trim();
       let url = newUrlInput.value.trim();
-      const category = newCategorySelect ? newCategorySelect.value : "default";
+      const folder = newCategorySelect ? newCategorySelect.value : "default";
 
       if (name && url) {
         if (!/^https?:\/\//i.test(url)) {
@@ -566,13 +567,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const saveShortcut = (customIcon) => {
-          STATE.shortcuts.push({ name, url, customIcon, category });
+          STATE.shortcuts.push({ name, url, customIcon, folder, category: folder });
           saveState();
           renderShortcuts();
           renderModalShortcutsList();
 
           addForm.reset();
-          populateCategorySelects();
+          populateFolderSelects();
           
           const iconLabel = document.querySelector('.input-icon-upload-label');
           if (iconLabel) {
@@ -1120,70 +1121,68 @@ document.addEventListener('DOMContentLoaded', () => {
     return isRu ? 'Умеренно' : 'Moderate';
   }
 
-  // --- УПРАВЛЕНИЕ КАТЕГОРИЯМИ ---
-  const btnAddCategory = document.getElementById('btn-add-category');
-  if (btnAddCategory) {
-    btnAddCategory.addEventListener('click', () => {
+  // --- УПРАВЛЕНИЕ ПАПКАМИ ---
+  const btnAddFolder = document.getElementById('btn-add-folder');
+  if (btnAddFolder) {
+    btnAddFolder.addEventListener('click', () => {
       const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
-      const catName = prompt(currentDict.addCategoryPrompt);
-      if (catName && catName.trim()) {
-        const newId = "cat_" + Date.now();
-        STATE.categories.push({ id: newId, name: catName.trim() });
+      const folderName = prompt(currentDict.addCategoryPrompt);
+      if (folderName && folderName.trim()) {
+        const newId = "folder_" + Date.now();
+        STATE.folders.push({ id: newId, name: folderName.trim() });
         saveState();
-        renderSettingsCategories();
-        renderMainCategories();
-        populateCategorySelects();
+        renderSettingsFolders();
+        renderShortcuts();
+        populateFolderSelects();
       }
     });
   }
 
-  function populateCategorySelects() {
-    const selects = [newCategorySelect];
+  function populateFolderSelects() {
+    const select = document.getElementById('new-shortcut-folder');
     const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
 
-    selects.forEach(select => {
-      if (select) {
-        select.innerHTML = '';
-        const fragment = document.createDocumentFragment();
-        STATE.categories.forEach(cat => {
-          const opt = document.createElement('option');
-          opt.value = cat.id;
-          opt.textContent = cat.id === 'default' ? currentDict.defaultCategoryName : cat.name;
-          fragment.appendChild(opt);
-        });
-        select.appendChild(fragment);
-      }
-    });
+    if (select) {
+      select.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      STATE.folders.forEach(folder => {
+        const opt = document.createElement('option');
+        opt.value = folder.id;
+        opt.textContent = folder.id === 'default' ? currentDict.defaultCategoryName : folder.name;
+        fragment.appendChild(opt);
+      });
+      select.appendChild(fragment);
+    }
   }
 
-  function renderSettingsCategories() {
-    const tabsContainer = document.getElementById('settings-categories-tabs');
+  function renderSettingsFolders() {
+    const tabsContainer = document.getElementById('settings-folders-tabs');
     if (!tabsContainer) return;
     tabsContainer.innerHTML = '';
 
     const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
     const fragment = document.createDocumentFragment();
 
-    STATE.categories.forEach((cat, index) => {
+    STATE.folders.forEach((folder, index) => {
       const tab = document.createElement('div');
-      tab.className = 'settings-category-tab';
-      if (cat.id === STATE.activeSettingsCategory) {
+      tab.className = 'settings-category-tab'; // Пользуемся существующим CSS
+      if (folder.id === STATE.activeSettingsFolder) {
         tab.classList.add('active');
       }
-      tab.textContent = cat.id === 'default' ? currentDict.defaultCategoryName : cat.name;
+      tab.textContent = folder.id === 'default' ? currentDict.defaultCategoryName : folder.name;
       
       tab.setAttribute('draggable', true);
-      tab.dataset.id = cat.id;
+      tab.dataset.id = folder.id;
       tab.dataset.index = index;
 
       tab.addEventListener('click', () => {
-        STATE.activeSettingsCategory = cat.id;
-        renderSettingsCategories();
+        STATE.activeSettingsFolder = folder.id;
+        renderSettingsFolders();
         renderModalShortcutsList();
       });
 
       tab.addEventListener('dragstart', (e) => {
-        dragCategorySrcId = cat.id;
+        dragFolderSrcId = folder.id;
         e.dataTransfer.effectAllowed = 'move';
         tab.classList.add('dragging');
       });
@@ -1207,51 +1206,57 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         tab.classList.remove('drag-over');
         const targetIndex = parseInt(tab.dataset.index, 10);
-        const srcIndex = STATE.categories.findIndex(c => c.id === dragCategorySrcId);
+        const srcIndex = STATE.folders.findIndex(f => f.id === dragFolderSrcId);
         
         if (srcIndex !== -1 && srcIndex !== targetIndex) {
-          const [movedCat] = STATE.categories.splice(srcIndex, 1);
-          STATE.categories.splice(targetIndex, 0, movedCat);
+          const [movedFolder] = STATE.folders.splice(srcIndex, 1);
+          STATE.folders.splice(targetIndex, 0, movedFolder);
           saveState();
-          renderSettingsCategories();
-          renderMainCategories();
-          populateCategorySelects();
+          renderSettingsFolders();
+          renderShortcuts();
+          populateFolderSelects();
         }
       });
 
       tab.addEventListener('dblclick', () => {
-        if (cat.id === 'default') return;
-        const newName = prompt(currentDict.renameCategoryPrompt, cat.name);
+        if (folder.id === 'default') return;
+        const newName = prompt(currentDict.renameCategoryPrompt, folder.name);
         if (newName && newName.trim()) {
-          cat.name = newName.trim();
+          folder.name = newName.trim();
           saveState();
-          renderSettingsCategories();
-          renderMainCategories();
-          populateCategorySelects();
+          renderSettingsFolders();
+          renderShortcuts();
+          populateFolderSelects();
         }
       });
 
       tab.addEventListener('contextmenu', (e) => {
-        if (cat.id === 'default') return;
+        if (folder.id === 'default') return;
         e.preventDefault();
         const confirmDelete = confirm(currentDict.deleteCategoryConfirm);
         if (confirmDelete) {
-          STATE.categories = STATE.categories.filter(c => c.id !== cat.id);
+          const deleteShortcuts = confirm(currentDict.deleteShortcutsConfirm);
           
-          STATE.shortcuts.forEach(s => {
-            if (s.category === cat.id) {
-              s.category = 'default';
-            }
-          });
+          if (deleteShortcuts) {
+            STATE.shortcuts = STATE.shortcuts.filter(s => s.folder !== folder.id);
+          } else {
+            STATE.shortcuts.forEach(s => {
+              if (s.folder === folder.id) {
+                s.folder = 'default';
+                s.category = 'default';
+              }
+            });
+          }
 
-          if (STATE.activeCategory === cat.id) STATE.activeCategory = 'default';
-          if (STATE.activeSettingsCategory === cat.id) STATE.activeSettingsCategory = 'default';
+          STATE.folders = STATE.folders.filter(f => f.id !== folder.id);
+
+          if (STATE.activeFolder === folder.id) STATE.activeFolder = 'default';
+          if (STATE.activeSettingsFolder === folder.id) STATE.activeSettingsFolder = 'default';
 
           saveState();
           renderShortcuts();
-          renderSettingsCategories();
-          renderMainCategories();
-          populateCategorySelects();
+          renderSettingsFolders();
+          populateFolderSelects();
           renderModalShortcutsList();
         }
       });
@@ -1262,77 +1267,131 @@ document.addEventListener('DOMContentLoaded', () => {
     tabsContainer.appendChild(fragment);
   }
 
-  function renderMainCategories() {
-    const mainTabsContainer = document.getElementById('main-categories-container');
-    if (!mainTabsContainer) return;
-    mainTabsContainer.innerHTML = '';
-
-    if (STATE.categories.length <= 1) {
-      mainTabsContainer.style.display = 'none';
-      return;
-    }
-
-    mainTabsContainer.style.display = 'flex';
+  function openFolder(folderId) {
+    const folder = STATE.folders.find(f => f.id === folderId);
+    if (!folder) return;
+    
     const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+    const folderModal = document.getElementById('folder-modal');
+    const titleEl = document.getElementById('folder-modal-title');
+    if (titleEl) {
+      titleEl.textContent = folder.id === 'default' ? currentDict.defaultCategoryName : folder.name;
+    }
+    if (folderModal) {
+      folderModal.dataset.folderId = folderId;
+      renderFolderShortcuts(folderId);
+      folderModal.classList.add('active');
+    }
+  }
+
+  function closeFolder() {
+    const folderModal = document.getElementById('folder-modal');
+    if (folderModal) {
+      folderModal.classList.remove('active');
+      delete folderModal.dataset.folderId;
+    }
+  }
+
+  function renderFolderShortcuts(folderId) {
+    const folderShortcutsContainer = document.getElementById('folder-shortcuts-container');
+    if (!folderShortcutsContainer) return;
+    folderShortcutsContainer.innerHTML = '';
+    
+    const filtered = STATE.shortcuts.filter(s => s.folder === folderId);
+    
+    let itemWidth = 85; 
+    if (STATE.size === "small") itemWidth = 85;
+    if (STATE.size === "medium") itemWidth = 98;
+    if (STATE.size === "large") itemWidth = 110;
+    const gap = 16;
+    const maxColumns = STATE.columns;
+    const actualColumns = Math.min(filtered.length, maxColumns);
+    const containerMaxWidth = (itemWidth * actualColumns) + (gap * (actualColumns - 1)) + 20;
+    folderShortcutsContainer.style.maxWidth = `${containerMaxWidth}px`;
+    
     const fragment = document.createDocumentFragment();
-
-    STATE.categories.forEach(cat => {
-      const tab = document.createElement('div');
-      tab.className = 'main-category-tab';
-      if (cat.id === STATE.activeCategory) {
-        tab.classList.add('active');
-      }
-      tab.textContent = cat.id === 'default' ? currentDict.defaultCategoryName : cat.name;
-
-      tab.addEventListener('click', () => {
-        switchMainCategory(cat.id);
+    
+    filtered.forEach((item, index) => {
+      const absoluteIndex = STATE.shortcuts.indexOf(item);
+      
+      const card = document.createElement('a');
+      card.href = item.url;
+      card.className = `shortcut-card size-${STATE.size}`;
+      card.title = item.name;
+      card.dataset.index = index;
+      card.dataset.absoluteIndex = absoluteIndex;
+      card.setAttribute('draggable', true);
+      
+      card.addEventListener('dragstart', (e) => {
+        e.stopPropagation();
+        dragSrcIndex = absoluteIndex;
+        e.dataTransfer.effectAllowed = 'move';
+        card.classList.add('dragging');
       });
-
-      fragment.appendChild(tab);
+      
+      card.addEventListener('dragend', (e) => {
+        e.stopPropagation();
+        card.classList.remove('dragging');
+        const items = folderShortcutsContainer.querySelectorAll('.shortcut-card');
+        items.forEach(item => item.classList.remove('drag-over'));
+      });
+      
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        card.classList.add('drag-over');
+      });
+      
+      card.addEventListener('dragleave', (e) => {
+        e.stopPropagation();
+        card.classList.remove('drag-over');
+      });
+      
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        card.classList.remove('drag-over');
+        
+        const targetAbsoluteIndex = parseInt(card.dataset.absoluteIndex, 10);
+        if (dragSrcIndex !== null && dragSrcIndex !== targetAbsoluteIndex) {
+          moveShortcut(dragSrcIndex, targetAbsoluteIndex);
+          renderFolderShortcuts(folderId);
+          renderShortcuts();
+        }
+      });
+      
+      const img = document.createElement('img');
+      img.className = 'shortcut-icon';
+      img.alt = '';
+      
+      let hostname = '';
+      try { hostname = new URL(item.url).hostname; } catch (e) { hostname = item.url; }
+      img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
+      
+      img.onerror = () => {
+        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
+      };
+      
+      const span = document.createElement('span');
+      span.className = 'shortcut-label';
+      span.textContent = item.name;
+      
+      card.appendChild(img);
+      card.appendChild(span);
+      fragment.appendChild(card);
     });
-
-    mainTabsContainer.appendChild(fragment);
+    
+    folderShortcutsContainer.appendChild(fragment);
   }
 
-  function switchMainCategory(newCategoryId) {
-    const shortcutsContainer = document.getElementById('shortcuts-container');
-    if (shortcutsContainer) {
-      shortcutsContainer.classList.add('fade-out');
-      setTimeout(() => {
-        STATE.activeCategory = newCategoryId;
-        renderMainCategories();
-        renderShortcuts();
-        
-        // Принудительный Reflow, чтобы зафиксировать состояние opacity: 0
-        void shortcutsContainer.offsetHeight; 
-        
-        shortcutsContainer.classList.remove('fade-out');
-      }, 150);
-    } else {
-      STATE.activeCategory = newCategoryId;
-      renderMainCategories();
-      renderShortcuts();
-    }
+  const folderModal = document.getElementById('folder-modal');
+  const folderCloseBtn = document.getElementById('folder-modal-close');
+  if (folderCloseBtn && folderModal) {
+    folderCloseBtn.addEventListener('click', closeFolder);
+    folderModal.addEventListener('click', (e) => {
+      if (e.target === folderModal) closeFolder();
+    });
   }
-
-  window.addEventListener('wheel', (e) => {
-    if (modal && modal.classList.contains('active')) return;
-    if (STATE.categories.length <= 1) return;
-
-    if (Math.abs(e.deltaY) < 15) return;
-
-    const currentIndex = STATE.categories.findIndex(c => c.id === STATE.activeCategory);
-    if (currentIndex === -1) return;
-
-    let nextIndex = currentIndex;
-    if (e.deltaY > 0) {
-      nextIndex = (currentIndex + 1) % STATE.categories.length;
-    } else {
-      nextIndex = (currentIndex - 1 + STATE.categories.length) % STATE.categories.length;
-    }
-
-    switchMainCategory(STATE.categories[nextIndex].id);
-  }, { passive: true });
 
   // --- Вспомогательная функция для проверки браузера Brave ---
   async function isBraveBrowser() {
@@ -1395,7 +1454,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           let shortcuts = [];
-          let categories = [{ id: "default", name: "General" }];
+          let folders = [{ id: "default", name: "General" }];
           let columns = 10;
           let size = 'small';
           let format12h = false;
@@ -1425,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', () => {
           } else if (typeof data === 'object') {
             // Если импортируется сложный объект настроек (новый формат)
             shortcuts = Array.isArray(data.shortcuts) ? data.shortcuts : DEFAULT_SHORTCUTS;
-            categories = Array.isArray(data.categories) ? data.categories : [{ id: "default", name: "General" }];
+            folders = Array.isArray(data.folders) ? data.folders : (Array.isArray(data.categories) ? data.categories : [{ id: "default", name: "General" }]);
             columns = data.columns ?? 10;
             size = data.size ?? 'small';
             
@@ -1464,12 +1523,14 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Проверяем наличие категории для каждого ярлыка
           shortcuts.forEach(s => {
-            if (!s.category) s.category = "default";
+            if (!s.folder) s.folder = s.category || "default";
+            if (!s.category) s.category = s.folder;
           });
 
           const cleanedData = {
             shortcuts,
-            categories,
+            folders,
+            categories: folders,
             columns,
             size,
             format12h,
@@ -1561,7 +1622,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleUpdateResult(latestVersion) {
-    const currentVersion = '1.10.4';
+    const currentVersion = '1.10.5';
     if (isNewerVersion(currentVersion, latestVersion)) {
       const notification = document.getElementById('update-notification');
       const updateText = document.getElementById('update-text');
@@ -1583,10 +1644,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates', 'layoutZenMode'], (result) => {
+    storage.get(['shortcuts', 'categories', 'folders', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates', 'layoutZenMode'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.customSearchEngines = result.customSearchEngines ?? [];
-      STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
+      STATE.folders = result.folders ?? result.categories ?? [{ id: "default", name: "General" }];
+      STATE.activeFolder = "default";
+      STATE.activeSettingsFolder = "default";
       STATE.columns = result.columns ?? 10;
       STATE.size = result.size ?? "small";
       STATE.customBackground = result.customBackground ?? null;
@@ -1618,7 +1681,8 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.layoutZenMode = result.layoutZenMode ?? false;
 
       STATE.shortcuts.forEach(s => {
-        if (!s.category) s.category = "default";
+        if (!s.folder) s.folder = s.category || "default";
+        if (!s.category) s.category = s.folder;
       });
 
       if (sizeSelect) sizeSelect.value = STATE.size;
@@ -1675,8 +1739,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateSearchEngineUI();
       updateClockAndDate();
       updateWeatherWidget();
-      populateCategorySelects();
-      renderMainCategories();
+      populateFolderSelects();
       renderShortcuts();
 
       if (STATE.showWeather && STATE.weatherCoords && STATE.weatherCoords.resolvedName) {
@@ -1693,7 +1756,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveState() {
     storage.set({
       shortcuts: STATE.shortcuts,
-      categories: STATE.categories,
+      folders: STATE.folders,
+      categories: STATE.folders,
       columns: STATE.columns,
       size: STATE.size,
       customBackground: STATE.customBackground,
@@ -1790,9 +1854,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
     container.innerHTML = '';
 
-    const filteredShortcuts = STATE.categories.length > 1
-      ? STATE.shortcuts.filter(s => s.category === STATE.activeCategory)
-      : STATE.shortcuts;
+    const folderTiles = STATE.folders.filter(f => f.id !== 'default');
+    const topLevelShortcuts = STATE.shortcuts.filter(s => s.folder === 'default' || !s.folder);
 
     let itemWidth = 85; 
     if (STATE.size === "small") itemWidth = 85;
@@ -1801,36 +1864,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const gap = 16;
     const maxColumns = STATE.columns;
-    const actualColumns = Math.min(filteredShortcuts.length, maxColumns);
+    const totalItemsCount = folderTiles.length + topLevelShortcuts.length;
+    const actualColumns = Math.min(totalItemsCount, maxColumns);
     
     if (document.body.classList.contains('mode-ios')) {
       container.style.maxWidth = '100%';
     } else {
-      // Добавляем запас (+20px): 16px для компенсации padding (8px с каждой стороны) контейнера и +4px для погрешностей субпиксельного рендеринга на масштабированных экранах.
-      // Это гарантирует, что последний ярлык в ряду никогда не перенесется на следующую строку.
       const containerMaxWidth = (itemWidth * actualColumns) + (gap * (actualColumns - 1)) + 20;
       container.style.maxWidth = `${containerMaxWidth}px`;
     }
 
     const fragment = document.createDocumentFragment();
 
-    filteredShortcuts.forEach((item) => {
+    // 1. Рендерим папки
+    folderTiles.forEach((folder) => {
+      const card = document.createElement('div');
+      card.className = `shortcut-card size-${STATE.size} folder-card`;
+      card.dataset.folderId = folder.id;
+      card.title = folder.name;
+
+      const iconContainer = document.createElement('div');
+      iconContainer.className = `shortcut-icon folder-icon-grid`;
+      
+      const folderShortcuts = STATE.shortcuts.filter(s => s.folder === folder.id);
+      const previewShortcuts = folderShortcuts.slice(0, 4);
+
+      previewShortcuts.forEach((s) => {
+        const miniImg = document.createElement('img');
+        miniImg.className = 'folder-mini-icon';
+        let hostname = '';
+        try { hostname = new URL(s.url).hostname; } catch(e) { hostname = s.url; }
+        miniImg.src = s.customIcon || `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
+        miniImg.onerror = () => {
+          miniImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
+        };
+        iconContainer.appendChild(miniImg);
+      });
+
+      if (previewShortcuts.length === 0) {
+        iconContainer.innerHTML = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="grid-column: span 2; grid-row: span 2; margin: auto; opacity: 0.7;">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>`;
+      }
+
+      const span = document.createElement('span');
+      span.className = 'shortcut-label';
+      span.textContent = folder.name;
+
+      card.appendChild(iconContainer);
+      card.appendChild(span);
+
+      // Открытие папки по клику
+      card.addEventListener('click', (e) => {
+        if (document.body.classList.contains('layout-edit-mode')) return;
+        openFolder(folder.id);
+      });
+
+      // Перетаскивание ярлыка внутрь папки
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        card.classList.add('drag-over');
+      });
+
+      card.addEventListener('dragleave', () => {
+        card.classList.remove('drag-over');
+      });
+
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        if (dragSrcIndex !== null) {
+          const item = STATE.shortcuts[dragSrcIndex];
+          if (item) {
+            item.folder = folder.id;
+            item.category = folder.id;
+            saveState();
+            renderShortcuts();
+          }
+        }
+      });
+
+      fragment.appendChild(card);
+    });
+
+    // 2. Рендерим обычные ярлыки на верхнем уровне
+    topLevelShortcuts.forEach((item) => {
+      const absoluteIndex = STATE.shortcuts.indexOf(item);
+
       const card = document.createElement('a');
       card.href = item.url;
       card.className = `shortcut-card size-${STATE.size}`;
       card.title = item.name;
+      card.dataset.absoluteIndex = absoluteIndex;
+      card.setAttribute('draggable', true);
+
+      card.addEventListener('dragstart', (e) => {
+        dragSrcIndex = absoluteIndex;
+        e.dataTransfer.effectAllowed = 'move';
+        card.classList.add('dragging');
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        const items = container.querySelectorAll('.shortcut-card');
+        items.forEach(item => item.classList.remove('drag-over'));
+      });
+
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        card.classList.add('drag-over');
+      });
+
+      card.addEventListener('dragleave', () => {
+        card.classList.remove('drag-over');
+      });
+
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        const targetAbsoluteIndex = parseInt(card.dataset.absoluteIndex, 10);
+        if (dragSrcIndex !== null && dragSrcIndex !== targetAbsoluteIndex) {
+          moveShortcut(dragSrcIndex, targetAbsoluteIndex);
+        }
+      });
 
       const img = document.createElement('img');
       img.className = 'shortcut-icon';
       img.alt = '';
 
       let hostname = '';
-      try {
-        hostname = new URL(item.url).hostname;
-      } catch (e) {
-        hostname = item.url;
-      }
-
+      try { hostname = new URL(item.url).hostname; } catch (e) { hostname = item.url; }
       img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
 
       img.onerror = () => {
@@ -1857,7 +2020,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
 
-    const filteredShortcuts = STATE.shortcuts.filter(s => s.category === STATE.activeSettingsCategory);
+    const filteredShortcuts = STATE.shortcuts.filter(s => (s.folder || s.category || 'default') === STATE.activeSettingsFolder);
 
     if (filteredShortcuts.length === 0) {
       const emptyDiv = document.createElement('div');
@@ -1904,19 +2067,19 @@ document.addEventListener('DOMContentLoaded', () => {
         urlInput.className = 'settings-input inline-input';
         urlInput.placeholder = currentDict.urlPlaceholder;
 
-        const catSelect = document.createElement('select');
-        catSelect.className = 'settings-input inline-input';
-        STATE.categories.forEach(cat => {
+        const folderSelectEl = document.createElement('select');
+        folderSelectEl.className = 'settings-input inline-input';
+        STATE.folders.forEach(f => {
           const opt = document.createElement('option');
-          opt.value = cat.id;
-          opt.textContent = cat.id === 'default' ? currentDict.defaultCategoryName : cat.name;
-          catSelect.appendChild(opt);
+          opt.value = f.id;
+          opt.textContent = f.id === 'default' ? currentDict.defaultCategoryName : f.name;
+          folderSelectEl.appendChild(opt);
         });
-        catSelect.value = item.category || 'default';
+        folderSelectEl.value = item.folder || item.category || 'default';
 
         fieldsWrapper.appendChild(nameInput);
         fieldsWrapper.appendChild(urlInput);
-        fieldsWrapper.appendChild(catSelect);
+        fieldsWrapper.appendChild(folderSelectEl);
 
         const actionsWrapper = document.createElement('div');
         actionsWrapper.className = 'inline-edit-actions';
@@ -1983,7 +2146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveBtn.addEventListener('click', () => {
           const newName = nameInput.value.trim();
           let newUrl = urlInput.value.trim();
-          const newCat = catSelect.value;
+          const newFolderVal = folderSelectEl.value;
 
           if (newName && newUrl) {
             if (!/^https?:\/\//i.test(newUrl)) {
@@ -1994,7 +2157,8 @@ document.addEventListener('DOMContentLoaded', () => {
               name: newName, 
               url: newUrl, 
               customIcon: tempIconBase64, 
-              category: newCat 
+              folder: newFolderVal,
+              category: newFolderVal 
             };
             saveState();
             editingIndex = -1;
