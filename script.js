@@ -1554,7 +1554,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleUpdateResult(latestVersion) {
-    const currentVersion = '1.10.3';
+    const currentVersion = '1.10.4';
     if (isNewerVersion(currentVersion, latestVersion)) {
       const notification = document.getElementById('update-notification');
       const updateText = document.getElementById('update-text');
