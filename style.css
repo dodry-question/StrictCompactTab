@@ -2910,3 +2910,18 @@ body.stealth-mode .search-form:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* --- Стили для Дзен-режима (Zen Mode) --- */
+body.mode-zen #widget-clock,
+body.mode-zen #weather-widget,
+body.mode-zen #search-form,
+body.mode-zen #widget-shortcuts {
+  display: none !important;
+}
+
+/* Стилизация отключенных переключателей */
+.toggle-label input:disabled + span,
+.toggle-label input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+

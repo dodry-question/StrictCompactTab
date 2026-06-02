@@ -81,7 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
       weatherNoCityAlert: "Weather city is not set. Please configure a city in settings.",
       checkUpdatesLabel: "Check for updates (GitHub)",
       updateAvailable: "New version available: ",
-      updateDownload: "Download"
+      updateDownload: "Download",
+      zenModeLabel: "Zen Mode (Only wallpaper & settings)"
     },
     ru: {
       searchPlaceholder: "Искать в интернете...",
@@ -162,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
       weatherNoCityAlert: "Город для погоды не задан. Пожалуйста, настройте его в параметрах.",
       checkUpdatesLabel: "Проверять обновления (GitHub)",
       updateAvailable: "Доступна новая версия: ",
-      updateDownload: "Скачать"
+      updateDownload: "Скачать",
+      zenModeLabel: "Дзен-режим (Только обои и настройки)"
     }
   };
 
@@ -291,8 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
     weatherCity: "",
     weatherCoords: { lat: null, lon: null, resolvedName: "" },
     weatherCache: { temp: "", code: null, desc: "", timestamp: 0 },
-    customSearchEngines: [],
-    checkUpdates: false
+    checkUpdates: false,
+    layoutZenMode: false
   };
 
   let editingIndex = -1;
@@ -847,6 +849,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const layoutZenModeCb = document.getElementById('layout-zen-mode');
+  if (layoutZenModeCb) {
+    layoutZenModeCb.addEventListener('change', (e) => {
+      STATE.layoutZenMode = e.target.checked;
+      saveState();
+      
+      if (STATE.layoutZenMode) {
+        document.body.classList.add('mode-zen');
+      } else {
+        document.body.classList.remove('mode-zen');
+      }
+      
+      const iosCb = document.getElementById('layout-ios-mode');
+      const stealthCb = document.getElementById('layout-stealth-mode');
+      if (iosCb) iosCb.disabled = STATE.layoutZenMode;
+      if (stealthCb) stealthCb.disabled = STATE.layoutZenMode;
+    });
+  }
+
   if (showSecondsCb) {
     showSecondsCb.addEventListener('change', (e) => {
       STATE.showSeconds = e.target.checked;
@@ -1389,6 +1410,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let searchEngine = 'duckduckgo';
           let customSearchEngines = [];
           let checkUpdates = false;
+          let layoutZenMode = false;
 
           // Если импортируется плоский массив ярлыков (старый формат)
           if (Array.isArray(data)) {
@@ -1425,6 +1447,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchEngine = data.searchEngine ?? 'duckduckgo';
             customSearchEngines = data.customSearchEngines ?? [];
             checkUpdates = data.checkUpdates ?? false;
+            layoutZenMode = data.layoutZenMode ?? false;
           } else {
             throw new Error("Invalid backup format: data must be an object or array");
           }
@@ -1460,7 +1483,8 @@ document.addEventListener('DOMContentLoaded', () => {
             weatherCoords,
             weatherCache,
             customSearchEngines,
-            checkUpdates
+            checkUpdates,
+            layoutZenMode
           };
 
           // Сохраняем в localStorage / Chrome Storage
@@ -1531,7 +1555,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleUpdateResult(latestVersion) {
-    const currentVersion = '1.10.2';
+    const currentVersion = '1.10.3';
     if (isNewerVersion(currentVersion, latestVersion)) {
       const notification = document.getElementById('update-notification');
       const updateText = document.getElementById('update-text');
@@ -1553,7 +1577,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
   function loadState() {
-    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates'], (result) => {
+    storage.get(['shortcuts', 'categories', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates', 'layoutZenMode'], (result) => {
       STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
       STATE.customSearchEngines = result.customSearchEngines ?? [];
       STATE.categories = result.categories ?? [{ id: "default", name: "General" }];
@@ -1585,6 +1609,7 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.weatherCoords = result.weatherCoords ?? { lat: null, lon: null, resolvedName: "" };
       STATE.weatherCache = result.weatherCache ?? { temp: "", code: null, desc: "", timestamp: 0 };
       STATE.checkUpdates = result.checkUpdates ?? false;
+      STATE.layoutZenMode = result.layoutZenMode ?? false;
 
       STATE.shortcuts.forEach(s => {
         if (!s.category) s.category = "default";
@@ -1607,6 +1632,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (layoutStealthModeCb) layoutStealthModeCb.checked = STATE.layoutStealthMode;
       const checkUpdatesCb = document.getElementById('check-updates-checkbox');
       if (checkUpdatesCb) checkUpdatesCb.checked = STATE.checkUpdates;
+      const layoutZenModeCb = document.getElementById('layout-zen-mode');
+      if (layoutZenModeCb) layoutZenModeCb.checked = STATE.layoutZenMode;
 
       if (STATE.layoutIosMode) {
         document.body.classList.add('mode-ios');
@@ -1618,6 +1645,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('stealth-mode');
       } else {
         document.body.classList.remove('stealth-mode');
+      }
+
+      if (STATE.layoutZenMode) {
+        document.body.classList.add('mode-zen');
+        if (layoutIosModeCb) layoutIosModeCb.disabled = true;
+        if (layoutStealthModeCb) layoutStealthModeCb.disabled = true;
+      } else {
+        document.body.classList.remove('mode-zen');
+        if (layoutIosModeCb) layoutIosModeCb.disabled = false;
+        if (layoutStealthModeCb) layoutStealthModeCb.disabled = false;
       }
 
       applyBackground();
@@ -1673,7 +1710,8 @@ document.addEventListener('DOMContentLoaded', () => {
       weatherCoords: STATE.weatherCoords,
       weatherCache: STATE.weatherCache,
       customSearchEngines: STATE.customSearchEngines,
-      checkUpdates: STATE.checkUpdates
+      checkUpdates: STATE.checkUpdates,
+      layoutZenMode: STATE.layoutZenMode
     });
   }
 
