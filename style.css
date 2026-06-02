@@ -3072,4 +3072,93 @@ body.theme-adaptive #folder-modal-title {
   transform: scale(0.95);
 }
 
+/* Иерархическое дерево в настройках */
+.modal-folder-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  transition: all 0.2s ease;
+  box-sizing: border-box !important;
+}
+
+body.theme-light .modal-folder-row {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+.modal-folder-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+body.theme-light .modal-folder-header {
+  color: #1d1d1f;
+}
+
+.folder-arrow {
+  cursor: pointer;
+  font-size: 10px;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.folder-arrow:hover {
+  opacity: 1;
+}
+
+.modal-folder-children {
+  padding-left: 20px;
+  margin-bottom: 8px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.1);
+  margin-left: 18px;
+}
+
+body.theme-light .modal-folder-children {
+  border-left-color: rgba(0, 0, 0, 0.1);
+}
+
+.modal-shortcut-item.child-item {
+  margin-bottom: 4px;
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+.modal-shortcut-item-empty {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 6px 12px;
+}
+
+/* Стили перетаскивания (Drag & Drop) */
+.modal-shortcut-item.drag-sort-before,
+.modal-folder-row.drag-sort-before {
+  border-top: 2px solid var(--adaptive-color, #357ae8) !important;
+}
+
+.modal-shortcut-item.drag-sort-after,
+.modal-folder-row.drag-sort-after {
+  border-bottom: 2px solid var(--adaptive-color, #357ae8) !important;
+}
+
+.modal-shortcut-item.drag-merge,
+.modal-folder-row.drag-merge {
+  outline: 2px dashed var(--adaptive-color, #357ae8) !important;
+  outline-offset: -2px;
+  background-color: rgba(var(--adaptive-color-rgb, 53, 122, 232), 0.15) !important;
+}
+
+
 

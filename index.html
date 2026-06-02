@@ -59,7 +59,7 @@
       <div class="modal-header">
         <div style="display: flex; align-items: baseline; gap: 8px;">
           <h2 data-i18n="settingsTitle" style="margin: 0;">Screen Settings</h2>
-          <span class="settings-version" style="font-size: 0.75rem; opacity: 0.5; font-weight: normal; font-family: monospace;">v1.10.5</span>
+          <span class="settings-version" style="font-size: 0.75rem; opacity: 0.5; font-weight: normal; font-family: monospace;">v1.10.6</span>
         </div>
         <button id="settings-close-btn" class="modal-close-icon">&times;</button>
       </div>
@@ -85,12 +85,7 @@
                   <input id="new-shortcut-icon-file" type="file" accept="image/*" style="display: none;">
                 </label>
               </div>
-              
-              <!-- Выбор папки при добавлении ярлыка -->
-              <div class="settings-field">
-                <label for="new-shortcut-folder" data-i18n="shortcutCategoryLabel">Folder</label>
-                <select id="new-shortcut-folder" class="settings-select"></select>
-              </div>
+
 
               <button type="submit" class="btn btn-add" data-i18n="addBtn">Add</button>
             </form>
@@ -316,13 +311,7 @@
           <div class="settings-section full-height">
             <h3 data-i18n="manageShortcutsTitle">Manage Shortcuts</h3>
             
-            <!-- Ряд управления папками в настройках -->
-            <div class="manage-shortcuts-header-row">
-              <div id="settings-folders-tabs" class="settings-categories-tabs"></div>
-              <button id="btn-add-folder" class="btn-add-category" data-i18n-title="addCategoryTitle" title="Add Folder">
-                <img src="assets/add-category-icon.png" alt="Add Folder">
-              </button>
-            </div>
+
 
             <!-- Список ярлыков выбранной категории -->
             <div id="modal-shortcuts-list" class="modal-shortcuts-list"></div>
@@ -355,7 +344,7 @@
 
   <!-- Уведомление о новой версии расширения -->
   <div id="update-notification" class="update-notification" style="display: none;">
-    <span id="update-text">New version available: 1.10.5</span>
+    <span id="update-text">New version available: 1.10.6</span>
     <a id="update-link" href="https://github.com/dodry-question/my-new-tab/releases" target="_blank" data-i18n="updateDownload">Download</a>
   </div>
 

@@ -273,9 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const STATE = {
     shortcuts: [],
-    folders: [{ id: "default", name: "General" }],
-    activeFolder: "default",
-    activeSettingsFolder: "default",
     columns: 10,
     size: "small",
     customBackground: null,
@@ -457,7 +454,6 @@ document.addEventListener('DOMContentLoaded', () => {
     openBtn.addEventListener('click', () => {
       modal.classList.add('active');
       editingIndex = -1;
-      renderSettingsFolders();
       renderModalShortcutsList();
       if (STATE.showWeather && STATE.weatherCoords && STATE.weatherCoords.resolvedName) {
         updateStatusText("success", STATE.weatherCoords.resolvedName);
@@ -503,8 +499,6 @@ document.addEventListener('DOMContentLoaded', () => {
       saveState();
       applyLanguage(STATE.language);
       updateClockAndDate();
-      populateFolderSelects();
-      renderSettingsFolders();
       renderModalShortcutsList();
       
       if (STATE.showWeather) {
@@ -552,14 +546,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const addForm = document.getElementById('add-shortcut-form');
   const newNameInput = document.getElementById('new-shortcut-name');
   const newUrlInput = document.getElementById('new-shortcut-url');
-  const newCategorySelect = document.getElementById('new-shortcut-folder');
 
   if (addForm) {
     addForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = newNameInput.value.trim();
       let url = newUrlInput.value.trim();
-      const folder = newCategorySelect ? newCategorySelect.value : "default";
 
       if (name && url) {
         if (!/^https?:\/\//i.test(url)) {
@@ -567,13 +559,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const saveShortcut = (customIcon) => {
-          STATE.shortcuts.push({ name, url, customIcon, folder, category: folder });
+          STATE.shortcuts.push({
+            id: "sc_" + Date.now() + Math.random().toString(36).substr(2, 5),
+            name,
+            url,
+            customIcon
+          });
           saveState();
           renderShortcuts();
           renderModalShortcutsList();
 
           addForm.reset();
-          populateFolderSelects();
           
           const iconLabel = document.querySelector('.input-icon-upload-label');
           if (iconLabel) {
@@ -1121,161 +1117,157 @@ document.addEventListener('DOMContentLoaded', () => {
     return isRu ? 'Умеренно' : 'Moderate';
   }
 
-  // --- УПРАВЛЕНИЕ ПАПКАМИ ---
-  const btnAddFolder = document.getElementById('btn-add-folder');
-  if (btnAddFolder) {
-    btnAddFolder.addEventListener('click', () => {
-      const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
-      const folderName = prompt(currentDict.addCategoryPrompt);
-      if (folderName && folderName.trim()) {
-        const newId = "folder_" + Date.now();
-        STATE.folders.push({ id: newId, name: folderName.trim() });
-        saveState();
-        renderSettingsFolders();
-        renderShortcuts();
-        populateFolderSelects();
+  // --- УПРАВЛЕНИЕ ПАПКАМИ (ДРЕВОВИДНАЯ ИЕРАРХИЯ) ---
+  const expandedFolders = new Set();
+  let draggedId = null;
+
+  function migrateToNested(flatShortcuts, categoriesOrFolders) {
+    if (!Array.isArray(flatShortcuts)) return [];
+    
+    // Check if it is already nested
+    const isAlreadyNested = flatShortcuts.some(s => s && s.isFolder);
+    if (isAlreadyNested) {
+      flatShortcuts.forEach(item => {
+        if (!item.id) {
+          item.id = (item.isFolder ? "f_" : "sc_") + Math.random().toString(36).substr(2, 9);
+        }
+        if (item.isFolder && item.children) {
+          item.children.forEach(child => {
+            if (!child.id) {
+              child.id = "sc_" + Math.random().toString(36).substr(2, 9);
+            }
+          });
+        }
+      });
+      return flatShortcuts;
+    }
+
+    const nested = [];
+    const foldersList = categoriesOrFolders || [];
+    
+    // Create folders
+    const folderMap = {};
+    foldersList.forEach(f => {
+      if (f.id !== 'default') {
+        folderMap[f.id] = {
+          id: f.id,
+          name: f.name,
+          isFolder: true,
+          children: []
+        };
+        nested.push(folderMap[f.id]);
       }
     });
+
+    // Populate shortcuts
+    flatShortcuts.forEach(s => {
+      const folderId = s.folder || s.category || 'default';
+      const itemObj = {
+        id: s.id || "sc_" + Math.random().toString(36).substr(2, 9),
+        name: s.name,
+        url: s.url,
+        customIcon: s.customIcon || null
+      };
+
+      if (folderId === 'default') {
+        nested.push(itemObj);
+      } else if (folderMap[folderId]) {
+        folderMap[folderId].children.push(itemObj);
+      } else {
+        nested.push(itemObj);
+      }
+    });
+
+    return nested;
   }
 
-  function populateFolderSelects() {
-    const select = document.getElementById('new-shortcut-folder');
-    const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+  function moveNestedItem(draggedId, targetId, action) {
+    let draggedItem = null;
+    
+    // Find dragged item and remove it
+    let rootIdx = STATE.shortcuts.findIndex(s => s.id === draggedId);
+    if (rootIdx !== -1) {
+      draggedItem = STATE.shortcuts.splice(rootIdx, 1)[0];
+    } else {
+      for (let f of STATE.shortcuts) {
+        if (f.isFolder && f.children) {
+          let childIdx = f.children.findIndex(s => s.id === draggedId);
+          if (childIdx !== -1) {
+            draggedItem = f.children.splice(childIdx, 1)[0];
+            break;
+          }
+        }
+      }
+    }
+    
+    if (!draggedItem) return;
 
-    if (select) {
-      select.innerHTML = '';
-      const fragment = document.createDocumentFragment();
-      STATE.folders.forEach(folder => {
-        const opt = document.createElement('option');
-        opt.value = folder.id;
-        opt.textContent = folder.id === 'default' ? currentDict.defaultCategoryName : folder.name;
-        fragment.appendChild(opt);
-      });
-      select.appendChild(fragment);
+    if (action === 'merge') {
+      let targetIdx = STATE.shortcuts.findIndex(s => s.id === targetId);
+      if (targetIdx !== -1) {
+        const targetItem = STATE.shortcuts[targetIdx];
+        if (targetItem.isFolder) {
+          if (!targetItem.children) targetItem.children = [];
+          targetItem.children.push(draggedItem);
+        } else {
+          // Merge two shortcuts to create a folder
+          const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+          const name = prompt(currentDict.addCategoryPrompt) || "Folder";
+          const newFolder = {
+            id: "f_" + Date.now() + Math.random().toString(36).substr(2, 5),
+            name: name.trim(),
+            isFolder: true,
+            children: [targetItem, draggedItem]
+          };
+          STATE.shortcuts[targetIdx] = newFolder;
+        }
+      }
+    } else {
+      // action is 'before' or 'after'
+      let targetIdx = STATE.shortcuts.findIndex(s => s.id === targetId);
+      if (targetIdx !== -1) {
+        const insertIdx = action === 'before' ? targetIdx : targetIdx + 1;
+        STATE.shortcuts.splice(insertIdx, 0, draggedItem);
+      } else {
+        for (let f of STATE.shortcuts) {
+          if (f.isFolder && f.children) {
+            let childIdx = f.children.findIndex(s => s.id === targetId);
+            if (childIdx !== -1) {
+              const insertIdx = action === 'before' ? childIdx : childIdx + 1;
+              f.children.splice(insertIdx, 0, draggedItem);
+              break;
+            }
+          }
+        }
+      }
     }
   }
 
-  function renderSettingsFolders() {
-    const tabsContainer = document.getElementById('settings-folders-tabs');
-    if (!tabsContainer) return;
-    tabsContainer.innerHTML = '';
-
-    const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
-    const fragment = document.createDocumentFragment();
-
-    STATE.folders.forEach((folder, index) => {
-      const tab = document.createElement('div');
-      tab.className = 'settings-category-tab'; // Пользуемся существующим CSS
-      if (folder.id === STATE.activeSettingsFolder) {
-        tab.classList.add('active');
+  function findShortcutOrFolderById(id) {
+    let item = STATE.shortcuts.find(s => s.id === id);
+    if (item) return item;
+    for (let f of STATE.shortcuts) {
+      if (f.isFolder && f.children) {
+        let child = f.children.find(s => s.id === id);
+        if (child) return child;
       }
-      tab.textContent = folder.id === 'default' ? currentDict.defaultCategoryName : folder.name;
-      
-      tab.setAttribute('draggable', true);
-      tab.dataset.id = folder.id;
-      tab.dataset.index = index;
+    }
+    return null;
+  }
 
-      tab.addEventListener('click', () => {
-        STATE.activeSettingsFolder = folder.id;
-        renderSettingsFolders();
-        renderModalShortcutsList();
-      });
-
-      tab.addEventListener('dragstart', (e) => {
-        dragFolderSrcId = folder.id;
-        e.dataTransfer.effectAllowed = 'move';
-        tab.classList.add('dragging');
-      });
-
-      tab.addEventListener('dragend', () => {
-        tab.classList.remove('dragging');
-        const items = tabsContainer.querySelectorAll('.settings-category-tab');
-        items.forEach(item => item.classList.remove('drag-over'));
-      });
-
-      tab.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        tab.classList.add('drag-over');
-      });
-
-      tab.addEventListener('dragleave', () => {
-        tab.classList.remove('drag-over');
-      });
-
-      tab.addEventListener('drop', (e) => {
-        e.preventDefault();
-        tab.classList.remove('drag-over');
-        const targetIndex = parseInt(tab.dataset.index, 10);
-        const srcIndex = STATE.folders.findIndex(f => f.id === dragFolderSrcId);
-        
-        if (srcIndex !== -1 && srcIndex !== targetIndex) {
-          const [movedFolder] = STATE.folders.splice(srcIndex, 1);
-          STATE.folders.splice(targetIndex, 0, movedFolder);
-          saveState();
-          renderSettingsFolders();
-          renderShortcuts();
-          populateFolderSelects();
-        }
-      });
-
-      tab.addEventListener('dblclick', () => {
-        if (folder.id === 'default') return;
-        const newName = prompt(currentDict.renameCategoryPrompt, folder.name);
-        if (newName && newName.trim()) {
-          folder.name = newName.trim();
-          saveState();
-          renderSettingsFolders();
-          renderShortcuts();
-          populateFolderSelects();
-        }
-      });
-
-      tab.addEventListener('contextmenu', (e) => {
-        if (folder.id === 'default') return;
-        e.preventDefault();
-        const confirmDelete = confirm(currentDict.deleteCategoryConfirm);
-        if (confirmDelete) {
-          const deleteShortcuts = confirm(currentDict.deleteShortcutsConfirm);
-          
-          if (deleteShortcuts) {
-            STATE.shortcuts = STATE.shortcuts.filter(s => s.folder !== folder.id);
-          } else {
-            STATE.shortcuts.forEach(s => {
-              if (s.folder === folder.id) {
-                s.folder = 'default';
-                s.category = 'default';
-              }
-            });
-          }
-
-          STATE.folders = STATE.folders.filter(f => f.id !== folder.id);
-
-          if (STATE.activeFolder === folder.id) STATE.activeFolder = 'default';
-          if (STATE.activeSettingsFolder === folder.id) STATE.activeSettingsFolder = 'default';
-
-          saveState();
-          renderShortcuts();
-          renderSettingsFolders();
-          populateFolderSelects();
-          renderModalShortcutsList();
-        }
-      });
-
-      fragment.appendChild(tab);
-    });
-
-    tabsContainer.appendChild(fragment);
+  function isFolderContainingTarget(folder, targetId) {
+    if (!folder.children) return false;
+    return folder.children.some(child => child.id === targetId);
   }
 
   function openFolder(folderId) {
-    const folder = STATE.folders.find(f => f.id === folderId);
+    const folder = STATE.shortcuts.find(f => f.isFolder && f.id === folderId);
     if (!folder) return;
     
-    const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
     const folderModal = document.getElementById('folder-modal');
     const titleEl = document.getElementById('folder-modal-title');
     if (titleEl) {
-      titleEl.textContent = folder.id === 'default' ? currentDict.defaultCategoryName : folder.name;
+      titleEl.textContent = folder.name;
     }
     if (folderModal) {
       folderModal.dataset.folderId = folderId;
@@ -1297,7 +1289,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!folderShortcutsContainer) return;
     folderShortcutsContainer.innerHTML = '';
     
-    const filtered = STATE.shortcuts.filter(s => s.folder === folderId);
+    const folder = STATE.shortcuts.find(f => f.isFolder && f.id === folderId);
+    if (!folder || !folder.children) return;
     
     let itemWidth = 85; 
     if (STATE.size === "small") itemWidth = 85;
@@ -1305,60 +1298,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (STATE.size === "large") itemWidth = 110;
     const gap = 16;
     const maxColumns = STATE.columns;
-    const actualColumns = Math.min(filtered.length, maxColumns);
+    const actualColumns = Math.min(folder.children.length, maxColumns);
     const containerMaxWidth = (itemWidth * actualColumns) + (gap * (actualColumns - 1)) + 20;
     folderShortcutsContainer.style.maxWidth = `${containerMaxWidth}px`;
     
     const fragment = document.createDocumentFragment();
     
-    filtered.forEach((item, index) => {
-      const absoluteIndex = STATE.shortcuts.indexOf(item);
-      
+    folder.children.forEach((item) => {
       const card = document.createElement('a');
       card.href = item.url;
       card.className = `shortcut-card size-${STATE.size}`;
       card.title = item.name;
-      card.dataset.index = index;
-      card.dataset.absoluteIndex = absoluteIndex;
-      card.setAttribute('draggable', true);
-      
-      card.addEventListener('dragstart', (e) => {
-        e.stopPropagation();
-        dragSrcIndex = absoluteIndex;
-        e.dataTransfer.effectAllowed = 'move';
-        card.classList.add('dragging');
-      });
-      
-      card.addEventListener('dragend', (e) => {
-        e.stopPropagation();
-        card.classList.remove('dragging');
-        const items = folderShortcutsContainer.querySelectorAll('.shortcut-card');
-        items.forEach(item => item.classList.remove('drag-over'));
-      });
-      
-      card.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        card.classList.add('drag-over');
-      });
-      
-      card.addEventListener('dragleave', (e) => {
-        e.stopPropagation();
-        card.classList.remove('drag-over');
-      });
-      
-      card.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        card.classList.remove('drag-over');
-        
-        const targetAbsoluteIndex = parseInt(card.dataset.absoluteIndex, 10);
-        if (dragSrcIndex !== null && dragSrcIndex !== targetAbsoluteIndex) {
-          moveShortcut(dragSrcIndex, targetAbsoluteIndex);
-          renderFolderShortcuts(folderId);
-          renderShortcuts();
-        }
-      });
       
       const img = document.createElement('img');
       img.className = 'shortcut-icon';
@@ -1390,6 +1340,463 @@ document.addEventListener('DOMContentLoaded', () => {
     folderCloseBtn.addEventListener('click', closeFolder);
     folderModal.addEventListener('click', (e) => {
       if (e.target === folderModal) closeFolder();
+    });
+  }
+
+  function renderModalShortcutsList() {
+    const modalList = document.getElementById('modal-shortcuts-list');
+    if (!modalList) return;
+    modalList.innerHTML = '';
+
+    const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+
+    if (STATE.shortcuts.length === 0) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.style.color = 'rgba(255,255,255,0.3)';
+      emptyDiv.style.fontSize = '11px';
+      emptyDiv.style.textAlign = 'center';
+      emptyDiv.style.padding = '12px';
+      emptyDiv.textContent = currentDict.listEmpty;
+      modalList.appendChild(emptyDiv);
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    STATE.shortcuts.forEach((item) => {
+      if (item.isFolder) {
+        // Рендерим папку в настройках
+        const folderRow = document.createElement('div');
+        folderRow.className = 'modal-folder-row';
+        folderRow.dataset.id = item.id;
+        folderRow.setAttribute('draggable', true);
+        
+        setupDragAndDropListeners(folderRow, item, false);
+
+        const folderHeader = document.createElement('div');
+        folderHeader.className = 'modal-folder-header';
+
+        const arrow = document.createElement('span');
+        arrow.className = 'folder-arrow';
+        const isExpanded = expandedFolders.has(item.id);
+        arrow.textContent = isExpanded ? '▼' : '▶';
+        arrow.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (isExpanded) {
+            expandedFolders.delete(item.id);
+          } else {
+            expandedFolders.add(item.id);
+          }
+          renderModalShortcutsList();
+        });
+        folderHeader.appendChild(arrow);
+
+        const folderNameSpan = document.createElement('span');
+        folderNameSpan.className = 'modal-folder-name';
+        folderNameSpan.textContent = item.name;
+        folderHeader.appendChild(folderNameSpan);
+
+        const actions = document.createElement('div');
+        actions.className = 'modal-folder-actions';
+
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'btn btn-edit';
+        renameBtn.title = currentDict.btnEdit;
+        renameBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>`;
+        renameBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const newName = prompt(currentDict.renameCategoryPrompt, item.name);
+          if (newName && newName.trim()) {
+            item.name = newName.trim();
+            saveState();
+            renderShortcuts();
+            renderModalShortcutsList();
+          }
+        });
+        actions.appendChild(renameBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-delete';
+        deleteBtn.title = currentDict.btnDelete;
+        deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line>
+          <line x1="14" y1="11" x2="14" y2="17"></line>
+        </svg>`;
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(currentDict.deleteCategoryConfirm)) {
+            const deleteChildren = confirm(currentDict.deleteShortcutsConfirm);
+            if (deleteChildren) {
+              const idx = STATE.shortcuts.indexOf(item);
+              STATE.shortcuts.splice(idx, 1);
+            } else {
+              const idx = STATE.shortcuts.indexOf(item);
+              STATE.shortcuts.splice(idx, 1, ...(item.children || []));
+            }
+            saveState();
+            renderShortcuts();
+            renderModalShortcutsList();
+          }
+        });
+        actions.appendChild(deleteBtn);
+
+        folderRow.appendChild(folderHeader);
+        folderRow.appendChild(actions);
+        fragment.appendChild(folderRow);
+
+        if (isExpanded) {
+          const childrenContainer = document.createElement('div');
+          childrenContainer.className = 'modal-folder-children';
+          
+          if (item.children && item.children.length > 0) {
+            item.children.forEach((child) => {
+              const childRow = renderShortcutRow(child, true, item.id);
+              childrenContainer.appendChild(childRow);
+            });
+          } else {
+            const emptyChildren = document.createElement('div');
+            emptyChildren.className = 'modal-shortcut-item-empty';
+            emptyChildren.textContent = currentDict.listEmpty;
+            childrenContainer.appendChild(emptyChildren);
+          }
+          fragment.appendChild(childrenContainer);
+        }
+      } else {
+        // Рендерим обычный ярлык в корне
+        const shortcutRow = renderShortcutRow(item, false, null);
+        fragment.appendChild(shortcutRow);
+      }
+    });
+
+    modalList.appendChild(fragment);
+  }
+
+  function renderShortcutRow(item, isChild, parentId) {
+    const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+    
+    const row = document.createElement('div');
+    row.className = 'modal-shortcut-item';
+    if (isChild) {
+      row.classList.add('child-item');
+      row.dataset.parentId = parentId;
+      row.dataset.isChild = 'true';
+    }
+    row.dataset.id = item.id;
+
+    if (editingIndex === item.id) {
+      row.setAttribute('draggable', false);
+      let tempIconBase64 = item.customIcon;
+
+      const editContainer = document.createElement('div');
+      editContainer.className = 'modal-shortcut-edit-container';
+      if (tempIconBase64) {
+        editContainer.classList.add('has-custom-icon');
+      }
+
+      const fieldsWrapper = document.createElement('div');
+      fieldsWrapper.className = 'inline-edit-fields';
+
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.value = item.name;
+      nameInput.className = 'settings-input inline-input';
+      nameInput.placeholder = currentDict.namePlaceholder;
+
+      const urlInput = document.createElement('input');
+      urlInput.type = 'text';
+      urlInput.value = item.url;
+      urlInput.className = 'settings-input inline-input';
+      urlInput.placeholder = currentDict.urlPlaceholder;
+
+      fieldsWrapper.appendChild(nameInput);
+      fieldsWrapper.appendChild(urlInput);
+
+      const actionsWrapper = document.createElement('div');
+      actionsWrapper.className = 'inline-edit-actions';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-inline-cancel';
+      cancelBtn.textContent = currentDict.btnCancel;
+      cancelBtn.addEventListener('click', () => {
+        editingIndex = -1;
+        renderModalShortcutsList();
+      });
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'btn btn-inline-save';
+      saveBtn.textContent = currentDict.btnSave;
+
+      const inlineIconInput = document.createElement('input');
+      inlineIconInput.type = 'file';
+      inlineIconInput.accept = 'image/*';
+      inlineIconInput.style.display = 'none';
+      inlineIconInput.id = `edit-shortcut-icon-file-${item.id}`;
+
+      const inlineIconLabel = document.createElement('label');
+      inlineIconLabel.htmlFor = `edit-shortcut-icon-file-${item.id}`;
+      inlineIconLabel.className = 'btn-square-upload';
+      inlineIconLabel.title = currentDict.uploadIconTitle;
+
+      const uploadImg = document.createElement('img');
+      uploadImg.src = 'assets/upload-icon.png';
+      uploadImg.alt = 'Upload';
+      inlineIconLabel.appendChild(uploadImg);
+
+      const inlineIconResetBtn = document.createElement('button');
+      inlineIconResetBtn.className = 'btn btn-inline-cancel btn-inline-reset';
+      inlineIconResetBtn.style.color = '#ff6b6b';
+      inlineIconResetBtn.textContent = currentDict.resetBtn;
+
+      inlineIconResetBtn.addEventListener('click', () => {
+        tempIconBase64 = null;
+        inlineIconLabel.title = currentDict.uploadIconTitle;
+        inlineIconLabel.style.borderColor = '';
+        editContainer.classList.remove('has-custom-icon');
+      });
+
+      inlineIconInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          inlineIconLabel.title = file.name;
+          inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+          compressImage(file, 128, 128, 0.85, (result) => {
+            tempIconBase64 = result;
+            editContainer.classList.add('has-custom-icon');
+          });
+        }
+      });
+
+      actionsWrapper.appendChild(cancelBtn);
+      actionsWrapper.appendChild(saveBtn);
+      actionsWrapper.appendChild(inlineIconResetBtn);
+      actionsWrapper.appendChild(inlineIconLabel);
+      actionsWrapper.appendChild(inlineIconInput); 
+
+      saveBtn.addEventListener('click', () => {
+        const newName = nameInput.value.trim();
+        let newUrl = urlInput.value.trim();
+
+        if (newName && newUrl) {
+          if (!/^https?:\/\//i.test(newUrl)) {
+            newUrl = 'https://' + newUrl;
+          }
+
+          item.name = newName;
+          item.url = newUrl;
+          item.customIcon = tempIconBase64;
+          
+          saveState();
+          editingIndex = -1;
+          renderShortcuts();
+          renderModalShortcutsList();
+        }
+      });
+
+      editContainer.appendChild(fieldsWrapper);
+      editContainer.appendChild(actionsWrapper);
+      row.appendChild(editContainer);
+
+    } else {
+      row.setAttribute('draggable', true);
+      setupDragAndDropListeners(row, item, isChild);
+
+      const info = document.createElement('div');
+      info.className = 'modal-shortcut-info';
+
+      const name = document.createElement('span');
+      name.className = 'modal-shortcut-name';
+      name.textContent = item.name;
+
+      const url = document.createElement('span');
+      url.className = 'modal-shortcut-url';
+      url.textContent = item.url;
+
+      info.appendChild(name);
+      info.appendChild(url);
+
+      const actionsWrapper = document.createElement('div');
+      actionsWrapper.className = 'modal-shortcut-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-edit';
+      editBtn.title = currentDict.btnEdit;
+      editBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"></path>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+      </svg>`;
+      editBtn.addEventListener('click', () => {
+        editingIndex = item.id;
+        renderModalShortcutsList();
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn btn-delete';
+      deleteBtn.title = currentDict.btnDelete;
+      deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <line x1="10" y1="11" x2="10" y2="17"></line>
+        <line x1="14" y1="11" x2="14" y2="17"></line>
+      </svg>`;
+      deleteBtn.addEventListener('click', () => {
+        if (isChild) {
+          for (let f of STATE.shortcuts) {
+            if (f.id === parentId) {
+              const idx = f.children.indexOf(item);
+              if (idx !== -1) f.children.splice(idx, 1);
+              break;
+            }
+          }
+        } else {
+          const idx = STATE.shortcuts.indexOf(item);
+          if (idx !== -1) STATE.shortcuts.splice(idx, 1);
+        }
+        saveState();
+        renderShortcuts();
+        renderModalShortcutsList();
+      });
+
+      actionsWrapper.appendChild(editBtn);
+      actionsWrapper.appendChild(deleteBtn);
+
+      row.appendChild(info);
+      row.appendChild(actionsWrapper);
+    }
+
+    return row;
+  }
+
+  function getDropAction(e, targetEl, isChild, isDraggedFolder, isTargetFolder) {
+    const rect = targetEl.getBoundingClientRect();
+    const relativeY = e.clientY - rect.top;
+    const height = rect.height;
+
+    // Folders cannot be dropped inside other folders or merged to make a folder
+    if (isDraggedFolder) {
+      if (relativeY < height / 2) {
+        return 'before';
+      } else {
+        return 'after';
+      }
+    }
+
+    // A child item inside a folder cannot have nested folders/children
+    if (isChild) {
+      if (relativeY < height / 2) {
+        return 'before';
+      } else {
+        return 'after';
+      }
+    }
+
+    // For root shortcuts or folder targets:
+    if (relativeY < height * 0.25) {
+      return 'before';
+    } else if (relativeY > height * 0.75) {
+      return 'after';
+    } else {
+      return 'merge';
+    }
+  }
+
+  function setupDragAndDropListeners(element, item, isChild) {
+    element.addEventListener('dragstart', (e) => {
+      draggedId = item.id;
+      e.dataTransfer.effectAllowed = 'move';
+      element.classList.add('dragging');
+    });
+
+    element.addEventListener('dragend', () => {
+      element.classList.remove('dragging');
+      const modalList = document.getElementById('modal-shortcuts-list');
+      if (modalList) {
+        const items = modalList.querySelectorAll('.modal-shortcut-item, .modal-folder-row');
+        items.forEach(el => el.classList.remove('drag-sort-before', 'drag-sort-after', 'drag-merge'));
+      }
+    });
+
+    element.addEventListener('dragover', (e) => {
+      if (!draggedId || draggedId === item.id) return;
+      
+      const draggedItem = findShortcutOrFolderById(draggedId);
+      const isDraggedFolder = draggedItem ? draggedItem.isFolder : false;
+
+      if (isDraggedFolder && isFolderContainingTarget(draggedItem, item.id)) {
+        return;
+      }
+
+      e.preventDefault();
+      
+      const dropAction = getDropAction(e, element, isChild, isDraggedFolder, item.isFolder);
+      
+      if (dropAction === 'before') {
+        element.classList.add('drag-sort-before');
+        element.classList.remove('drag-sort-after', 'drag-merge');
+      } else if (dropAction === 'after') {
+        element.classList.add('drag-sort-after');
+        element.classList.remove('drag-sort-before', 'drag-merge');
+      } else if (dropAction === 'merge') {
+        element.classList.add('drag-merge');
+        element.classList.remove('drag-sort-before', 'drag-sort-after');
+      }
+    });
+
+    element.addEventListener('dragleave', () => {
+      element.classList.remove('drag-sort-before', 'drag-sort-after', 'drag-merge');
+    });
+
+    element.addEventListener('drop', (e) => {
+      if (!draggedId || draggedId === item.id) return;
+      e.preventDefault();
+      element.classList.remove('drag-sort-before', 'drag-sort-after', 'drag-merge');
+      
+      const draggedItem = findShortcutOrFolderById(draggedId);
+      const isDraggedFolder = draggedItem ? draggedItem.isFolder : false;
+      const dropAction = getDropAction(e, element, isChild, isDraggedFolder, item.isFolder);
+      
+      moveNestedItem(draggedId, item.id, dropAction);
+      saveState();
+      renderShortcuts();
+      renderModalShortcutsList();
+    });
+  }
+
+  // Навешиваем слушатель на пустой фон контейнера ярлыков в настройках
+  const settingsModalList = document.getElementById('modal-shortcuts-list');
+  if (settingsModalList) {
+    settingsModalList.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+    settingsModalList.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.target === settingsModalList && draggedId) {
+        let draggedItem = null;
+        let rootIdx = STATE.shortcuts.findIndex(s => s.id === draggedId);
+        if (rootIdx !== -1) {
+          draggedItem = STATE.shortcuts.splice(rootIdx, 1)[0];
+        } else {
+          for (let f of STATE.shortcuts) {
+            if (f.isFolder && f.children) {
+              let childIdx = f.children.findIndex(s => s.id === draggedId);
+              if (childIdx !== -1) {
+                draggedItem = f.children.splice(childIdx, 1)[0];
+                break;
+              }
+            }
+          }
+        }
+        if (draggedItem) {
+          STATE.shortcuts.push(draggedItem);
+          saveState();
+          renderShortcuts();
+          renderModalShortcutsList();
+        }
+      }
     });
   }
 
@@ -1521,16 +1928,11 @@ document.addEventListener('DOMContentLoaded', () => {
           // Обязательная фильтрация ярлыков (отсеиваем null и не-объекты)
           shortcuts = shortcuts.filter(s => s && typeof s === 'object');
           
-          // Проверяем наличие категории для каждого ярлыка
-          shortcuts.forEach(s => {
-            if (!s.folder) s.folder = s.category || "default";
-            if (!s.category) s.category = s.folder;
-          });
+          // Конвертируем плоскую структуру в древовидную
+          const migratedShortcuts = migrateToNested(shortcuts, folders);
 
           const cleanedData = {
-            shortcuts,
-            folders,
-            categories: folders,
+            shortcuts: migratedShortcuts,
             columns,
             size,
             format12h,
@@ -1622,7 +2024,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleUpdateResult(latestVersion) {
-    const currentVersion = '1.10.5';
+    const currentVersion = '1.10.6';
     if (isNewerVersion(currentVersion, latestVersion)) {
       const notification = document.getElementById('update-notification');
       const updateText = document.getElementById('update-text');
@@ -1645,11 +2047,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function loadState() {
     storage.get(['shortcuts', 'categories', 'folders', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates', 'layoutZenMode'], (result) => {
-      STATE.shortcuts = result.shortcuts ?? DEFAULT_SHORTCUTS;
+      STATE.shortcuts = migrateToNested(result.shortcuts ?? DEFAULT_SHORTCUTS, result.folders ?? result.categories);
       STATE.customSearchEngines = result.customSearchEngines ?? [];
-      STATE.folders = result.folders ?? result.categories ?? [{ id: "default", name: "General" }];
-      STATE.activeFolder = "default";
-      STATE.activeSettingsFolder = "default";
       STATE.columns = result.columns ?? 10;
       STATE.size = result.size ?? "small";
       STATE.customBackground = result.customBackground ?? null;
@@ -1679,11 +2078,6 @@ document.addEventListener('DOMContentLoaded', () => {
       STATE.weatherCache = result.weatherCache ?? { temp: "", code: null, desc: "", timestamp: 0 };
       STATE.checkUpdates = result.checkUpdates ?? false;
       STATE.layoutZenMode = result.layoutZenMode ?? false;
-
-      STATE.shortcuts.forEach(s => {
-        if (!s.folder) s.folder = s.category || "default";
-        if (!s.category) s.category = s.folder;
-      });
 
       if (sizeSelect) sizeSelect.value = STATE.size;
       if (columnsSelect) columnsSelect.value = STATE.columns;
@@ -1739,7 +2133,6 @@ document.addEventListener('DOMContentLoaded', () => {
       updateSearchEngineUI();
       updateClockAndDate();
       updateWeatherWidget();
-      populateFolderSelects();
       renderShortcuts();
 
       if (STATE.showWeather && STATE.weatherCoords && STATE.weatherCoords.resolvedName) {
@@ -1756,8 +2149,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveState() {
     storage.set({
       shortcuts: STATE.shortcuts,
-      folders: STATE.folders,
-      categories: STATE.folders,
       columns: STATE.columns,
       size: STATE.size,
       customBackground: STATE.customBackground,
@@ -1854,9 +2245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
     container.innerHTML = '';
 
-    const folderTiles = STATE.folders.filter(f => f.id !== 'default');
-    const topLevelShortcuts = STATE.shortcuts.filter(s => s.folder === 'default' || !s.folder);
-
     let itemWidth = 85; 
     if (STATE.size === "small") itemWidth = 85;
     if (STATE.size === "medium") itemWidth = 98;
@@ -1864,7 +2252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const gap = 16;
     const maxColumns = STATE.columns;
-    const totalItemsCount = folderTiles.length + topLevelShortcuts.length;
+    const totalItemsCount = STATE.shortcuts.length;
     const actualColumns = Math.min(totalItemsCount, maxColumns);
     
     if (document.body.classList.contains('mode-ios')) {
@@ -1876,394 +2264,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fragment = document.createDocumentFragment();
 
-    // 1. Рендерим папки
-    folderTiles.forEach((folder) => {
-      const card = document.createElement('div');
-      card.className = `shortcut-card size-${STATE.size} folder-card`;
-      card.dataset.folderId = folder.id;
-      card.title = folder.name;
+    STATE.shortcuts.forEach((item) => {
+      if (!item) return;
 
-      const iconContainer = document.createElement('div');
-      iconContainer.className = `shortcut-icon folder-icon-grid`;
-      
-      const folderShortcuts = STATE.shortcuts.filter(s => s.folder === folder.id);
-      const previewShortcuts = folderShortcuts.slice(0, 4);
+      if (item.isFolder) {
+        // Render folder card
+        const card = document.createElement('div');
+        card.className = `shortcut-card size-${STATE.size} folder-card`;
+        card.dataset.folderId = item.id;
+        card.title = item.name;
 
-      previewShortcuts.forEach((s) => {
-        const miniImg = document.createElement('img');
-        miniImg.className = 'folder-mini-icon';
+        const iconContainer = document.createElement('div');
+        iconContainer.className = `shortcut-icon folder-icon-grid`;
+        
+        const folderShortcuts = item.children || [];
+        const previewShortcuts = folderShortcuts.slice(0, 4);
+
+        previewShortcuts.forEach((s) => {
+          const miniImg = document.createElement('img');
+          miniImg.className = 'folder-mini-icon';
+          let hostname = '';
+          try { hostname = new URL(s.url).hostname; } catch(e) { hostname = s.url; }
+          miniImg.src = s.customIcon || `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
+          miniImg.onerror = () => {
+            miniImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
+          };
+          iconContainer.appendChild(miniImg);
+        });
+
+        if (previewShortcuts.length === 0) {
+          iconContainer.innerHTML = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="grid-column: span 2; grid-row: span 2; margin: auto; opacity: 0.7;">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>`;
+        }
+
+        const span = document.createElement('span');
+        span.className = 'shortcut-label';
+        span.textContent = item.name;
+
+        card.appendChild(iconContainer);
+        card.appendChild(span);
+
+        // Open folder modal on click
+        card.addEventListener('click', (e) => {
+          if (document.body.classList.contains('layout-edit-mode')) return;
+          openFolder(item.id);
+        });
+
+        fragment.appendChild(card);
+      } else {
+        // Render regular shortcut card
+        const card = document.createElement('a');
+        card.href = item.url;
+        card.className = `shortcut-card size-${STATE.size}`;
+        card.title = item.name;
+        card.dataset.id = item.id;
+
+        const img = document.createElement('img');
+        img.className = 'shortcut-icon';
+        img.alt = '';
+
         let hostname = '';
-        try { hostname = new URL(s.url).hostname; } catch(e) { hostname = s.url; }
-        miniImg.src = s.customIcon || `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
-        miniImg.onerror = () => {
-          miniImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
+        try { hostname = new URL(item.url).hostname; } catch (e) { hostname = item.url; }
+        img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
+
+        img.onerror = () => {
+          img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
         };
-        iconContainer.appendChild(miniImg);
-      });
 
-      if (previewShortcuts.length === 0) {
-        iconContainer.innerHTML = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="grid-column: span 2; grid-row: span 2; margin: auto; opacity: 0.7;">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-        </svg>`;
+        const span = document.createElement('span');
+        span.className = 'shortcut-label';
+        span.textContent = item.name;
+
+        card.appendChild(img);
+        card.appendChild(span);
+        fragment.appendChild(card);
       }
-
-      const span = document.createElement('span');
-      span.className = 'shortcut-label';
-      span.textContent = folder.name;
-
-      card.appendChild(iconContainer);
-      card.appendChild(span);
-
-      // Открытие папки по клику
-      card.addEventListener('click', (e) => {
-        if (document.body.classList.contains('layout-edit-mode')) return;
-        openFolder(folder.id);
-      });
-
-      // Перетаскивание ярлыка внутрь папки
-      card.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        card.classList.add('drag-over');
-      });
-
-      card.addEventListener('dragleave', () => {
-        card.classList.remove('drag-over');
-      });
-
-      card.addEventListener('drop', (e) => {
-        e.preventDefault();
-        card.classList.remove('drag-over');
-        if (dragSrcIndex !== null) {
-          const item = STATE.shortcuts[dragSrcIndex];
-          if (item) {
-            item.folder = folder.id;
-            item.category = folder.id;
-            saveState();
-            renderShortcuts();
-          }
-        }
-      });
-
-      fragment.appendChild(card);
-    });
-
-    // 2. Рендерим обычные ярлыки на верхнем уровне
-    topLevelShortcuts.forEach((item) => {
-      const absoluteIndex = STATE.shortcuts.indexOf(item);
-
-      const card = document.createElement('a');
-      card.href = item.url;
-      card.className = `shortcut-card size-${STATE.size}`;
-      card.title = item.name;
-      card.dataset.absoluteIndex = absoluteIndex;
-      card.setAttribute('draggable', true);
-
-      card.addEventListener('dragstart', (e) => {
-        dragSrcIndex = absoluteIndex;
-        e.dataTransfer.effectAllowed = 'move';
-        card.classList.add('dragging');
-      });
-
-      card.addEventListener('dragend', () => {
-        card.classList.remove('dragging');
-        const items = container.querySelectorAll('.shortcut-card');
-        items.forEach(item => item.classList.remove('drag-over'));
-      });
-
-      card.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        card.classList.add('drag-over');
-      });
-
-      card.addEventListener('dragleave', () => {
-        card.classList.remove('drag-over');
-      });
-
-      card.addEventListener('drop', (e) => {
-        e.preventDefault();
-        card.classList.remove('drag-over');
-        const targetAbsoluteIndex = parseInt(card.dataset.absoluteIndex, 10);
-        if (dragSrcIndex !== null && dragSrcIndex !== targetAbsoluteIndex) {
-          moveShortcut(dragSrcIndex, targetAbsoluteIndex);
-        }
-      });
-
-      const img = document.createElement('img');
-      img.className = 'shortcut-icon';
-      img.alt = '';
-
-      let hostname = '';
-      try { hostname = new URL(item.url).hostname; } catch (e) { hostname = item.url; }
-      img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
-
-      img.onerror = () => {
-        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
-      };
-
-      const span = document.createElement('span');
-      span.className = 'shortcut-label';
-      span.textContent = item.name;
-
-      card.appendChild(img);
-      card.appendChild(span);
-      fragment.appendChild(card);
     });
 
     container.appendChild(fragment);
   }
 
-  const modalList = document.getElementById('modal-shortcuts-list');
 
-  function renderModalShortcutsList() {
-    if (!modalList) return;
-    modalList.textContent = '';
-
-    const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
-
-    const filteredShortcuts = STATE.shortcuts.filter(s => (s.folder || s.category || 'default') === STATE.activeSettingsFolder);
-
-    if (filteredShortcuts.length === 0) {
-      const emptyDiv = document.createElement('div');
-      emptyDiv.style.color = 'rgba(255,255,255,0.3)';
-      emptyDiv.style.fontSize = '11px';
-      emptyDiv.style.textAlign = 'center';
-      emptyDiv.style.padding = '12px';
-      emptyDiv.textContent = currentDict.listEmpty;
-      modalList.appendChild(emptyDiv);
-      return;
-    }
-
-    const fragment = document.createDocumentFragment();
-
-    filteredShortcuts.forEach((item) => {
-      const absoluteIndex = STATE.shortcuts.indexOf(item);
-
-      const row = document.createElement('div');
-      row.className = 'modal-shortcut-item';
-
-      if (editingIndex === absoluteIndex) {
-        row.setAttribute('draggable', false);
-
-        let tempIconBase64 = item.customIcon;
-
-        const editContainer = document.createElement('div');
-        editContainer.className = 'modal-shortcut-edit-container';
-        if (tempIconBase64) {
-          editContainer.classList.add('has-custom-icon');
-        }
-
-        const fieldsWrapper = document.createElement('div');
-        fieldsWrapper.className = 'inline-edit-fields';
-
-        const nameInput = document.createElement('input');
-        nameInput.type = 'text';
-        nameInput.value = item.name;
-        nameInput.className = 'settings-input inline-input';
-        nameInput.placeholder = currentDict.namePlaceholder;
-
-        const urlInput = document.createElement('input');
-        urlInput.type = 'text';
-        urlInput.value = item.url;
-        urlInput.className = 'settings-input inline-input';
-        urlInput.placeholder = currentDict.urlPlaceholder;
-
-        const folderSelectEl = document.createElement('select');
-        folderSelectEl.className = 'settings-input inline-input';
-        STATE.folders.forEach(f => {
-          const opt = document.createElement('option');
-          opt.value = f.id;
-          opt.textContent = f.id === 'default' ? currentDict.defaultCategoryName : f.name;
-          folderSelectEl.appendChild(opt);
-        });
-        folderSelectEl.value = item.folder || item.category || 'default';
-
-        fieldsWrapper.appendChild(nameInput);
-        fieldsWrapper.appendChild(urlInput);
-        fieldsWrapper.appendChild(folderSelectEl);
-
-        const actionsWrapper = document.createElement('div');
-        actionsWrapper.className = 'inline-edit-actions';
-
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'btn btn-inline-cancel';
-        cancelBtn.textContent = currentDict.btnCancel;
-        cancelBtn.addEventListener('click', () => {
-          editingIndex = -1;
-          renderModalShortcutsList();
-        });
-
-        const saveBtn = document.createElement('button');
-        saveBtn.className = 'btn btn-inline-save';
-        saveBtn.textContent = currentDict.btnSave;
-
-        const inlineIconInput = document.createElement('input');
-        inlineIconInput.type = 'file';
-        inlineIconInput.accept = 'image/*';
-        inlineIconInput.style.display = 'none';
-        inlineIconInput.id = `edit-shortcut-icon-file-${absoluteIndex}`;
-
-        const inlineIconLabel = document.createElement('label');
-        inlineIconLabel.htmlFor = `edit-shortcut-icon-file-${absoluteIndex}`;
-        inlineIconLabel.className = 'btn-square-upload';
-        inlineIconLabel.title = currentDict.uploadIconTitle;
-
-        const uploadImg = document.createElement('img');
-        uploadImg.src = 'assets/upload-icon.png';
-        uploadImg.alt = 'Upload';
-
-        inlineIconLabel.appendChild(uploadImg);
-
-        const inlineIconResetBtn = document.createElement('button');
-        inlineIconResetBtn.className = 'btn btn-inline-cancel btn-inline-reset';
-        inlineIconResetBtn.style.color = '#ff6b6b';
-        inlineIconResetBtn.textContent = currentDict.resetBtn;
-
-        inlineIconResetBtn.addEventListener('click', () => {
-          tempIconBase64 = null;
-          inlineIconLabel.title = currentDict.uploadIconTitle;
-          inlineIconLabel.style.borderColor = '';
-          editContainer.classList.remove('has-custom-icon');
-        });
-
-        inlineIconInput.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            inlineIconLabel.title = file.name;
-            inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-            compressImage(file, 128, 128, 0.85, (result) => {
-              tempIconBase64 = result;
-              editContainer.classList.add('has-custom-icon');
-            });
-          }
-        });
-
-        actionsWrapper.appendChild(cancelBtn);
-        actionsWrapper.appendChild(saveBtn);
-        actionsWrapper.appendChild(inlineIconResetBtn);
-        actionsWrapper.appendChild(inlineIconLabel);
-        actionsWrapper.appendChild(inlineIconInput); 
-
-        saveBtn.addEventListener('click', () => {
-          const newName = nameInput.value.trim();
-          let newUrl = urlInput.value.trim();
-          const newFolderVal = folderSelectEl.value;
-
-          if (newName && newUrl) {
-            if (!/^https?:\/\//i.test(newUrl)) {
-              newUrl = 'https://' + newUrl;
-            }
-
-            STATE.shortcuts[absoluteIndex] = { 
-              name: newName, 
-              url: newUrl, 
-              customIcon: tempIconBase64, 
-              folder: newFolderVal,
-              category: newFolderVal 
-            };
-            saveState();
-            editingIndex = -1;
-            renderShortcuts();
-            renderModalShortcutsList();
-          }
-        });
-
-        editContainer.appendChild(fieldsWrapper);
-        editContainer.appendChild(actionsWrapper);
-        row.appendChild(editContainer);
-
-      } else {
-        row.setAttribute('draggable', true);
-        row.dataset.absoluteIndex = absoluteIndex;
-
-        row.addEventListener('dragstart', (e) => {
-          dragSrcIndex = absoluteIndex;
-          e.dataTransfer.effectAllowed = 'move';
-          row.classList.add('dragging');
-        });
-
-        row.addEventListener('dragend', () => {
-          row.classList.remove('dragging');
-          const items = modalList.querySelectorAll('.modal-shortcut-item');
-          items.forEach(item => item.classList.remove('drag-over'));
-        });
-
-        row.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          row.classList.add('drag-over');
-          handleAutoscroll(e);
-        });
-
-        row.addEventListener('dragleave', () => {
-          row.classList.remove('drag-over');
-        });
-
-        row.addEventListener('drop', (e) => {
-          e.preventDefault();
-          row.classList.remove('drag-over');
-          
-          const targetAbsoluteIndex = parseInt(row.dataset.absoluteIndex, 10);
-          if (dragSrcIndex !== null && dragSrcIndex !== targetAbsoluteIndex) {
-            moveShortcut(dragSrcIndex, targetAbsoluteIndex);
-          }
-        });
-
-        const info = document.createElement('div');
-        info.className = 'modal-shortcut-info';
-
-        const name = document.createElement('span');
-        name.className = 'modal-shortcut-name';
-        name.textContent = item.name;
-
-        const url = document.createElement('span');
-        url.className = 'modal-shortcut-url';
-        url.textContent = item.url;
-
-        info.appendChild(name);
-        info.appendChild(url);
-
-        const actionsWrapper = document.createElement('div');
-        actionsWrapper.className = 'modal-shortcut-actions';
-
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn btn-edit';
-        editBtn.title = currentDict.btnEdit;
-        editBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 20h9"></path>
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-        </svg>`;
-        editBtn.addEventListener('click', () => {
-          editingIndex = absoluteIndex;
-          renderModalShortcutsList();
-        });
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-delete';
-        deleteBtn.title = currentDict.btnDelete;
-        deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"></polyline>
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          <line x1="10" y1="11" x2="10" y2="17"></line>
-          <line x1="14" y1="11" x2="14" y2="17"></line>
-        </svg>`;
-        deleteBtn.addEventListener('click', () => {
-          STATE.shortcuts.splice(absoluteIndex, 1);
-          saveState();
-          renderShortcuts();
-          renderModalShortcutsList();
-        });
-
-        actionsWrapper.appendChild(editBtn);
-        actionsWrapper.appendChild(deleteBtn);
-
-        row.appendChild(info);
-        row.appendChild(actionsWrapper);
-      }
-
-      fragment.appendChild(row);
-    });
-
-    modalList.appendChild(fragment);
-  }
 
   // --- АДАПТИВНЫЙ МЕНЕДЖЕР ТЕМ ---
   const AdaptiveThemeManager = {
