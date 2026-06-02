@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally. It replaces the default start page with a clean, fast interface featuring a search bar, customizable shortcuts, a clock, and local configuration storage.
+  A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally. Originally created as a personal project with the help of AI assistance, it replaces the default start page with a clean, fast interface featuring a search bar, customizable shortcuts, a clock, and local configuration storage.
 </p>
 
 ---
