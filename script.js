@@ -1120,6 +1120,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- УПРАВЛЕНИЕ ПАПКАМИ (ДРЕВОВИДНАЯ ИЕРАРХИЯ) ---
   const expandedFolders = new Set();
   let draggedId = null;
+  let justDroppedId = null;
 
   function migrateToNested(flatShortcuts, categoriesOrFolders) {
     if (!Array.isArray(flatShortcuts)) return [];
@@ -1182,6 +1183,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function moveNestedItem(draggedId, targetId, action) {
+    const targetItem = findShortcutOrFolderById(targetId);
+    if (!targetItem) return false;
+
+    let folderName = "";
+    if (action === 'merge' && !targetItem.isFolder) {
+      const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
+      const name = prompt(currentDict.addCategoryPrompt);
+      if (name === null) return false; // User canceled, abort operation
+      folderName = name.trim() || "Folder";
+    }
+
     let draggedItem = null;
     
     // Find dragged item and remove it
@@ -1200,24 +1212,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    if (!draggedItem) return;
+    if (!draggedItem) return false;
 
     if (action === 'merge') {
       let targetIdx = STATE.shortcuts.findIndex(s => s.id === targetId);
       if (targetIdx !== -1) {
-        const targetItem = STATE.shortcuts[targetIdx];
-        if (targetItem.isFolder) {
-          if (!targetItem.children) targetItem.children = [];
-          targetItem.children.push(draggedItem);
+        const target = STATE.shortcuts[targetIdx];
+        if (target.isFolder) {
+          if (!target.children) target.children = [];
+          target.children.push(draggedItem);
         } else {
-          // Merge two shortcuts to create a folder
-          const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
-          const name = prompt(currentDict.addCategoryPrompt) || "Folder";
+          // Merge two shortcuts to create a folder using pre-prompted folderName
           const newFolder = {
             id: "f_" + Date.now() + Math.random().toString(36).substr(2, 5),
-            name: name.trim(),
+            name: folderName,
             isFolder: true,
-            children: [targetItem, draggedItem]
+            children: [target, draggedItem]
           };
           STATE.shortcuts[targetIdx] = newFolder;
         }
@@ -1241,6 +1251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
+    return true;
   }
 
   function findShortcutOrFolderById(id) {
@@ -1368,6 +1379,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Рендерим папку в настройках
         const folderRow = document.createElement('div');
         folderRow.className = 'modal-folder-row';
+        if (justDroppedId === item.id) {
+          folderRow.classList.add('just-dropped');
+        }
         folderRow.dataset.id = item.id;
         folderRow.setAttribute('draggable', true);
         
@@ -1474,6 +1488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     modalList.appendChild(fragment);
+    justDroppedId = null;
   }
 
   function renderShortcutRow(item, isChild, parentId) {
@@ -1481,6 +1496,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const row = document.createElement('div');
     row.className = 'modal-shortcut-item';
+    if (justDroppedId === item.id) {
+      row.classList.add('just-dropped');
+    }
     if (isChild) {
       row.classList.add('child-item');
       row.dataset.parentId = parentId;
@@ -1676,31 +1694,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const relativeY = e.clientY - rect.top;
     const height = rect.height;
 
-    // Folders cannot be dropped inside other folders or merged to make a folder
-    if (isDraggedFolder) {
-      if (relativeY < height / 2) {
-        return 'before';
-      } else {
-        return 'after';
-      }
+    // Folders cannot be dropped inside other folders or merged to make a folder.
+    // Also, children inside a folder cannot have nested folders/children.
+    if (isDraggedFolder || isChild) {
+      return (relativeY < height / 2) ? 'before' : 'after';
     }
 
-    // A child item inside a folder cannot have nested folders/children
-    if (isChild) {
-      if (relativeY < height / 2) {
+    // For root-level items:
+    if (isTargetFolder) {
+      // Pushing into folders (merge) is common, keep the merge zone relatively wide (40%)
+      if (relativeY < height * 0.3) {
         return 'before';
-      } else {
+      } else if (relativeY > height * 0.7) {
         return 'after';
+      } else {
+        return 'merge';
       }
-    }
-
-    // For root shortcuts or folder targets:
-    if (relativeY < height * 0.25) {
-      return 'before';
-    } else if (relativeY > height * 0.75) {
-      return 'after';
     } else {
-      return 'merge';
+      // Merging two shortcuts to create a folder is rarer, keep the merge zone narrow (20%)
+      // to make reordering easier and prevent accidental folder prompts.
+      if (relativeY < height * 0.4) {
+        return 'before';
+      } else if (relativeY > height * 0.6) {
+        return 'after';
+      } else {
+        return 'merge';
+      }
     }
   }
 
@@ -1708,13 +1727,21 @@ document.addEventListener('DOMContentLoaded', () => {
     element.addEventListener('dragstart', (e) => {
       draggedId = item.id;
       e.dataTransfer.effectAllowed = 'move';
-      element.classList.add('dragging');
+      // Defer class additions to prevent Chrome from aborting drag start due to instant layout reflow
+      setTimeout(() => {
+        element.classList.add('dragging');
+        const modalList = document.getElementById('modal-shortcuts-list');
+        if (modalList) {
+          modalList.classList.add('list-dragging');
+        }
+      }, 0);
     });
 
     element.addEventListener('dragend', () => {
       element.classList.remove('dragging');
       const modalList = document.getElementById('modal-shortcuts-list');
       if (modalList) {
+        modalList.classList.remove('list-dragging');
         const items = modalList.querySelectorAll('.modal-shortcut-item, .modal-folder-row');
         items.forEach(el => el.classList.remove('drag-sort-before', 'drag-sort-after', 'drag-merge'));
       }
@@ -1726,11 +1753,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const draggedItem = findShortcutOrFolderById(draggedId);
       const isDraggedFolder = draggedItem ? draggedItem.isFolder : false;
 
-      if (isDraggedFolder && isFolderContainingTarget(draggedItem, item.id)) {
+      // Folders cannot contain other folders (no nested folders allowed)
+      if (isDraggedFolder && (isChild || isFolderContainingTarget(draggedItem, item.id))) {
         return;
       }
 
       e.preventDefault();
+      e.stopPropagation();
       
       const dropAction = getDropAction(e, element, isChild, isDraggedFolder, item.isFolder);
       
@@ -1746,23 +1775,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    element.addEventListener('dragleave', () => {
+    element.addEventListener('dragleave', (e) => {
+      e.stopPropagation();
+      if (e.relatedTarget && element.contains(e.relatedTarget)) {
+        return;
+      }
       element.classList.remove('drag-sort-before', 'drag-sort-after', 'drag-merge');
     });
 
     element.addEventListener('drop', (e) => {
       if (!draggedId || draggedId === item.id) return;
       e.preventDefault();
+      e.stopPropagation();
       element.classList.remove('drag-sort-before', 'drag-sort-after', 'drag-merge');
       
       const draggedItem = findShortcutOrFolderById(draggedId);
       const isDraggedFolder = draggedItem ? draggedItem.isFolder : false;
+
+      // Folders cannot be placed inside folder children
+      if (isDraggedFolder && isChild) {
+        return;
+      }
+
       const dropAction = getDropAction(e, element, isChild, isDraggedFolder, item.isFolder);
       
-      moveNestedItem(draggedId, item.id, dropAction);
-      saveState();
-      renderShortcuts();
-      renderModalShortcutsList();
+      if (moveNestedItem(draggedId, item.id, dropAction)) {
+        justDroppedId = draggedId;
+        saveState();
+        renderShortcuts();
+        renderModalShortcutsList();
+      }
     });
   }
 
@@ -1770,11 +1812,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsModalList = document.getElementById('modal-shortcuts-list');
   if (settingsModalList) {
     settingsModalList.addEventListener('dragover', (e) => {
-      e.preventDefault();
+      const targetRow = e.target.closest('.modal-shortcut-item, .modal-folder-row');
+      if (!targetRow && draggedId) {
+        e.preventDefault();
+      }
     });
     settingsModalList.addEventListener('drop', (e) => {
-      e.preventDefault();
-      if (e.target === settingsModalList && draggedId) {
+      const targetRow = e.target.closest('.modal-shortcut-item, .modal-folder-row');
+      if (!targetRow && draggedId) {
+        e.preventDefault();
         let draggedItem = null;
         let rootIdx = STATE.shortcuts.findIndex(s => s.id === draggedId);
         if (rootIdx !== -1) {
@@ -1792,6 +1838,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (draggedItem) {
           STATE.shortcuts.push(draggedItem);
+          justDroppedId = draggedId;
           saveState();
           renderShortcuts();
           renderModalShortcutsList();
@@ -2024,7 +2071,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleUpdateResult(latestVersion) {
-    const currentVersion = '1.10.6';
+    const currentVersion = '1.10.7';
     if (isNewerVersion(currentVersion, latestVersion)) {
       const notification = document.getElementById('update-notification');
       const updateText = document.getElementById('update-text');
