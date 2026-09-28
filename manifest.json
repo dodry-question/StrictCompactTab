@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SCT test",
-  "version": "1.10.7",
+  "version": "1.11.0",
   "description": "A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally.",
   "author": "dodry-question",
   "homepage_url": "https://github.com/dodry-question/my-new-tab",
