@@ -1,0 +1,377 @@
+/* ==========================================
+   🎨 АДАПТИВНАЯ ТЕМА ОФОРМЛЕНИЯ / ADAPTIVE THEME
+   ========================================== */
+
+body.theme-adaptive {
+  background-color: var(--adapt-surface);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .clock {
+  color: var(--adapt-on-surface);
+  text-shadow: 0 2px 10px rgba(var(--adapt-surface-rgb), 0.8), 0 0 4px rgba(var(--adapt-on-surface-rgb), 0.3);
+}
+
+body.theme-adaptive .date-display {
+  color: var(--adapt-secondary);
+  text-shadow: 0 1px 5px rgba(var(--adapt-surface-rgb), 0.8), 0 0 3px rgba(var(--adapt-on-surface-rgb), 0.3);
+}
+
+body.theme-adaptive #clock-subsettings {
+  border-left-color: rgba(var(--adapt-outline-rgb), 0.4) !important;
+}
+
+body.theme-adaptive .weather-temp {
+  color: var(--adapt-on-surface);
+  text-shadow: 0 2px 10px rgba(var(--adapt-surface-rgb), 0.8), 0 0 4px rgba(var(--adapt-on-surface-rgb), 0.3);
+}
+
+body.theme-adaptive .weather-details {
+  color: var(--adapt-secondary);
+  text-shadow: 0 1px 5px rgba(var(--adapt-surface-rgb), 0.8), 0 0 3px rgba(var(--adapt-on-surface-rgb), 0.3);
+}
+
+body.theme-adaptive #weather-subsettings {
+  border-left-color: rgba(var(--adapt-outline-rgb), 0.4) !important;
+}
+
+body.theme-adaptive .weather-input-status.status-searching {
+  color: var(--adapt-secondary);
+}
+
+/* Поисковая строка */
+body.theme-adaptive .search-form {
+  background-color: rgba(var(--adapt-surface-rgb), 0.8);
+  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.theme-adaptive .search-form:focus-within {
+  border-color: var(--adapt-primary);
+  box-shadow: 0 0 12px rgba(var(--adapt-primary-rgb), 0.25);
+  background-color: var(--adapt-surface);
+}
+
+body.theme-adaptive .search-input {
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .search-input::placeholder {
+  color: rgba(var(--adapt-on-surface-rgb), 0.5);
+}
+
+body.theme-adaptive .search-btn {
+  color: var(--adapt-primary);
+}
+
+body.theme-adaptive .search-btn:hover {
+  background-color: rgba(var(--adapt-outline-rgb), 0.2);
+  color: var(--adapt-primary);
+}
+
+/* Плитки ярлыков быстрого доступа */
+body.theme-adaptive .shortcut-card {
+  background-color: rgba(var(--adapt-surface-rgb), 0.7);
+  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+  color: var(--adapt-on-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+body.theme-adaptive .shortcut-card:hover {
+  background-color: rgba(var(--adapt-surface-rgb), 0.9);
+  border-color: var(--adapt-primary);
+  box-shadow: 0 4px 12px rgba(var(--adapt-primary-rgb), 0.2);
+}
+
+/* Кнопка настроек в левом нижнем углу */
+body.theme-adaptive .settings-icon-btn {
+  color: var(--adapt-on-surface);
+}
+
+/* Модальное окно настроек */
+body.theme-adaptive .modal-content {
+  background: rgba(var(--adapt-surface-rgb), 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(var(--adapt-outline-rgb), 0.4);
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+  color: var(--adapt-on-surface);
+  box-shadow: 15px 0 40px rgba(0, 0, 0, 0.4);
+}
+
+body.theme-adaptive .modal-header {
+  border-bottom-color: rgba(var(--adapt-outline-rgb), 0.3);
+}
+
+body.theme-adaptive .modal-close-icon {
+  color: rgba(var(--adapt-on-surface-rgb), 0.5);
+}
+
+body.theme-adaptive .modal-close-icon:hover {
+  color: var(--adapt-primary);
+}
+
+body.theme-adaptive .modal-col-left::-webkit-scrollbar-thumb {
+  background: rgba(var(--adapt-outline-rgb), 0.5);
+}
+
+body.theme-adaptive .modal-col-left {
+  border-right-color: rgba(var(--adapt-outline-rgb), 0.3);
+}
+
+body.theme-adaptive .settings-section {
+  border-bottom-color: rgba(var(--adapt-outline-rgb), 0.2);
+}
+
+body.theme-adaptive .settings-section h3 {
+  color: rgba(var(--adapt-on-surface-rgb), 0.8);
+}
+
+body.theme-adaptive .settings-field label {
+  color: rgba(var(--adapt-on-surface-rgb), 0.8);
+}
+
+body.theme-adaptive .toggle-label {
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .toggle-label input[type="checkbox"] {
+  accent-color: var(--adapt-primary);
+}
+
+/* Селекты и инпуты */
+body.theme-adaptive .settings-select, 
+body.theme-adaptive .settings-input {
+  background-color: rgba(0, 0, 0, 0.45);
+  border-color: transparent;
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .settings-select:hover, 
+body.theme-adaptive .settings-input:hover {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+body.theme-adaptive .settings-select:focus, 
+body.theme-adaptive .settings-input:focus {
+  background-color: rgba(0, 0, 0, 0.65);
+  border-color: var(--adapt-primary);
+  box-shadow: 0 0 0 3px rgba(var(--adapt-primary-rgb), 0.2);
+}
+
+body.theme-adaptive .add-shortcut-form {
+  background: rgba(var(--adapt-on-surface-rgb), 0.03);
+  border-color: rgba(var(--adapt-outline-rgb), 0.2);
+}
+
+/* Кнопки в настройках */
+body.theme-adaptive .btn-add {
+  background-color: var(--adapt-primary);
+  color: var(--adapt-on-primary);
+  border: none;
+  box-shadow: 0 2px 4px rgba(var(--adapt-primary-rgb), 0.25);
+}
+
+body.theme-adaptive .btn-add:hover {
+  background-color: var(--adapt-primary);
+  opacity: 0.9;
+  box-shadow: 0 4px 8px rgba(var(--adapt-primary-rgb), 0.4);
+}
+
+body.theme-adaptive .btn-file-label {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.04);
+  border: 1px solid rgba(var(--adapt-outline-rgb), 0.3);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .btn-file-label:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+  border-color: var(--adapt-primary);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .btn-secondary {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.03);
+  border-color: rgba(var(--adapt-outline-rgb), 0.25);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .btn-secondary:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+  border-color: var(--adapt-primary);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .btn-edit,
+body.theme-adaptive .btn-delete {
+  background-color: transparent;
+  border-color: transparent;
+  color: rgba(var(--adapt-on-surface-rgb), 0.4);
+}
+
+body.theme-adaptive .btn-edit:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+  border-color: rgba(var(--adapt-outline-rgb), 0.3);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .btn-delete:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+body.theme-adaptive .btn-danger-action {
+  background-color: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+body.theme-adaptive .btn-danger-action:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #ff6b6b;
+}
+
+/* Список ярлыков в модальном окне */
+body.theme-adaptive .modal-shortcuts-list {
+  border: none;
+  background-color: transparent;
+}
+
+body.theme-adaptive .modal-shortcuts-list::-webkit-scrollbar-thumb {
+  background: rgba(var(--adapt-outline-rgb), 0.5);
+}
+
+body.theme-adaptive .modal-shortcut-item {
+  background-color: transparent;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid rgba(var(--adapt-outline-rgb), 0.25) !important;
+}
+
+body.theme-adaptive .modal-shortcut-item:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.03);
+}
+
+body.theme-adaptive .modal-shortcut-item::before {
+  color: rgba(var(--adapt-on-surface-rgb), 0.25);
+}
+
+body.theme-adaptive .modal-shortcut-item:hover::before {
+  color: rgba(var(--adapt-on-surface-rgb), 0.45);
+}
+
+body.theme-adaptive .modal-shortcut-name {
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .modal-shortcut-url {
+  color: rgba(var(--adapt-on-surface-rgb), 0.5);
+}
+
+body.theme-adaptive .manage-shortcuts-header-row {
+  background-color: rgba(0, 0, 0, 0.25);
+  border-color: rgba(var(--adapt-outline-rgb), 0.2);
+}
+
+body.theme-adaptive .settings-category-tab {
+  background-color: transparent;
+  border-color: transparent;
+  color: rgba(var(--adapt-on-surface-rgb), 0.6);
+}
+
+body.theme-adaptive .settings-category-tab:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.06);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .settings-category-tab.active {
+  color: var(--adapt-on-primary);
+  background-color: var(--adapt-primary);
+  border-color: transparent;
+}
+
+body.theme-adaptive .btn-add-category {
+  background-color: rgba(var(--adapt-outline-rgb), 0.2);
+  border: none;
+}
+
+body.theme-adaptive .btn-add-category:hover {
+  background-color: rgba(var(--adapt-outline-rgb), 0.35);
+  transform: scale(1.05);
+}
+
+body.theme-adaptive .btn-add-category:active {
+  transform: scale(0.95);
+}
+
+body.theme-adaptive .btn-add-category img {
+  filter: brightness(0) invert(1);
+  opacity: 0.7;
+}
+
+body.theme-adaptive .btn-add-category:hover img {
+  opacity: 1;
+}
+
+body.theme-adaptive .btn-inline-save {
+  background-color: var(--adapt-primary);
+  border: none;
+  color: var(--adapt-on-primary);
+}
+
+body.theme-adaptive .btn-inline-save:hover {
+  background-color: var(--adapt-primary);
+  opacity: 0.9;
+}
+
+body.theme-adaptive .btn-inline-cancel {
+  border-color: rgba(var(--adapt-outline-rgb), 0.3);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .btn-inline-cancel:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .btn-square-upload {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.04);
+  border-color: rgba(var(--adapt-outline-rgb), 0.3);
+}
+
+body.theme-adaptive .btn-square-upload:hover {
+  border-color: var(--adapt-primary);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+}
+
+body.theme-adaptive .btn-square-upload img {
+  filter: brightness(0) invert(1);
+  opacity: 0.7;
+}
+
+body.theme-adaptive .btn-square-upload:hover img {
+  opacity: 1;
+}
+
+body.theme-adaptive .modal-shortcut-item.dragging {
+  border-color: var(--adapt-primary);
+  background-color: rgba(var(--adapt-surface-rgb), 0.3);
+}
+
+body.theme-adaptive .modal-shortcut-item.drag-over {
+  border-top-color: var(--adapt-primary);
+  background-color: rgba(var(--adapt-surface-rgb), 0.5);
+}
+
+@media (max-width: 850px) {
+  body.theme-adaptive .modal-col-right {
+    border-top: 1px solid rgba(var(--adapt-outline-rgb), 0.3);
+  }
+}
+

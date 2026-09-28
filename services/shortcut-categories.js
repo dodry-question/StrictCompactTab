@@ -1,4 +1,9 @@
 window.ShortcutCategories = {
+  getHotkeyIndex(key, categoryCount) {
+    const index = key === '0' ? 9 : /^[1-9]$/.test(key) ? Number(key) - 1 : -1;
+    return index >= 0 && index < categoryCount ? index : -1;
+  },
+
   getCategories(shortcuts) {
     const topLevel = [];
     const folders = [];

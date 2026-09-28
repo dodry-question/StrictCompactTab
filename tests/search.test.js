@@ -352,6 +352,16 @@ test('builds category tabs and preserves or replaces the active category', () =>
   assert.equal(empty.activeCategory, 'main');
 });
 
+test('maps category hotkeys 1-9 and 0 to category indexes', () => {
+  assert.equal(ShortcutCategories.getHotkeyIndex('1', 10), 0);
+  assert.equal(ShortcutCategories.getHotkeyIndex('2', 10), 1);
+  assert.equal(ShortcutCategories.getHotkeyIndex('9', 10), 8);
+  assert.equal(ShortcutCategories.getHotkeyIndex('0', 10), 9);
+  assert.equal(ShortcutCategories.getHotkeyIndex('0', 9), -1);
+  assert.equal(ShortcutCategories.getHotkeyIndex('x', 10), -1);
+  assert.equal(ShortcutCategories.getHotkeyIndex('1', 0), -1);
+});
+
 test('calculates classic shortcut grid metrics within the viewport', () => {
   const narrowGrid = ShortcutLayout.getGridMetrics(10, 'small', 10, 320);
   assert.deepEqual(narrowGrid, {

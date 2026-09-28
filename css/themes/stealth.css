@@ -1,0 +1,64 @@
+/* ==========================================
+   🕵️‍♂️ СТЕЛС-РЕЖИМ (STEALTH MODE / ULTRA-MINIMALISM)
+   ========================================== */
+
+/* 1. Ярлыки быстрого доступа */
+body.stealth-mode .shortcut-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 2. Монохромный эффект и прозрачность для иконок */
+body.stealth-mode .shortcut-icon {
+  filter: grayscale(100%) opacity(0.85) !important;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+body.stealth-mode .shortcut-card:hover .shortcut-icon {
+  filter: grayscale(0%) opacity(1) !important;
+  transform: translateY(-2px);
+}
+
+/* 3. Текст подписей ярлыков */
+body.stealth-mode .shortcut-label {
+  opacity: 0.25 !important;
+  transition: opacity 0.3s ease, color 0.3s ease !important;
+}
+
+body.stealth-mode .shortcut-card:hover .shortcut-label {
+  opacity: 1 !important;
+  color: #fff !important;
+}
+
+body.theme-light.stealth-mode .shortcut-card:hover .shortcut-label {
+  color: #000 !important;
+}
+
+body.theme-adaptive.stealth-mode .shortcut-card:hover .shortcut-label {
+  color: var(--adapt-on-surface) !important;
+}
+
+/* 4. Виджеты Часов и Погоды */
+body.stealth-mode .clock-container,
+body.stealth-mode .weather-container,
+body.stealth-mode .weather-forecast,
+body.stealth-mode .search-form {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.3s ease, background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease !important;
+}
+
+body.stealth-mode .clock-container:hover,
+body.stealth-mode .weather-container:hover,
+body.stealth-mode .weather-forecast:hover,
+body.stealth-mode .search-form:hover {
+  opacity: 1 !important;
+}
+

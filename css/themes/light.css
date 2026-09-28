@@ -1,0 +1,373 @@
+/* ==========================================
+   🎨 СВЕТЛАЯ ТЕМА ОФОРМЛЕНИЯ / LIGHT THEME
+   ========================================== */
+
+body.theme-light {
+  background-color: #f3f4f6;
+  color: #2d3748;
+}
+
+body.theme-light .clock {
+  color: #1a202c;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.9), 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+body.theme-light .date-display {
+  color: #4a5568;
+  text-shadow: 0 1px 5px rgba(255, 255, 255, 0.9), 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+body.theme-light #clock-subsettings {
+  border-left-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.theme-light .weather-temp {
+  color: #1a202c;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.9), 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+body.theme-light .weather-details {
+  color: #4a5568;
+  text-shadow: 0 1px 5px rgba(255, 255, 255, 0.9), 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+body.theme-light #weather-subsettings {
+  border-left-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.theme-light .weather-input-status.status-searching {
+  color: #718096;
+}
+
+/* Поисковая строка */
+body.theme-light .search-form {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+}
+
+body.theme-light .search-form:focus-within {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  background-color: #ffffff;
+}
+
+body.theme-light .search-input {
+  color: #1a202c;
+}
+
+body.theme-light .search-input::placeholder {
+  color: #a0aec0;
+}
+
+body.theme-light .search-btn {
+  color: #718096;
+}
+
+body.theme-light .search-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  color: #1a202c;
+}
+
+/* Плитки ярлыков быстрого доступа */
+body.theme-light .shortcut-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #2d3748;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+}
+
+body.theme-light .shortcut-card:hover {
+  background-color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a202c;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Кнопка настроек в левом нижнем углу */
+body.theme-light .settings-icon-btn {
+  color: #2d3748;
+}
+
+/* Модальное окно настроек (Left Sidebar) */
+body.theme-light .modal-content {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+  color: #1a1a1a;
+  box-shadow: 15px 0 40px rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .modal-header {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .modal-header h2 {
+  color: #1a1a1a;
+}
+
+body.theme-light .modal-close-icon {
+  color: #718096;
+}
+
+body.theme-light .modal-close-icon:hover {
+  color: #1a1a1a;
+}
+
+body.theme-light .modal-col-left::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .modal-col-left {
+  border-right-color: rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .settings-section {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+
+body.theme-light .settings-section h3 {
+  color: #2d3748;
+}
+
+body.theme-light .settings-field label {
+  color: #1a1a1a;
+}
+
+body.theme-light .toggle-label {
+  color: #1a1a1a;
+}
+
+/* Селекты и инпуты */
+body.theme-light .settings-select, 
+body.theme-light .settings-input {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  color: #1a1a1a !important;
+}
+
+body.theme-light .settings-select:hover, 
+body.theme-light .settings-input:hover {
+  background-color: #f7fafc !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
+}
+
+body.theme-light .settings-select:focus, 
+body.theme-light .settings-input:focus {
+  background-color: #ffffff !important;
+  border-color: #357ae8 !important;
+  box-shadow: 0 0 0 3px rgba(53, 122, 232, 0.15) !important;
+}
+
+body.theme-light .settings-select::placeholder,
+body.theme-light .settings-input::placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+  opacity: 1 !important;
+}
+
+/* Оболочка редактирования ярлыка */
+body.theme-light .modal-shortcut-edit-container {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+body.theme-adaptive .modal-shortcut-edit-container {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.02) !important;
+  border: 1px solid rgba(var(--adapt-outline-rgb), 0.2) !important;
+}
+
+body.theme-light .add-shortcut-form {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Кнопки в настройках */
+body.theme-light .btn-add {
+  background-color: #357ae8;
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 4px rgba(53, 122, 232, 0.2);
+}
+
+body.theme-light .btn-add:hover {
+  background-color: #2b6cb0;
+  box-shadow: 0 4px 8px rgba(53, 122, 232, 0.35);
+}
+
+body.theme-light .btn-file-label {
+  background-color: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: #4a5568;
+}
+
+body.theme-light .btn-file-label:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a202c;
+}
+
+body.theme-light .btn-secondary {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.05);
+  color: #4a5568;
+}
+
+body.theme-light .btn-secondary:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1a202c;
+}
+
+body.theme-light .btn-edit {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.05);
+  color: #4a5568;
+}
+
+body.theme-light .btn-edit:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #1a202c;
+}
+
+/* Список ярлыков в модальном окне */
+body.theme-light .modal-shortcuts-list {
+  border: none;
+  background-color: transparent;
+}
+
+body.theme-light .modal-shortcuts-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .modal-shortcut-item {
+  background-color: transparent;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+body.theme-light .modal-shortcut-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.theme-light .modal-shortcut-item::before {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+body.theme-light .modal-shortcut-item:hover::before {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+body.theme-light .modal-shortcut-name {
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+body.theme-light .modal-shortcut-url {
+  color: #555555;
+}
+
+body.theme-light .manage-shortcuts-header-row {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+body.theme-light .settings-category-tab {
+  background-color: transparent;
+  border-color: transparent;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.theme-light .settings-category-tab:hover {
+  color: #000;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+body.theme-light .settings-category-tab.active {
+  color: #000;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .btn-add-category {
+  background-color: rgba(0, 0, 0, 0.04);
+  border: none;
+}
+
+body.theme-light .btn-add-category:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  transform: scale(1.05);
+}
+
+body.theme-light .btn-add-category:active {
+  transform: scale(0.95);
+}
+
+body.theme-light .btn-add-category img {
+  filter: none;
+  opacity: 0.6;
+}
+
+body.theme-light .btn-add-category:hover img {
+  opacity: 0.9;
+}
+
+body.theme-light .btn-inline-save {
+  background-color: #357ae8;
+  border: none;
+  color: #fff;
+}
+
+body.theme-light .btn-inline-save:hover {
+  background-color: #2b6cb0;
+}
+
+body.theme-light .btn-inline-cancel {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #4a5568;
+}
+
+body.theme-light .btn-inline-cancel:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  color: #1a202c;
+}
+
+body.theme-light .btn-square-upload {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .btn-square-upload:hover {
+  border-color: #cbd5e1;
+  background-color: #edf2f7;
+}
+
+body.theme-light .btn-square-upload img {
+  filter: none;
+  opacity: 0.5;
+}
+
+body.theme-light .btn-square-upload:hover img {
+  opacity: 0.8;
+}
+
+body.theme-light .modal-shortcut-item.dragging {
+  border-color: #cbd5e1;
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+body.theme-light .modal-shortcut-item.drag-over {
+  border-top-color: #718096;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+@media (max-width: 850px) {
+  body.theme-light .modal-col-right {
+    border-top: 1px solid #e2e8f0;
+  }
+}
+

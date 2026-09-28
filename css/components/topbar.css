@@ -1,0 +1,551 @@
+/* ==========================================
+   TOP BAR — ДАТА И ПОГОДА В ОДНУ ГОРИЗОНТАЛЬНУЮ СТРОКУ
+   Default Mist / SCT: верхний ЛЕВЫЙ угол.
+   Mist Left/Split: верхний ПРАВЫЙ угол (правило задано в пресете split).
+   ========================================== */
+.mist-topbar {
+  position: fixed;
+  top: 30px;
+  left: 40px;
+  right: auto;
+  z-index: 12;
+  display: none;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  max-width: calc(100vw - 80px);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mist-topbar .topbar-part {
+  display: inline-block;
+}
+
+.mist-topbar .topbar-sep {
+  font-size: 11px;
+  opacity: 0.45;
+}
+
+.mist-topbar .topbar-temp {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+}
+
+.mist-topbar .topbar-desc {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+}
+
+.mist-topbar .topbar-temp,
+.mist-topbar .topbar-desc {
+  pointer-events: auto;
+}
+
+/* Дата отображается в Top Bar — исходный блок скрываем.
+   В Mist дата живёт ПОД часами, поэтому там её не прячем */
+body:not(.mode-ios):not(.mode-zen):not(.mode-mist).has-topbar .date-display {
+  display: none !important;
+}
+
+/* Погода показывается СТРОГО в ОДНОМ месте — в Top Bar строкой с датой
+   («ВОСКРЕСЕНЬЕ, 27 СЕНТЯБРЯ • 17°C Пасмурно, Киров»).
+   Старый виджет погоды скрыт во всех не-iOS режимах, в том числе в режиме
+   редактирования макета, чтобы в сетке не дублировался модуль погоды. */
+body:not(.mode-ios) .weather-container {
+  display: none !important;
+}
+
+/* В iOS- и Zen-режимах Top Bar не используется */
+body.mode-ios .mist-topbar,
+body.mode-zen .mist-topbar {
+  display: none !important;
+}
+
+/* ---------- Top Bar: светлая тема ---------- */
+body.theme-light .mist-topbar {
+  color: rgba(20, 22, 26, 0.7);
+  text-shadow: none;
+}
+
+body.theme-light .mist-topbar .topbar-temp {
+  color: rgba(20, 22, 26, 0.9);
+}
+
+body.theme-light .mist-topbar .topbar-desc {
+  color: rgba(20, 22, 26, 0.5);
+}
+
+/* ---------- Top Bar: адаптивная тема ---------- */
+body.theme-adaptive .mist-topbar {
+  color: rgba(var(--adapt-on-surface-rgb), 0.75);
+  text-shadow: none;
+}
+
+body.theme-adaptive .mist-topbar .topbar-temp {
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .mist-topbar .topbar-desc {
+  color: rgba(var(--adapt-on-surface-rgb), 0.55);
+}
+
+/* ---------- Вкладки категорий: светлая тема (классический режим) ---------- */
+body.theme-light .mist-tabs {
+  background: none;
+  border: none;
+}
+
+body.theme-light .mist-tab {
+  color: rgba(20, 22, 26, 0.45);
+}
+
+body.theme-light .mist-tab:hover {
+  color: rgba(20, 22, 26, 0.8);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+body.theme-light .mist-tab.active {
+  color: rgba(20, 22, 26, 0.95);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- Вкладки категорий: адаптивная тема ---------- */
+body.theme-adaptive .mist-tabs {
+  background: none;
+  border: none;
+}
+
+body.theme-adaptive .mist-tab {
+  color: rgba(var(--adapt-on-surface-rgb), 0.55);
+}
+
+body.theme-adaptive .mist-tab:hover {
+  color: var(--adapt-on-surface);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+}
+
+body.theme-adaptive .mist-tab.active {
+  color: var(--adapt-on-surface);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+}
+
+/* Мягкие Material-подложки повышают контраст на ярких обоях, не накрывая всю сцену. */
+body.mode-mist.theme-adaptive.has-wallpaper .date-display,
+body.mode-mist.theme-adaptive.has-wallpaper .mist-topbar {
+  color: var(--adapt-on-surface) !important;
+  text-shadow: none !important;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--adapt-surface-rgb), 0.6) 0%,
+    rgba(var(--adapt-surface-rgb), 0.38) 78%,
+    rgba(var(--adapt-surface-rgb), 0) 100%
+  );
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .date-display {
+  padding: 4px 14px 4px 10px !important;
+  border-radius: 6px;
+  opacity: 1;
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-topbar {
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-tab {
+  color: rgba(var(--adapt-on-surface-rgb), 0.88);
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-tab:hover {
+  background-color: rgba(var(--adapt-surface-rgb), 0.28);
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-tab.active {
+  color: var(--adapt-on-surface);
+  background-color: rgba(var(--adapt-surface-rgb), 0.24);
+  box-shadow: none;
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-tab:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Погодная шторка */
+.weather-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(5, 8, 13, 0.48);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.28s ease, visibility 0s linear 0.28s;
+}
+
+.weather-drawer-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.weather-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1201;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, 100vw);
+  padding: 24px 24px 18px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: rgba(245, 247, 250, 0.96);
+  background: rgba(14, 17, 23, 0.96);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: -24px 0 72px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(28px) saturate(135%);
+  -webkit-backdrop-filter: blur(28px) saturate(135%);
+  transform: translateX(102%);
+  visibility: hidden;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.18s;
+}
+
+.weather-drawer.is-open {
+  transform: translateX(0);
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.weather-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-drawer-header h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.weather-drawer-city {
+  margin: 5px 0 0;
+  color: rgba(245, 247, 250, 0.58);
+  font-size: 13px;
+}
+
+.weather-drawer-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.weather-drawer-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.weather-drawer-content {
+  flex: 1 0 auto;
+  min-height: 0;
+  padding-top: 18px;
+}
+
+.weather-current {
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.weather-current-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.weather-current-icon {
+  flex: 0 0 auto;
+  font-size: 48px;
+  line-height: 1;
+}
+
+.weather-current-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.weather-current-temperature {
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.weather-current-description {
+  color: rgba(245, 247, 250, 0.72);
+  font-size: 14px;
+}
+
+.weather-current-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-current-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.weather-current-stat-label,
+.weather-hourly-precipitation,
+.weather-daily-precipitation {
+  color: rgba(245, 247, 250, 0.52);
+  font-size: 11px;
+}
+
+.weather-current-stat-value {
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.weather-forecast-section {
+  margin-top: 24px;
+}
+
+.weather-forecast-heading {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.weather-hourly-list {
+  display: grid;
+  grid-auto-columns: minmax(58px, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 1px 10px;
+  scrollbar-width: thin;
+}
+
+.weather-hourly-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px 6px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 11px;
+}
+
+.weather-hourly-time {
+  color: rgba(245, 247, 250, 0.68);
+  font-size: 11px;
+}
+
+.weather-hourly-icon {
+  font-size: 20px;
+}
+
+.weather-hourly-temperature {
+  font-size: 13px;
+}
+
+.weather-hourly-precipitation {
+  font-size: 10px;
+}
+
+.weather-daily-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-daily-item {
+  display: grid;
+  grid-template-columns: minmax(74px, 1fr) 28px auto 38px;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.weather-daily-date {
+  color: rgba(245, 247, 250, 0.78);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.weather-daily-icon {
+  font-size: 18px;
+  text-align: center;
+}
+
+.weather-daily-temperatures {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.weather-daily-precipitation {
+  text-align: right;
+}
+
+.weather-drawer-message {
+  margin: 24px 0;
+  color: rgba(245, 247, 250, 0.72);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.weather-drawer-message.is-loading::before {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 9px;
+  border: 2px solid rgba(245, 247, 250, 0.22);
+  border-top-color: rgba(245, 247, 250, 0.9);
+  border-radius: 50%;
+  content: '';
+  vertical-align: -2px;
+  animation: weather-spin 0.8s linear infinite;
+}
+
+@keyframes weather-spin {
+  to { transform: rotate(360deg); }
+}
+
+.weather-drawer-retry {
+  min-height: 38px;
+  padding: 0 14px;
+  color: inherit;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.weather-data-source {
+  margin: 24px 0 0;
+  color: rgba(245, 247, 250, 0.38);
+  font-size: 10px;
+  text-align: right;
+}
+
+body.theme-light .weather-drawer {
+  color: #20242b;
+  background: rgba(246, 248, 252, 0.97);
+  border-left-color: rgba(0, 0, 0, 0.1);
+}
+
+body.theme-light .weather-drawer-header,
+body.theme-light .weather-current-stats,
+body.theme-light .weather-daily-item {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.theme-light .weather-current,
+body.theme-light .weather-hourly-item {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .weather-drawer-city,
+body.theme-light .weather-current-description,
+body.theme-light .weather-current-stat-label,
+body.theme-light .weather-hourly-time,
+body.theme-light .weather-hourly-precipitation,
+body.theme-light .weather-daily-date,
+body.theme-light .weather-daily-precipitation,
+body.theme-light .weather-drawer-message,
+body.theme-light .weather-data-source {
+  color: rgba(32, 36, 43, 0.62);
+}
+
+body.theme-adaptive .weather-drawer {
+  color: var(--adapt-on-surface);
+  background: rgba(var(--adapt-surface-rgb), 0.96);
+  border-left-color: rgba(var(--adapt-outline-rgb), 0.42);
+}
+
+body.theme-adaptive .weather-drawer-header,
+body.theme-adaptive .weather-current-stats,
+body.theme-adaptive .weather-daily-item {
+  border-color: rgba(var(--adapt-outline-rgb), 0.28);
+}
+
+body.theme-adaptive .weather-current,
+body.theme-adaptive .weather-hourly-item {
+  background: rgba(var(--adapt-on-surface-rgb), 0.045);
+  border-color: rgba(var(--adapt-outline-rgb), 0.24);
+}
+
+body.theme-adaptive .weather-drawer-city,
+body.theme-adaptive .weather-current-description,
+body.theme-adaptive .weather-current-stat-label,
+body.theme-adaptive .weather-hourly-time,
+body.theme-adaptive .weather-hourly-precipitation,
+body.theme-adaptive .weather-daily-date,
+body.theme-adaptive .weather-daily-precipitation,
+body.theme-adaptive .weather-drawer-message,
+body.theme-adaptive .weather-data-source {
+  color: rgba(var(--adapt-on-surface-rgb), 0.62);
+}
+
+@media (max-width: 520px) {
+  .weather-drawer {
+    width: 100vw;
+    padding: 18px 18px 14px;
+  }
+}
+

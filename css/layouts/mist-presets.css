@@ -1,0 +1,226 @@
+/* ==========================================
+   🌫️ РЕЖИМ MIST — ПРЕСЕТЫ КОМПОНОВКИ (v2)
+   ========================================== */
+
+/* Подразделы режима Mist (пресет + ярлыков в ряду) */
+.mist-subsettings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding-left: 4px;
+}
+
+/* ---------- Пресет: Центральный (Mist Standard) ---------- */
+/* Композиция: часы и поиск отцентрованы по вертикали, а панель категорий
+   вместе с ярлыками жёстко закреплены у нижнего края экрана */
+body.mode-mist.mist-preset-center {
+  justify-content: flex-start !important;
+  align-items: center !important;
+  padding: 0 !important;
+}
+
+body.mode-mist.mist-preset-center .clock-container {
+  margin-top: auto !important;
+}
+
+body.mode-mist.mist-preset-center .search-form {
+  margin: 24px 0 auto 0 !important;
+}
+
+body.mode-mist.mist-preset-center .shortcuts-wrapper {
+  margin: 0 !important;
+}
+
+body.mode-mist.mist-preset-center .mist-tabs,
+body.mode-mist.mist-preset-center .shortcuts-container {
+  /* Поток слева направо (спец: justify-content: flex-start) — панель чипов
+     и ряды пилюлей начинаются от ОДНОЙ левой линии центрального блока */
+  justify-content: flex-start;
+}
+
+/* ---------- Пресет: Левосторонний (Mist Left/Split) ---------- */
+body.mode-mist.mist-preset-split {
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  padding: 0 0 0 6vw !important;
+}
+
+/* Дата и погода (одной строкой) — в ВЕРХНИЙ ПРАВЫЙ угол для баланса */
+body.mode-mist.mist-preset-split .mist-topbar {
+  left: auto;
+  right: 40px;
+  justify-content: flex-end;
+}
+
+/* Часы опущены ниже и отцентрованы по вертикали вместе с поиском */
+body.mode-mist.mist-preset-split .clock-container {
+  align-items: flex-start !important;
+  text-align: left !important;
+  margin-top: auto !important;
+}
+
+body.mode-mist.mist-preset-split .weather-container {
+  justify-content: flex-start !important;
+}
+
+body.mode-mist.mist-preset-split .search-form {
+  width: min(600px, 46vw) !important;
+  max-width: 600px !important;
+  margin: 24px 0 auto 0 !important;
+}
+
+/* Блок ярлыков прижимается к низу левой колонки; вкладки категорий —
+   СВЕРХУ, прямо под поиском (порядок в DOM задаёт syncTabsDomPosition) */
+body.mode-mist.mist-preset-split .shortcuts-wrapper {
+  flex-direction: column !important;
+  margin-top: auto !important;
+  margin-bottom: 7vh !important;
+  padding: 0 !important;
+  align-items: flex-start !important;
+}
+
+/* Левосторонний: вкладки категорий СВЕРХУ (прямо под поиском) →
+   строки ярлыков сразу под чипами, без пустого поля между ними.
+   «safe» включается только при переполнении, чтобы верхние ряды
+   оставались достижимыми для Tab/стрелок */
+body.mode-mist.mist-preset-split .shortcuts-container {
+  align-items: center !important;
+  align-content: safe start !important;
+  /* Общий предел с учётом настройки «Ярлыков в ряду» (--mist-max-w) */
+  max-width: min(62vw, var(--mist-max-w, 62vw)) !important;
+  max-height: 42vh;
+}
+
+/* В левой колонке пилюли — по ширине контента (width: auto), не растянуты */
+body.mode-mist.mist-preset-split .mist-pill {
+  justify-self: start;
+}
+
+body.mode-mist.mist-preset-split .mist-tabs,
+body.mode-mist.mist-preset-split .shortcuts-container {
+  justify-content: start;
+}
+
+/* ---------- Пресет: Ультра-минимал (Zen Drop) ---------- */
+body.mode-mist.mist-preset-zen {
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+body.mode-mist.mist-preset-zen .mist-tabs,
+body.mode-mist.mist-preset-zen .shortcuts-container {
+  justify-content: flex-start;
+}
+
+body.mode-mist.mist-preset-zen .shortcuts-container {
+  align-content: safe start !important;
+}
+
+/* Standard and Zen panels are anchored below the search widget and follow
+   its saved edit-layout offset and width. */
+body.mode-mist.mist-preset-center .shortcuts-wrapper,
+body.mode-mist.mist-preset-zen .shortcuts-wrapper {
+  position: absolute !important;
+  top: calc(100% + 14px + var(--mist-panel-y, 0px)) !important;
+  left: calc(50% + var(--mist-panel-x, 0px)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: min(100%, var(--mist-panel-width, 100%)) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: translate(-50%, 0);
+}
+
+/* Zen keeps its reveal interaction; only the anchor changed. */
+body.mode-mist.mist-preset-zen .shortcuts-wrapper {
+  z-index: 6 !important;
+  opacity: 0;
+  transform: translate(-50%, 28px);
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.mode-mist.mist-preset-zen.mist-zen-revealed .shortcuts-wrapper,
+body.mode-mist.mist-preset-zen .shortcuts-wrapper:focus-within {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+/* Невидимая зона у нижнего края: наведение или клик показывают ярлыки */
+.mist-zen-zone {
+  display: none;
+}
+
+body.mode-mist.mist-preset-zen .mist-zen-zone {
+  display: block;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120px;
+  z-index: 5;
+}
+
+/* ---------- Обводка фокуса (Tab): не обрезается краями контейнеров ---------- */
+.shortcut-card:focus-visible,
+.mist-pill:focus-visible,
+.mist-tab:focus-visible,
+.search-btn:focus-visible,
+.settings-icon-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+body.theme-light .shortcut-card:focus-visible,
+body.theme-light .mist-pill:focus-visible,
+body.theme-light .mist-tab:focus-visible {
+  outline-color: rgba(0, 0, 0, 0.6);
+}
+
+body.theme-adaptive .shortcut-card:focus-visible,
+body.theme-adaptive .mist-pill:focus-visible,
+body.theme-adaptive .mist-tab:focus-visible {
+  outline-color: var(--adapt-primary);
+}
+
+/* Воздух у крайних ярлыков, чтобы обводка фокуса помещалась целиком */
+.shortcuts-container {
+  padding: 12px !important;
+  scroll-padding: 14px;
+}
+
+/* ---------- Светлая тема: погода в режиме Mist ---------- */
+body.mode-mist.theme-light .weather-temp {
+  color: rgba(20, 22, 26, 0.8) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-light .weather-details {
+  color: rgba(20, 22, 26, 0.5) !important;
+  text-shadow: none !important;
+}
+
+/* ---------- Адаптивная тема: погода и часы берут цвета из палитры обоев ---------- */
+body.mode-mist.theme-adaptive .weather-temp {
+  color: rgba(var(--adapt-on-surface-rgb), 0.85) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-adaptive .weather-details {
+  color: rgba(var(--adapt-on-surface-rgb), 0.55) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-adaptive .clock {
+  color: var(--adapt-on-surface) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-adaptive .date-display {
+  color: rgba(var(--adapt-on-surface-rgb), 0.6) !important;
+}
+
+

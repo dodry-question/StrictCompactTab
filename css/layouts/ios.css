@@ -1,0 +1,414 @@
+/* ==========================================
+   📱 РЕЖИМ ВИДЖЕТОВ iOS (iOS WIDGET MODE)
+   ========================================== */
+
+/* 1. Контейнер времени и даты (Строго квадратный: 8х8 клеток) */
+body.mode-ios .clock-container {
+  position: absolute;
+  top: calc(2 * var(--grid-size, 20px));
+  left: calc(2 * var(--grid-size, 20px));
+  width: calc(8 * var(--grid-size, 20px));
+  height: calc(8 * var(--grid-size, 20px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  line-height: 1.1;
+  background-color: rgba(14, 14, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+body.mode-ios .clock {
+  font-size: calc(2.2 * var(--grid-size, 20px) * var(--clock-scale, 1));
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  white-space: nowrap; /* Исключает переносы секунд или AM/PM */
+}
+
+body.mode-ios .date-display {
+  font-size: calc(13px * var(--clock-scale, 1));
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+/* 2. Контейнер погоды (Строго квадратный: 6х6 клеток) */
+body.mode-ios .weather-container {
+  position: absolute;
+  top: calc(2 * var(--grid-size, 20px));
+  right: calc(2 * var(--grid-size, 20px));
+  width: calc(6 * var(--grid-size, 20px));
+  height: calc(6 * var(--grid-size, 20px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.2;
+  text-align: center;
+  background-color: rgba(14, 14, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+body.mode-ios .weather-temp-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+body.mode-ios .weather-temp {
+  font-size: calc(1.4 * var(--grid-size, 20px));
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+body.mode-ios .weather-icon {
+  font-size: calc(1.8 * var(--grid-size, 20px));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+body.mode-ios .weather-details {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+body.mode-ios .weather-input-status {
+  font-size: 10px;
+  margin-top: 2px;
+  min-height: 12px;
+  transition: color 0.2s ease;
+}
+
+body.mode-ios .weather-input-status.status-searching {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+body.mode-ios .weather-input-status.status-success {
+  color: #4caf50;
+}
+
+body.mode-ios .weather-input-status.status-error {
+  color: #f44336;
+}
+
+/* 3. Поисковая строка (Строго квадратная: 8х8 клеток) */
+body.mode-ios .search-form {
+  position: absolute;
+  top: calc(2 * var(--grid-size, 20px));
+  left: calc(50% - calc(4 * var(--grid-size, 20px)));
+  width: calc(8 * var(--grid-size, 20px));
+  height: calc(8 * var(--grid-size, 20px));
+  background-color: rgba(14, 14, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              background-color 0.3s ease;
+}
+
+body.mode-ios .search-form:focus-within {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 40px 0 rgba(255, 255, 255, 0.04);
+  background-color: rgba(18, 18, 18, 0.55);
+}
+
+body.mode-ios .search-engine-logo {
+  height: calc(1.8 * var(--grid-size, 20px));
+  max-width: 80%;
+  object-fit: contain;
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+body.mode-ios .search-input {
+  width: 100%;
+  height: 38px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  padding: 0 12px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+body.mode-ios .search-input:focus {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.mode-ios .search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+body.mode-ios .search-btn {
+  width: 100%;
+  height: 38px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  margin-left: 0;
+  flex-shrink: 0;
+}
+
+body.mode-ios .search-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* 4. Панель вкладок и ярлыков (Строго квадратная: 16х16 клеток) */
+body.mode-ios .shortcuts-wrapper {
+  position: absolute;
+  top: calc(12 * var(--grid-size, 20px));
+  left: calc(50% - calc(8 * var(--grid-size, 20px)));
+  width: calc(16 * var(--grid-size, 20px));
+  height: calc(16 * var(--grid-size, 20px));
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(14, 14, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px;
+  gap: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  overflow: hidden;
+  z-index: 10;
+}
+
+/* Выборочная инверсия логотипа в белый цвет */
+.search-engine-logo.inverted, .settings-search-logo.inverted {
+  filter: brightness(0) invert(1);
+}
+
+/* Сетка ярлыков быстрого доступа */
+.shortcuts-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  gap: 16px;
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px; /* Безопасный внутренний отступ (padding) для предотвращения прижатия содержимого к границам */
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Постоянная высота области сетки (JS уточняет её под самую длинную категорию):
+      панель вкладок и ярлыки остаются на одном месте при переключении категорий */
+body:not(.mode-ios):not(.mode-mist) #shortcuts-container {
+  flex: 0 0 auto;
+  height: clamp(150px, 34vh, 460px);
+}
+
+/* Чёткая сетка ярлыков: жёсткие равные колонки, одинаковые плитки, gap: 12px.
+      Высота контейнера фиксирована, содержимое прижато к НИЗУ (align-content),
+      поэтому панель категорий СВЕРХУ никогда не «прыгает» при переключении. */
+body:not(.mode-ios):not(.mode-mist) #shortcuts-container {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 6), var(--cell-size, 85px));
+  gap: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  justify-content: center;
+  align-content: start;
+}
+
+body:not(.mode-ios):not(.mode-mist) .shortcuts-wrapper {
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+/* Все плитки одинаковой ширины и строго по колонкам сетки */
+body:not(.mode-ios) #shortcuts-container .shortcut-card {
+  width: 100%;
+  min-width: 0;
+}
+
+.shortcuts-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shortcuts-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shortcuts-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.shortcuts-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+body.theme-light .shortcuts-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+body.theme-light .shortcuts-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.1);
+}
+
+body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.2);
+}/* Класс для плавного скрытия контейнера */
+.shortcuts-container.fade-out {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+/* Стили ярлыков */
+.shortcut-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(18, 18, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.85);
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), 
+              background-color 0.2s ease, 
+              border-color 0.2s ease;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.shortcut-card:hover {
+  transform: translateY(-2px);
+  background-color: rgba(25, 25, 25, 0.95);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+/* Размеры плиток (задаются пользователем в настройках): квадратная плитка
+      одинаковой формы независимо от плотности сетки */
+.shortcut-card.size-small {
+  width: 85px;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  gap: 6px;
+}
+.shortcut-card.size-small .shortcut-icon {
+  width: 32px;
+  height: 32px;
+  max-width: 100%;
+  max-height: 100%;
+}
+.shortcut-card.size-small .shortcut-label {
+  font-size: 11px;
+  max-width: 75px;
+}
+
+.shortcut-card.size-medium {
+  width: 98px;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  gap: 8px;
+}
+.shortcut-card.size-medium .shortcut-icon {
+  width: 38px;
+  height: 38px;
+  max-width: 100%;
+  max-height: 100%;
+}
+.shortcut-card.size-medium .shortcut-label {
+  font-size: 12px;
+  max-width: 86px;
+}
+
+.shortcut-card.size-large {
+  width: 110px;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  gap: 10px;
+}
+.shortcut-card.size-large .shortcut-icon {
+  width: 44px;
+  height: 44px;
+  max-width: 100%;
+  max-height: 100%;
+}
+.shortcut-card.size-large .shortcut-label {
+  font-size: 13px;
+  max-width: 96px;
+}
+
+.shortcut-icon {
+  border-radius: 6px;
+  object-fit: contain;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.shortcut-label {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  padding: 0 4px;
+  font-weight: 500;
+}
+

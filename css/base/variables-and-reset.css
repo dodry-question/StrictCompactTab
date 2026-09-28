@@ -1,0 +1,67 @@
+:root {
+  --primary-color: #357ae8;
+  --primary-color-rgb: 53, 122, 232;
+  --adaptive-color: var(--adapt-primary, var(--primary-color));
+  --adaptive-color-rgb: var(--adapt-primary-rgb, var(--primary-color-rgb));
+  --adaptive-color-hover: var(--adapt-primary, #2b6cb0);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Сброс дефолтных внешних отступов */
+.widget, .card, p, span, h1, h2, h3, h4, a,
+.clock, .date-display, .weather-temp, .weather-icon, .weather-details, .weather-input-status, .shortcut-label {
+  margin: 0 !important;
+}
+
+/* Ограничение высоты строк (line-height) */
+.widget-text, .card-title, p, span,
+.clock, .date-display, .weather-temp, .weather-details, .weather-input-status, .shortcut-label {
+  line-height: 1.15 !important;
+}
+
+/* Принудительное ограничение переполнения (overflow fail-safe) */
+.clock-container, .weather-container, .search-form, .shortcut-card, .widget, .card {
+  overflow: hidden !important;
+}
+
+/* Эстетичный суффикс AM/PM с уменьшенным размером */
+.clock-ampm {
+  font-size: 0.35em !important;
+  font-weight: 450 !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  margin-left: 8px !important;
+  text-transform: uppercase;
+  vertical-align: baseline;
+  display: inline-block;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #fff;
+  user-select: none;
+}
+
+body {
+  background-color: #000000;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+}
+
+html.state-loading body > * {
+  visibility: hidden;
+}
+

@@ -1,0 +1,52 @@
+/* ==========================================
+   ЦЕНТР (Default / Mist Standard) И ЛЕВАЯ КОЛОНКА (Mist Split)
+   Поиск, панель категорий и сетка ярлыков выравниваются по горизонтальной
+   оси экрана в классическом режиме и в Mist Standard; в пресете
+   Left/Split та же колонка прижата к левому краю, справа — пусто.
+   ========================================== */
+
+/* Классический режим: элементы по центральной оси */
+body:not(.mode-ios):not(.mode-mist) .search-form {
+  margin-inline: auto;
+}
+
+body:not(.mode-ios):not(.mode-mist) .shortcuts-wrapper {
+  align-items: center;
+}
+
+body:not(.mode-ios):not(.mode-mist) .mist-tabs {
+  justify-content: center;
+}
+
+body:not(.mode-ios):not(.mode-mist) #shortcuts-container {
+  margin-inline: auto;
+}
+
+/* Mist Standard: те же элементы по центру (страховка поверх базовых правил) */
+body.mode-mist.mist-preset-center .shortcuts-wrapper {
+  align-items: flex-start;
+}
+
+body.mode-mist.mist-preset-center .mist-tabs {
+  justify-content: flex-start;
+}
+
+body.mode-mist.mist-preset-center #shortcuts-container {
+  margin-inline: auto;
+}
+
+/* Mist Left/Split: панель категорий и сетка ярлыков — к ЛЕВОМУ краю.
+   Селектор с ID обязателен: базовое `margin-inline: auto` у #shortcuts-container
+   имеет более высокий приоритет, чем правила пресета, и центрировало сетку. */
+body.mode-mist.mist-preset-split #shortcuts-container {
+  margin-inline: 0;
+}
+
+body.mode-mist.mist-preset-split .shortcuts-wrapper {
+  text-align: left;
+}
+
+body.mode-mist.mist-preset-split .mist-tabs {
+  width: 100%;
+  justify-content: flex-start;
+}

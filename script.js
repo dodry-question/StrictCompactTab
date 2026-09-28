@@ -4513,6 +4513,31 @@
     //      сквозные переходы работают в любом режиме Layout.
     if (navHandleKeydown(e)) return;
 
+    // 3.6. Цифровые хоткеи категорий: 1…9 — по порядку вкладок, 0 — десятая.
+    //      Работают в любом режиме Layout, пока панель категорий видима
+    //      (при одной категории она скрыта), и не мешают вводу текста,
+    //      модальным окнам, шторке погоды и режиму редактирования.
+    const activeEl = document.activeElement;
+    const isModalOpen = (modal && modal.classList.contains('active')) ||
+      (folderModal && folderModal.classList.contains('active'));
+    const weatherDrawerOpen = document.body.classList.contains('weather-drawer-open');
+    const categoryButtons = mistTabsEl && mistTabsEl.style.display !== 'none'
+      ? Array.from(mistTabsEl.querySelectorAll('.mist-tab'))
+      : [];
+    const digitIndex = window.ShortcutCategories.getHotkeyIndex(e.key, categoryButtons.length);
+
+    if (digitIndex >= 0 && digitIndex < categoryButtons.length &&
+        !isInputActive && !isModalOpen && !weatherDrawerOpen &&
+        !document.body.classList.contains('layout-edit-mode') &&
+        !e.ctrlKey && !e.altKey && !e.metaKey) {
+      e.preventDefault();
+      // Пресет Zen Drop: панель скрыта до взаимодействия — показываем её,
+      // иначе переход по цифре остаётся незамеченным (как и у колеса мыши)
+      revealMistZenByWheel();
+      selectCategory(categoryButtons[digitIndex].dataset.tabId, digitIndex, false);
+      return;
+    }
+
     // 4. Р“Р»РѕР±Р°Р»СЊРЅС‹Рµ С…РѕС‚РєРµРё СЂРµР¶РёРјР° Mist (Р±С‹СЃС‚СЂРѕРµ РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РєР°С‚РµРіРѕСЂРёР№/РїР°РїРѕРє)
     if (!document.body.classList.contains('mode-ios') && !document.body.classList.contains('mode-zen')) {
       const activeEl = document.activeElement;
@@ -4541,15 +4566,6 @@
             return;
           }
 
-          // Р¦РёС„СЂС‹ 1, 2, 3... РїРµСЂРµС…РѕРґСЏС‚ РїСЂСЏРјРѕ РЅР° СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰СѓСЋ РїР°РїРєСѓ
-          if (/^[1-9]$/.test(e.key) && !e.ctrlKey && !e.altKey && !e.metaKey) {
-            const numIndex = parseInt(e.key, 10) - 1;
-            if (numIndex < buttons.length) {
-              e.preventDefault();
-              selectCategory(buttons[numIndex].dataset.tabId, numIndex, false);
-              return;
-            }
-          }
         }
       }
     }

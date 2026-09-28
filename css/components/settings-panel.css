@@ -1,0 +1,860 @@
+/* Скрытая кнопка настроек (нижний левый угол) */
+.settings-trigger-zone {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.settings-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.settings-trigger-zone:hover .settings-icon-btn {
+  opacity: 0.5;
+}
+
+.settings-icon-btn:hover {
+  opacity: 1 !important;
+}
+
+/* Модальное окно настроек (Left Sidebar) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(6, 6, 8, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.modal-content {
+  background: rgba(15, 15, 16, 0.8);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0;
+  width: 45vw;
+  min-width: 780px;
+  max-width: 900px;
+  height: 100vh;
+  padding: 32px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 15px 0 40px rgba(0, 0, 0, 0.5);
+  
+  /* Sliding transform animation */
+  transform: translateX(-100%);
+  will-change: transform;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateX(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.modal-close-icon {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 28px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  line-height: 1;
+}
+
+.modal-close-icon:hover {
+  color: #fff;
+}
+
+.modal-body {
+  display: flex;
+  gap: 0; /* Gaps handled by column paddings */
+  flex: 1;
+  min-height: 0;
+}
+
+/* Левая колонка настроек */
+.modal-col-left {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding-right: 24px;
+  padding-bottom: 20px;
+  min-height: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.modal-col-left::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-col-left::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+/* Правая колонка настроек */
+.modal-col-right {
+  flex: 1.25;
+  min-width: 380px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: none;
+  padding-left: 24px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-section.full-height {
+  height: 100%;
+  min-height: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-section h3 {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.settings-row {
+  display: flex;
+  gap: 16px;
+}
+
+.settings-row-align {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.settings-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-field label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Semantic helper classes replacing HTML inline styles */
+.settings-field.ios-mode-field {
+  margin-top: 10px;
+}
+
+.settings-toggle-group.settings-subsettings {
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 6px;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Контейнер для селектора поисковой системы с превью-иконкой */
+.select-with-icon-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.settings-search-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.select-with-icon-wrapper .settings-select {
+  flex: 1;
+}
+
+/* Ряд вкладок-категорий настроек */
+.manage-shortcuts-header-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 9999px;
+  padding: 3px 4px 3px 8px;
+  margin-bottom: 12px;
+  min-height: 32px;
+  box-sizing: border-box;
+}
+
+.settings-categories-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  flex: 1;
+}
+
+.settings-categories-tabs::-webkit-scrollbar {
+  display: none; /* Hide scrollbars for pill tracker */
+}
+
+.settings-category-tab {
+  background-color: transparent;
+  border: none;
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-category-tab:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.settings-category-tab.active {
+  color: #fff;
+  background-color: var(--adaptive-color);
+  box-shadow: 0 2px 4px rgba(var(--adaptive-color-rgb), 0.25);
+}
+
+/* Кнопка добавления категории */
+.btn-add-category {
+  width: 26px;
+  height: 26px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.btn-add-category:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.btn-add-category:active {
+  transform: scale(0.95);
+}
+
+.btn-add-category img {
+  width: 10px;
+  height: 10px;
+  object-fit: contain;
+  opacity: 0.7;
+  filter: brightness(0) invert(1);
+  transition: all 0.2s ease;
+}
+
+.btn-add-category:hover img {
+  opacity: 1;
+}
+
+/* Переключатели */
+.settings-toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--adaptive-color);
+  cursor: pointer;
+}
+
+/* Формы, Инпуты и Селекты */
+.settings-select, .settings-input {
+  background-color: rgba(0, 0, 0, 0.45);
+  border: 1px solid transparent;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  outline: none;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-select:hover, .settings-input:hover {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+.settings-select:focus, .settings-input:focus {
+  background-color: rgba(0, 0, 0, 0.65);
+  border-color: var(--adaptive-color);
+  box-shadow: 0 0 0 3px rgba(var(--adaptive-color-rgb), 0.15);
+}
+
+/* Обособленная, компактная форма добавления ярлыка */
+.add-shortcut-form {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-shortcut-form .settings-input,
+.add-shortcut-form .settings-select {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* Кнопки */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-add {
+  background-color: var(--adaptive-color);
+  border: none;
+  color: #ffffff;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(var(--adaptive-color-rgb), 0.2);
+  width: 100%;
+}
+.btn-add:hover {
+  background-color: var(--adaptive-color-hover);
+  opacity: 0.95;
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 8px rgba(var(--adaptive-color-rgb), 0.35);
+}
+.btn-add:active {
+  transform: translateY(0);
+}
+
+.btn-file-label {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-file-label:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.btn-danger-action {
+  background-color: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.btn-danger-action:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ff6b6b;
+}
+
+.btn-secondary {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.btn-delete {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.4);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-delete:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.btn-edit {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.4);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-edit:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* Высокий правый список ярлыков */
+.modal-shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* clean rows separated by line border */
+  flex: 1;
+  overflow-y: auto;
+  border: none; /* remove heavy borders */
+  border-radius: 0;
+  padding: 0 8px;
+  background-color: transparent;
+  min-height: 0;
+}
+
+.modal-shortcuts-list::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-shortcuts-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+.modal-shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 8px;
+  border-radius: 0;
+  background-color: transparent; /* fully flat/borderless */
+  gap: 16px;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.2s ease;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.modal-shortcut-info,
+.modal-shortcut-actions {
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.modal-shortcut-item:last-child {
+  border-bottom: none;
+}
+
+.modal-shortcut-item:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Элегантный CSS-гриппер ⋮⋮ для перетаскивания */
+.modal-shortcut-item::before {
+  content: "⋮⋮";
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.modal-shortcut-item:hover::before {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.modal-shortcut-item:active::before {
+  cursor: grabbing;
+}
+
+/* Скрываем гриппер в режиме inline-редактирования */
+.modal-shortcut-item:has(.modal-shortcut-edit-container)::before {
+  display: none;
+}
+
+.modal-shortcut-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-shortcut-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal-shortcut-url {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal-shortcut-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-shortcut-item:hover .modal-shortcut-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Контейнер инлайн-редактирования */
+.modal-shortcut-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.inline-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.inline-input {
+  height: 32px;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.inline-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-inline-save {
+  background-color: var(--primary-color, #357ae8);
+  border: none;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 36px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.btn-inline-save:hover {
+  background-color: #2b6cb0;
+}
+
+.btn-inline-cancel {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 36px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.btn-inline-cancel:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+/* Кнопка сброса скрыта по умолчанию */
+.btn-inline-reset {
+  display: none !important;
+}
+
+/* Кнопка показывается только тогда, когда у контейнера есть класс has-custom-icon */
+.modal-shortcut-edit-container.has-custom-icon .btn-inline-reset {
+  display: inline-flex !important;
+}
+
+/* Стили для drag & drop сортировки */
+.modal-shortcut-item[draggable="true"] {
+  cursor: grab;
+}
+
+.modal-shortcut-item.dragging {
+  opacity: 0.35;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+.modal-shortcut-item.drag-over {
+  border-top: 2px solid var(--primary-color, #357ae8);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Стили компактных кнопок загрузки иконок */
+.form-actions-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.add-shortcut-form .btn-add {
+  width: 100%;
+}
+
+.input-with-icon-upload-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-with-icon-upload-wrapper .settings-input {
+  width: 100%;
+  padding-right: 36px;
+}
+
+.input-icon-upload-label {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.input-icon-upload-label:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-light .input-icon-upload-label {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+body.theme-light .input-icon-upload-label:hover {
+  color: #000;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.btn-square-upload {
+  width: 36px !important;
+  height: 36px !important;
+  background-color: #161617;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  flex-shrink: 0;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+}
+
+.btn-square-upload:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background-color: #1c1c1e;
+}
+
+.btn-square-upload img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  opacity: 0.5;
+  filter: brightness(0) invert(1);
+  transition: opacity 0.15s ease;
+}
+
+.btn-square-upload:hover img {
+  opacity: 1;
+}
+
+@media (max-width: 850px) {
+  .modal-content {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-right: none !important;
+  }
+  .modal-body {
+    flex-direction: column;
+    overflow-y: visible;
+    height: auto;
+  }
+  .modal-col-left, .modal-col-right {
+    min-width: 100%;
+    overflow-y: visible;
+    height: auto;
+    padding-right: 0;
+  }
+  .modal-col-left {
+    border-right: none;
+  }
+  .modal-col-right {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-left: 0;
+    padding-top: 24px;
+    margin-top: 12px;
+  }
+}
+

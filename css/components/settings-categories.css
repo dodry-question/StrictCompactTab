@@ -1,0 +1,184 @@
+/* ==========================================
+   НАСТРОЙКИ: УПРАВЛЕНИЕ КАТЕГОРИЯМИ
+   Вкладки-категории (выбор / создание / порядок),
+   заголовок активной категории и подсказка перетаскивания.
+   ========================================== */
+.category-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.category-tab-chip {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.65);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.category-tab-chip:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.category-tab-chip.active {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 -2px 0 0 rgba(255, 255, 255, 0.65);
+}
+
+/* Ярлык перетаскивается на эту вкладку — перенос в категорию */
+.category-tab-chip.drop-target {
+  color: #fff;
+  border-color: rgba(122, 162, 255, 0.9);
+  background: rgba(122, 162, 255, 0.18);
+}
+
+.category-tab-add {
+  border-style: dashed;
+  opacity: 0.8;
+}
+
+.category-active-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 8px;
+}
+
+.category-header-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-header-count {
+  font-size: 0.72rem;
+  opacity: 0.5;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+
+.category-header-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.category-action-btn {
+  padding: 4px 6px;
+  font-size: 0.72rem;
+  line-height: 1;
+  border-radius: 6px;
+}
+
+.category-action-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.category-hint {
+  font-size: 0.72rem;
+  opacity: 0.45;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.modal-list-empty {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 11px;
+  text-align: center;
+  padding: 12px;
+}
+
+/* ---------- Категории: светлая тема ---------- */
+body.theme-light .category-tab-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.65);
+}
+
+body.theme-light .category-tab-chip:hover {
+  color: #000;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+body.theme-light .category-tab-chip.active {
+  color: #1a202c;
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 -2px 0 0 rgba(0, 0, 0, 0.5);
+}
+
+body.theme-light .category-active-header {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .category-header-count {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.theme-light .category-hint,
+body.theme-light .modal-list-empty {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* ---------- Категории: адаптивная тема ---------- */
+body.theme-adaptive .category-tab-chip {
+  background: rgba(var(--adapt-surface-rgb), 0.7);
+  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .category-tab-chip:hover {
+  background: rgba(var(--adapt-surface-rgb), 0.9);
+  border-color: var(--adapt-primary);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .category-tab-chip.active {
+  background: rgba(var(--adapt-surface-rgb), 0.95);
+  border-color: var(--adapt-primary);
+  color: var(--adapt-primary);
+  box-shadow: inset 0 -2px 0 0 var(--adapt-primary);
+}
+
+body.theme-adaptive .category-active-header {
+  background: rgba(var(--adapt-surface-rgb), 0.5);
+  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+}
+
+body.theme-adaptive .category-header-count {
+  border-color: rgba(var(--adapt-outline-rgb), 0.5);
+}
+
+body.theme-adaptive .category-hint,
+body.theme-adaptive .modal-list-empty {
+  color: rgba(var(--adapt-on-surface-rgb), 0.6);
+}
+
