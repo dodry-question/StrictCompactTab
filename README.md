@@ -36,8 +36,20 @@
 * **Fluid Responsive Sidebar Layout**: The settings panel is fully responsive. On narrow screens or smaller viewports (under 850px), the dual-column layout dynamically collapses into a single-column stack, and the sidebar automatically scales to 100% of the screen width to guarantee readability without clipping.
 * **Adjustable Clock and Date**: Master toggle to display or hide the clock/date widget on the page (hiding it also hides sub-settings to clean up settings panel). Toggle the display of the current day of the week, choose between 12-hour (AM/PM) and 24-hour formats, and toggle the seconds counter.
 * **Confidential Weather Widget**: A private weather display located in the top-right corner of the page. It requires manual city input to prevent geo-tracking or IP leakage (note that when enabled, the browser sends queries directly to the keyless Open-Meteo API to retrieve weather updates; if the toggle is disabled, no network queries are ever initiated). Features automatic duplicate city resolution feedback (showing region and country details).
-* **Complete Privacy**: All configurations, shortcut lists, custom wallpapers, and favicons are stored strictly on your local machine using the storage API. The adaptive theme algorithm works 100% offline using a locally bundled version of Google's color utilities. No telemetry, tracking, or external server connections are used (except for the optional weather widget).
+* **Class Schedule (`.xlsx`)**: An optional widget for students. Enable it in the settings and a calendar button appears in the bottom-right corner (in every layout except Zen, where the screen stays empty). The panel slides up from the bottom edge **without any overlay or background blur** — shortcuts, clock and search stay visible and clickable underneath — and its height is exactly the height of its content, so a normal week fits without scrolling. Drop the weekly `.xlsx` file (or pick it with a click) and the extension parses it entirely on your machine: no library, no upload, no network request. The reader understands the real VyatSU College layout, which is 22 print blocks laid out side by side across 320 columns, with merged day/time cells and 650 merged ranges — it locates the header row by its text, resolves merged cells, and collapses groups that appear twice. You get a searchable list of every group found in the file (67 in the current file), pick yours once, and the week is rendered day by day: Monday to Sunday, pairs sorted by time. The day of your **next classes** is outlined in the Material You accent colour — and the outline follows you: once today's classes are over it moves to tomorrow by itself, and it shows the start time of that next class. When the week is over, nothing is highlighted rather than something stale. Because the file is republished every week, the file itself is what you replace, not the group: your choice survives an update, and `Change group` / `Remove file` are always one click away in the panel header. `Schedule in VK` opens the college group to grab the fresh file.
+* **Instant Icons, Cached Locally**: Shortcut tiles are never empty. Each tile paints a local placeholder on the very first frame, and the real icon is fetched **once per site**, cached in `localStorage` as a data URL, and drawn straight from cache on every later new tab — so your page is complete the moment it appears, with no network wait and no jumping layout. Uploading your own icon for a shortcut (Settings → Shortcut) skips the fetch entirely. *Transparency note:* for shortcuts **without** an uploaded icon, the icon comes from Google's public favicon service (`google.com/s2/favicons`). That request happens once per site and is then served from your own machine — but if you want zero third-party requests at all, upload icons for your shortcuts.
+* **Complete Privacy**: All configurations, shortcut lists, custom wallpapers, and favicons are stored strictly on your local machine using the storage API. The adaptive theme algorithm works 100% offline using a locally bundled version of Google's color utilities (and even that bundle is now loaded only when the adaptive theme is actually used). No telemetry, tracking, or external server connections are used (except for the optional weather widget and the one-time favicon fetch described above).
 * **JSON Backup and Restore**: Export your entire setup to a single JSON backup containing structured categories (`categories: [{ id, name, items }]`) together with the nested shortcut list, or import previous backups with safe fallback values and page reload handling. A built-in migrator understands every past format — flat shortcut lists, and the legacy `folders`, `categories` or `groups` keys (including groups with nested items) — and converts them into the current category structure automatically, without losing links, icons or category membership.
+
+---
+
+## Screenshots
+
+| Main view | Settings |
+|---|---|
+| <img src="assets/preview_main.png" alt="Strict Compact Tab main view" width="420"> | <img src="assets/preview_settings.png" alt="Strict Compact Tab settings" width="420"> |
+
+> These two images live in `assets/` for this page only. They are **excluded from the release archive** (`tools/build-release.ps1`) — the extension never loads them, and shipping 492 KB of unused screenshots in every install would break the "lightweight" promise.
 
 ---
 
@@ -79,6 +91,26 @@ To configure your interface:
 2. Click the gear icon that fades into view.
 3. Use the left column of the settings panel to add shortcuts, configure the grid layout, upload your wallpaper, change the tab icon, or manage your custom shortcut categories.
 4. Alternatively, use the **Backup** section to import an existing JSON configuration file to restore your settings.
+
+---
+
+## Class Schedule Setup
+
+The schedule widget is **off by default** and stores everything locally.
+
+1. In the settings panel (bottom-left gear), find **Grid Display → Class schedule** and switch it on.
+2. Click the calendar button in the bottom-right corner. The panel slides up from the bottom.
+3. Drop the weekly `.xlsx` schedule onto the panel — or click the drop zone to pick the file.
+4. Search for your group in the list and click it. The week appears immediately.
+
+Updating for a new week takes two clicks: open **Schedule in VK** to get the fresh `.xlsx` from the college group, then drop the new file onto the open panel. Your group is remembered, so the week is rebuilt for you.
+
+Notes:
+
+* The file is parsed locally in the browser. Nothing is uploaded.
+* Only the *parsed* schedule is kept in storage (not the `.xlsx` itself), and it is deliberately kept out of the JSON backup — the backup stays small. A removed file can be loaded again at any time.
+* The panel never blocks the page: there is no dimming overlay, clicking outside closes it, and `Escape` closes it too (`Escape` inside the group search box clears the search first).
+* In *Zen Mode* the button is hidden, because that mode is meant to be an empty screen.
 
 ---
 

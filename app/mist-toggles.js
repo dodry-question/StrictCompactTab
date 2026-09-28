@@ -115,17 +115,20 @@ if (layoutMistModeCb) {
 if (mistPresetSelect) {
   mistPresetSelect.addEventListener('change', (e) => {
     STATE.mistPreset = e.target.value;
-    saveState();
     applyMistPreset();
     // Смена пресета — абсолютные кастомные координаты сбрасываем
     // до значений нового пресета, чтобы элементы не «уезжали»
     clearCustomLayoutStyles();
-    // …и сдвиги обоих независимых виджетов возвращаем в ноль
+    // …и сдвиги обоих независимых виджетов возвращаем в ноль.
+    // saveState() теперь ПОСЛЕ сброса: раньше он стоял выше и записывал
+    // старые сдвиги, из-за чего на следующей вкладке виджеты возвращались
+    // на прежние координаты и сброс пресета не сохранялся
     STATE.mistHeadOffset = normalizeMistWidgets(null);
     tempMistWidgets = normalizeMistWidgets(null);
     applyLayoutPositions();
     renderShortcuts();
     renderTopbar();
+    saveState();
   });
 }
 

@@ -1,10 +1,43 @@
 // --- РђР”РђРџРўРР’РќР«Р™ РњР•РќР•Р”Р–Р•Р  РўР•Рњ ---
+// Библиотека Material You весит 47 КБ и нужна ТОЛЬКО адаптивной теме с
+// собственными обоями. Раньше она была обычным <script> в index.html, то есть
+// загружалась и разбиралась при КАЖДОЙ новой вкладке, хотя по умолчанию тема
+// тёмная и библиотека никому не нужна. Теперь она подгружается по требованию —
+// из generateThemeFromWallpaper, который вызывается только по действию
+// пользователя (загрузка обоев или переключение темы в настройках).
+// Если скрипт не загрузился, тема молча откатывается на getFallbackTheme().
+let materialLibPromise = null;
+
 const AdaptiveThemeManager = {
   getLib() {
     return window.materialColorUtilities || null;
   },
 
+  // Один раз за сессию: подмешивает <script> и ждёт его. CSP 'self' это
+  // разрешает — файл лежит рядом, внутри расширения.
+  ensureLib() {
+    if (window.materialColorUtilities) return Promise.resolve(window.materialColorUtilities);
+    if (materialLibPromise) return materialLibPromise;
+
+    materialLibPromise = new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'assets/material-color-utilities.min.js';
+      script.onload = () => resolve(window.materialColorUtilities || null);
+      script.onerror = () => {
+        // Неудачную загрузку НЕ запоминаем навсегда: иначе одна неудача
+        // (обновление кэша расширения, оборванная загрузка) навсегда
+        // оставляла бы адаптивную тему на серой заглушке до перезагрузки
+        materialLibPromise = null;
+        resolve(null);
+      };
+      document.head.appendChild(script);
+    });
+    return materialLibPromise;
+  },
+
   async generateThemeFromWallpaper(imageSrc, isDark = null) {
+    await this.ensureLib();
+
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'Anonymous';

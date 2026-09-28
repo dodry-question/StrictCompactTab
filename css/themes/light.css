@@ -17,6 +17,12 @@ body.theme-light .date-display {
   text-shadow: 0 1px 5px rgba(255, 255, 255, 0.9), 0 0 3px rgba(255, 255, 255, 0.5);
 }
 
+/* Суффикс AM/PM в базовых стилях белый — на светлом фоне исчезал */
+body.theme-light .clock-ampm {
+  color: rgba(26, 32, 44, 0.5) !important;
+  text-shadow: none !important;
+}
+
 body.theme-light #clock-subsettings {
   border-left-color: rgba(0, 0, 0, 0.08) !important;
 }
@@ -37,6 +43,16 @@ body.theme-light #weather-subsettings {
 
 body.theme-light .weather-input-status.status-searching {
   color: #718096;
+}
+
+/* Зелёный и красный статусы заданы в layouts/*.css под тёмный фон —
+   на светлом они не читались, поэтому дублируем с тёмными оттенками */
+body.theme-light .weather-input-status.status-success {
+  color: #2f855a;
+}
+
+body.theme-light .weather-input-status.status-error {
+  color: #c53030;
 }
 
 /* Поисковая строка */
@@ -231,6 +247,25 @@ body.theme-light .btn-edit {
 body.theme-light .btn-edit:hover {
   background-color: rgba(0, 0, 0, 0.06);
   color: #1a202c;
+}
+
+/* Кнопка «Сбросить»: базовый #ef4444 на белом фоне не хватает контраста */
+body.theme-light .btn-danger-action {
+  background-color: rgba(239, 68, 68, 0.08);
+  color: #c53030;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Баннер новой версии: переменной --text-color в проекте нет, поэтому
+   в светлой теме текст оставался белым на светлой подложке */
+body.theme-light .update-notification {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #2d3748;
+}
+
+body.theme-light .update-notification a {
+  color: #2b6cb0;
 }
 
 /* Список ярлыков в модальном окне */

@@ -153,6 +153,11 @@ function navHandleKeydown(e) {
   if (!model.zones.length) return false;
 
   const anchor = (e.target && e.target.nodeType === 1) ? e.target : document.activeElement;
+  // Панель «Расписание» — самостоятельный интерфейс (app/schedule.js): стрелки
+  // прокручивают её, Tab ходит по её элементам, а не по зонам новой вкладки
+  const schedulePanelEl = document.getElementById('schedule-panel');
+  if (schedulePanelEl && schedulePanelEl.classList.contains('is-open') &&
+      schedulePanelEl.contains(anchor)) return true;
   const inputType = anchor && anchor.tagName === 'INPUT' ? (anchor.type || 'text').toLowerCase() : '';
   const textLike = anchor && anchor.tagName === 'INPUT' &&
     ['text', 'search', 'url', 'email'].includes(inputType);
@@ -295,12 +300,7 @@ function createMistPill(item) {
   img.className = 'mist-pill-icon';
   img.alt = '';
 
-  let hostname = '';
-  try { hostname = new URL(item.url).hostname; } catch (e) { hostname = item.url; }
-  img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
-  img.onerror = () => {
-    img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
-  };
+  window.ShortcutIcons.attach(img, item, 64);
 
   const span = document.createElement('span');
   span.className = 'mist-pill-label';

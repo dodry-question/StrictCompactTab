@@ -26,6 +26,8 @@ window.STATE = {
   layoutMistMode: false,
   mistPreset: "center",
   mistPerRow: 6,
+  scheduleEnabled: false,
+  scheduleGroup: null,
   mistHeadOffset: {
     clock: { x: 0, y: 0, w: 0, h: 0, s: 1 },
     search: { x: 0, y: 0, w: 0, h: 0, s: 1 }

@@ -113,6 +113,11 @@ const byId = (id) => {
   return elementById.get(id);
 };
 
+// Кэш по селектору: в браузере document.querySelector('.x') всегда возвращает
+// ОДИН и тот же элемент. Без кэша нельзя проверить, что код выставил атрибут
+// (например href иконки вкладки) — каждый вызов давал бы новый элемент.
+const selectorCache = new Map();
+
 globalThis.document = {
   body: makeElement('body'),
   documentElement: makeElement('html'),
@@ -122,7 +127,12 @@ globalThis.document = {
   hidden: false,
   getElementById: (id) => byId(id),
   // в index.html есть link.page-favicon — возвращаем элемент, чтобы href можно было назначить
-  querySelector: (sel) => makeElement('link', String(sel).replace(/[.#]/, '')),
+  querySelector: (sel) => {
+    if (!selectorCache.has(sel)) {
+      selectorCache.set(sel, makeElement('link', String(sel).replace(/[.#]/, '')));
+    }
+    return selectorCache.get(sel);
+  },
   querySelectorAll: () => [],
   getElementsByClassName: () => [],
   createElement: (tag) => makeElement(tag),
@@ -251,4 +261,121 @@ test('обработчики событий навешены и инициали
   assert.ok((docListeners.keydown || []).length >= 1, 'нет keydown на document');
   assert.ok((winListeners.wheel || []).length >= 1, 'нет wheel на window');
   assert.ok(intervals.length >= 1, 'часы не заведены через setInterval');
+});
+
+test('иконка вкладки: по умолчанию компактная, своя — из состояния', () => {
+  // Раньше здесь ставился логотип favicon.png на 78 КБ, потом прозрачная
+  // иконка 16px — иконка вкладки переключалась и исчезала на долю секунды.
+  // Теперь значение одно и то же в favicon-loader.js и applyFavicon().
+  const href = () => probe("document.querySelector('.page-favicon').getAttribute('href')");
+  assert.equal(href(), 'assets/icon-48.png');
+
+  probe('STATE.customFavicon = "data:image/png;base64,myicon"; applyFavicon()');
+  assert.equal(href(), 'data:image/png;base64,myicon');
+
+  probe('STATE.customFavicon = null; applyFavicon()');
+  assert.equal(href(), 'assets/icon-48.png');
+});
+
+test('панель расписания скрыта критическим правилом до применения стилей', () => {
+  // Плагин грузит свой CSS по требованию, поэтому в index.html есть
+  // html:not(.schedule-ready) #schedule-panel { display: none !important }.
+  // Проверяем, что правило действительно лежит в подключённой таблице —
+  // иначе панель мелькала бы неоформленной на долю секунды.
+  const base = read('css/base/variables-and-reset.css');
+  assert.match(base, /html:not\(\.schedule-ready\)\s+#schedule-panel/);
+  assert.match(base, /display:\s*none\s*!important/);
+
+  // И в index.html плагин подключён НЕ через <link>, а кодом
+  const html = read('index.html');
+  assert.doesNotMatch(html, /<link[^>]*schedule-panel\.css/);
+  assert.match(html, /services\/shortcut-icons\.js/);
+});
+
+test('манифест объявляет прозрачные иконки 16/32 — иначе вкладка моргает логотипом', () => {
+  // Chrome до загрузки страницы показывает иконку расширения из манифеста.
+  // Раньше там стояли настоящие 48/128, и при своей иконке вкладка на долю
+  // секунды показывала логотип, прежде чем подставить пользовательский.
+  const manifest = JSON.parse(read('manifest.json'));
+  assert.equal(manifest.icons['16'], 'assets/icon16_trans.png');
+  assert.equal(manifest.icons['32'], 'assets/icon32_trans.png');
+  // карточка расширения и панель настроек по-прежнему с нормальным логотипом
+  assert.equal(manifest.icons['48'], 'assets/icon-48.png');
+  assert.equal(manifest.icons['128'], 'assets/icon-128.png');
+
+  // сами файлы существуют и действительно крошечные (пустые прозрачные PNG)
+  ['16', '32'].forEach((size) => {
+    const file = path.join(ROOT, manifest.icons[size]);
+    assert.ok(fs.existsSync(file), `нет ${manifest.icons[size]}`);
+    assert.ok(fs.statSync(file).size < 1024, 'прозрачная иконка должна быть крошечной');
+  });
+});
+
+// --- Статические проверки: то, что не ловит загрузка скриптов ------------
+
+test('все ключи data-i18n* из разметки есть в словаре для en и ru', () => {
+  const html = read('index.html');
+  const keys = [...html.matchAll(/data-i18n(?:-title|-placeholder)?="([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(keys.length > 20, `найдено ключей: ${keys.length}`);
+
+  const en = TRANSLATIONS.en;
+  const ru = TRANSLATIONS.ru;
+  const missingEn = keys.filter((key) => !(key in en));
+  const missingRu = keys.filter((key) => !(key in ru));
+  // Раньше здесь опечатка saveBtn вместо btnSave: кнопка «Сохранить»
+  // в панели макета не переводилась, а applyLanguage молча её пропускал
+  assert.deepEqual(missingEn, [], 'нет ключей в en');
+  assert.deepEqual(missingRu, [], 'нет ключей в ru');
+  assert.deepEqual(Object.keys(en).sort(), Object.keys(ru).sort(),
+    'наборы ключей en и ru должны совпадать');
+});
+
+test('обработчик клавиш не падает на цифрах (isInputActive должен быть в области видимости)', () => {
+  // Регрессия: isInputActive объявлялся во вложенном блоке ниже по
+  // обработчику, и обращение к нему выше бросало ReferenceError —
+  // цифровые хоткеи категорий не работали вообще.
+  mistTabsEl.style.display = 'flex';
+  const keydown = (docListeners.keydown || [])[0];
+  assert.ok(keydown, 'нет слушателя keydown');
+  ['1', '2', '9', '0', 'ArrowLeft', 'Escape'].forEach((key) => {
+    assert.doesNotThrow(() => keydown({
+      key,
+      target: { nodeType: 1, tagName: 'BODY' },
+      preventDefault() {},
+      ctrlKey: false,
+      altKey: false,
+      metaKey: false
+    }), `клавиша ${key} вызывает исключение`);
+  });
+  mistTabsEl.style.display = '';
+});
+
+test('loadState снимает флаг state-loading даже при исключении', () => {
+  // Иначе любая ошибка внутри колбэка оставляла страницу с
+  // html.state-loading, то есть с вечно пустой (чёрной) вкладкой
+  const source = read('app/state-render.js');
+  assert.match(source, /finally\s*\{[\s\S]*classList\.remove\('state-loading'\)/,
+    'снятие флага должно быть в finally');
+  assert.match(source, /catch\s*\(error\)/, 'тело колбэка должно быть в try/catch');
+});
+
+test('экспорт бэкапа не тащит файл расписания, импорт возвращает настройки плагина', () => {
+  // Асимметрия была с обеих сторон: scheduleData (сотни КБ разобранного .xlsx)
+  // попадал в JSON, а scheduleEnabled/scheduleGroup при импорте терялись,
+  // потому что clearAndSet стирает хранилище целиком.
+  const payload = probe('buildBackupPayload({' +
+    ' scheduleData: { groups: [{ name: "G", lessons: [1,2,3] }] },' +
+    ' lastUpdateCheck: 123,' +
+    ' shortcutIconCache: { "128|example.com": "data:image/png;base64,x" },' +
+    ' theme: "dark" })');
+
+  assert.equal(payload.scheduleData, undefined, 'файл расписания не должен попадать в бэкап');
+  assert.equal(payload.lastUpdateCheck, undefined, 'служебные ключи не должны попадать в бэкап');
+  assert.equal(payload.shortcutIconCache, undefined, 'кэш иконок не должен попадать в бэкап');
+  assert.equal(payload.theme, 'dark', 'обычные настройки сохраняются');
+
+  // импорт обязан вернуть галку и выбранную группу
+  const importSource = read('app/backup-updates.js');
+  assert.match(importSource, /scheduleEnabled:\s*data\.scheduleEnabled/);
+  assert.match(importSource, /scheduleGroup:\s*data\.scheduleGroup/);
 });

@@ -98,9 +98,31 @@ globalThis.document = {
   }
 };
 
+// services/shortcut-icons.js грузит иконку через new Image() и кэширует её
+// в localStorage. В тестах сеть недоступна: картинка не «приедет», плитка
+// остаётся на локальной заглушке — этого достаточно для проверки структуры.
+const imageProbes = [];
+globalThis.Image = class {
+  constructor() {
+    imageProbes.push(this);
+    this._src = '';
+  }
+  // геттер обязателен: сервис читает probe.src, чтобы положить иконку в кэш
+  get src() { return this._src; }
+  set src(value) { this._src = value; }
+};
+
+const iconStore = new Map();
+globalThis.localStorage = {
+  getItem: (k) => (iconStore.has(k) ? iconStore.get(k) : null),
+  setItem: (k, v) => { iconStore.set(k, String(v)); },
+  removeItem: (k) => { iconStore.delete(k); }
+};
+
 await import('../services/search.js');
 await import('../services/search-ui.js');
 await import('../services/weather.js');
+await import('../services/shortcut-icons.js');
 await import('../services/shortcut-renderer.js');
 await import('../services/shortcut-categories.js');
 await import('../services/shortcut-layout.js');
@@ -277,11 +299,77 @@ test('renders classic shortcut cards and skips folders', () => {
   assert.equal(exampleCard.href, 'https://example.com/path');
   assert.equal(exampleCard.className, 'shortcut-card size-medium');
   assert.equal(exampleCard.dataset.id, 'example');
-  assert.equal(exampleCard.children[0].src, 'https://www.google.com/s2/favicons?sz=128&domain=example.com');
+  // Без загруженной иконки на плитке мгновенно рисуется ЛОКАЛЬНАЯ заглушка
+  // (никакого сетевого запроса на первом кадре — раньше карточка была пустой)
+  assert.equal(exampleCard.children[0].src, window.ShortcutIcons.PLACEHOLDER);
   assert.equal(exampleCard.children[1].textContent, 'Example');
+  // Загруженная пользователем иконка ставится как есть и сразу помечается
+  // как готовая (is-loaded), onerror-обработчика больше нет
   assert.equal(customCard.children[0].src, 'data:image/png;base64,icon');
-  customCard.children[0].onerror();
-  assert.match(customCard.children[0].src, /^data:image\/svg\+xml/);
+  assert.equal(customCard.children[0].onerror, undefined);
+});
+
+// --- Иконки ярлыков: мгновенная отрисовка и локальный кэш ----------------
+
+test('иконка без кэша: плитка сразу получает локальную заглушку, сеть — отдельно', () => {
+  window.ShortcutIcons.clear();
+  imageProbes.length = 0;
+
+  const img = new MockElement('img');
+  window.ShortcutIcons.attach(img, { id: 'a', url: 'https://example.com/x' }, 128);
+
+  // главное: на первом кадре уже есть картинка, плитка не выглядит пустой
+  assert.equal(img.src, window.ShortcutIcons.PLACEHOLDER);
+  assert.ok(!img.classes.has('is-loaded'), 'пока не загружена — не помечена как готовая');
+  // а сетевой запрос ушёл отдельным объектом, а не в src плитки
+  assert.equal(imageProbes.length, 1);
+  assert.equal(imageProbes[0]._src, 'https://www.google.com/s2/favicons?sz=128&domain=example.com');
+});
+
+test('иконка из кэша ставится сразу и без сетевого запроса', () => {
+  window.ShortcutIcons.clear();
+  imageProbes.length = 0;
+
+  // первая загрузка отработала — иконка легла в кэш
+  const first = new MockElement('img');
+  window.ShortcutIcons.attach(first, { id: 'a', url: 'https://example.com/x' }, 128);
+  imageProbes[0].onload();                       // имитируем успешный ответ
+  assert.ok(first.classes.has('is-loaded'));
+  assert.ok(iconStore.has('shortcutIconCache'));
+
+  // второе открытие вкладки: тот же домен — картинка есть сразу
+  imageProbes.length = 0;
+  const second = new MockElement('img');
+  window.ShortcutIcons.attach(second, { id: 'a', url: 'https://example.com/other' }, 128);
+
+  assert.notEqual(second.src, window.ShortcutIcons.PLACEHOLDER);
+  assert.ok(second.classes.has('is-loaded'), 'иконка из кэша должна быть сразу готова');
+  assert.equal(imageProbes.length, 0, 'из кэша — без обращения к сети');
+});
+
+test('недоступная иконка даёт нейтральный запасной глиф', () => {
+  window.ShortcutIcons.clear();
+  imageProbes.length = 0;
+
+  const img = new MockElement('img');
+  window.ShortcutIcons.attach(img, { id: 'b', url: 'https://broken.example/' }, 128);
+  imageProbes[0].onerror();
+
+  assert.equal(img.src, window.ShortcutIcons.FALLBACK);
+  assert.ok(img.classes.has('is-loaded'));
+  assert.ok(!img.classes.has('icon-pending'), 'ожидание снято, плитка не осталась приглушённой');
+});
+
+test('загруженная пользователем иконка идёт как есть, без кэша и сети', () => {
+  window.ShortcutIcons.clear();
+  imageProbes.length = 0;
+
+  const img = new MockElement('img');
+  window.ShortcutIcons.attach(img, { id: 'c', url: 'https://x.example/', customIcon: 'data:image/png;base64,q' }, 128);
+
+  assert.equal(img.src, 'data:image/png;base64,q');
+  assert.equal(imageProbes.length, 0, 'своя иконка никуда не отправляется');
+  assert.equal(iconStore.size, 0, 'свои иконки не кэшируются');
 });
 
 test('renders category tabs with roving focus and reuses matching buttons', () => {

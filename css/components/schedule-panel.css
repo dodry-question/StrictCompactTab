@@ -1,0 +1,808 @@
+/* ==========================================
+   ПЛАГИН «РАСПИСАНИЕ ЗАНЯТИЙ»
+   ==========================================
+
+   Кнопка в правом нижнем углу + панель, выезжающая снизу.
+
+   Отличие от погодной шторки (topbar.css) — здесь НЕТ оверлея и НЕТ блюра
+   страницы: панель ничего не перекрывает и не затемняет, под ней остаются
+   ярлыки, часы и поиск. Высота панели не задана — она ровно такая, сколько
+   нужно содержимому, чтобы не прокручивать колесом (прокрутка внутри тела
+   панели — только страховка для очень длинной недели). */
+
+/* ---------- КНОПКА (FAB) ---------- */
+
+.schedule-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 60;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  color: #fff;
+  background: rgba(20, 20, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  opacity: 0.62;
+  transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+/* Показываем только при включённой галке в настройках: до загрузки
+   состояния кнопка не мигает, а сразу появляется готовая */
+body.schedule-on .schedule-fab {
+  display: flex;
+}
+
+.schedule-fab:hover,
+.schedule-fab:focus-visible {
+  opacity: 1;
+  background: rgba(28, 28, 28, 0.72);
+  transform: translateY(-1px);
+}
+
+.schedule-fab:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+.schedule-fab[aria-expanded="true"] {
+  opacity: 1;
+  background: rgba(28, 28, 28, 0.78);
+}
+
+/* Дзен-режим (чистый экран) и режим редактирования макета — кнопки нет.
+   Пресет Mist «Ультра-минимал» (Zen Drop) — это интерфейс, он остаётся. */
+body.mode-zen .schedule-fab,
+body.layout-edit-mode .schedule-fab {
+  display: none !important;
+}
+
+/* ---------- ПАНЕЛЬ ---------- */
+
+.schedule-panel {
+  position: fixed;
+  right: 14px;
+  bottom: 82px;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  /* «Квадратная» вкладка снизу: не широкая колонка во весь экран */
+  width: min(440px, calc(100vw - 28px));
+  /* высота = содержимому; предел — страховка для очень длинной недели */
+  max-height: calc(100vh - 108px);
+  color: rgba(245, 247, 250, 0.96);
+  background: rgba(14, 17, 23, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(24px) saturate(135%);
+  -webkit-backdrop-filter: blur(24px) saturate(135%);
+  transform: translateY(24px);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.22s ease, opacity 0.22s ease, visibility 0s linear 0.22s;
+}
+
+.schedule-panel.is-open {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.schedule-panel.is-dragover {
+  border-color: rgba(120, 170, 255, 0.7);
+}
+
+/* ---------- ШАПКА ----------
+   Три строки: заголовок + крестик, подзаголовок, кнопки. Так текст никуда не
+   «улетает» при любой ширине панели. */
+.schedule-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: inherit;
+  border-radius: 20px 20px 0 0;
+}
+
+.schedule-heading {
+  min-width: 0;
+}
+
+.schedule-heading-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.schedule-header h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-subtitle {
+  margin: 3px 0 0;
+  overflow: hidden;
+  color: rgba(245, 247, 250, 0.55);
+  font-size: 11.5px;
+  /* !important — обходит глобальный сброс line-height: 1.15 для p/span */
+  line-height: 1.35 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* inline-flex, а не button: у <a> свой текст иначе прилипает к верхнему
+   краю бокса, и «Расписание в ВК» визуально уезжает вверх */
+.schedule-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 11px;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.schedule-action:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.schedule-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 19px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.schedule-close:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.schedule-action:focus-visible,
+.schedule-close:focus-visible,
+.schedule-group-btn:focus-visible,
+.schedule-drop:focus-visible,
+.schedule-search:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+/* ---------- ТЕЛО ПАНЕЛИ ---------- */
+
+.schedule-body {
+  flex: 0 1 auto;
+  min-height: 0;
+  padding: 12px 14px 14px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Свой ползунок: системный белый на тёмной панели бросается в глаза */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.schedule-body::-webkit-scrollbar {
+  width: 9px;
+}
+
+.schedule-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.schedule-body::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.18);
+  background-clip: content-box;
+  border: 3px solid transparent;
+  border-radius: 9px;
+}
+
+.schedule-body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.34);
+  background-clip: content-box;
+}
+
+/* ---------- ВИД 1: ПЕРЕНОС ФАЙЛА ---------- */
+
+.schedule-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 180px;
+  padding: 26px 18px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px dashed rgba(255, 255, 255, 0.24);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.schedule-drop:hover,
+.schedule-drop.is-dragover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(160, 195, 255, 0.7);
+}
+
+.schedule-drop-hint {
+  color: rgba(245, 247, 250, 0.88);
+  font-size: 14px;
+  line-height: 1.4 !important;
+}
+
+.schedule-drop-or {
+  color: rgba(245, 247, 250, 0.5);
+  font-size: 12px;
+  line-height: 1.4 !important;
+}
+
+.schedule-error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  color: #ffd7d7;
+  font-size: 12.5px;
+  line-height: 1.45 !important;
+  background: rgba(196, 62, 62, 0.18);
+  border: 1px solid rgba(255, 138, 138, 0.34);
+  border-radius: 10px;
+}
+
+/* ---------- ВИД 2: ВЫБОР ГРУППЫ ---------- */
+
+.schedule-groups-title {
+  margin: 0 0 8px;
+  color: rgba(245, 247, 250, 0.6);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.schedule-search-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.schedule-search-icon {
+  position: absolute;
+  left: 11px;
+  color: rgba(245, 247, 250, 0.42);
+  pointer-events: none;
+}
+
+.schedule-search {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 12px 0 34px;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.3 !important;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 11px;
+  outline: none;
+  appearance: none;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.schedule-search::-webkit-search-cancel-button {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  background: rgba(245, 247, 250, 0.45);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.schedule-search::placeholder {
+  color: rgba(245, 247, 250, 0.38);
+}
+
+.schedule-search:focus {
+  border-color: rgba(160, 195, 255, 0.7);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* иконка поиска подсвечивается вместе с полем */
+.schedule-search-row:focus-within .schedule-search-icon {
+  color: rgba(160, 195, 255, 0.95);
+}
+
+/* Групп в файле десятки: одна колонка, чтобы названия не рвались на полуслове */
+.schedule-groups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.schedule-group-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 44px;
+  padding: 8px 42px 8px 11px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.schedule-group-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.schedule-group-btn.is-selected {
+  border-color: rgba(120, 170, 255, 0.75);
+  background: rgba(120, 170, 255, 0.16);
+}
+
+.schedule-group-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.schedule-group-spec {
+  color: rgba(245, 247, 250, 0.5);
+  font-size: 11.5px;
+  line-height: 1.3 !important;
+}
+
+.schedule-group-count {
+  position: absolute;
+  top: 8px;
+  right: 11px;
+  color: rgba(245, 247, 250, 0.38);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.schedule-groups-none {
+  margin: 14px 0 0;
+  color: rgba(245, 247, 250, 0.55);
+  font-size: 13px;
+  line-height: 1.4 !important;
+  text-align: center;
+}
+
+/* ---------- ВИД 3: САМО РАСПИСАНИЕ ---------- */
+
+.schedule-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.schedule-day {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+}
+
+.schedule-day-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 12px;
+  color: rgba(245, 247, 250, 0.7);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.3 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(20, 24, 31, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.schedule-day-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Подсвечивается день СЛЕДУЮЩИХ пар, а не «сегодня»: если сегодня всё
+   закончилось, обводка уезжает на завтра.
+   Цвет — основной цвет темы: в адаптивной теме это палитра Material You
+   (--adaptive-color -> --adapt-primary). Акцент намеренно приглушённый:
+   раньше заливка заголовка была крикливой, поэтому берём ~15–20% основного
+   цвета на фоне, а акцент даём тонкой рамкой и полосой слева. */
+.schedule-day.is-next {
+  border-color: color-mix(in srgb, var(--adaptive-color) 58%, transparent);
+  background: color-mix(in srgb, var(--adaptive-color) 6%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--adaptive-color) 32%, transparent);
+}
+
+.schedule-day.is-next .schedule-day-title {
+  color: color-mix(in srgb, var(--adaptive-color) 72%, #ffffff);
+  background: color-mix(in srgb, var(--adaptive-color) 15%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--adaptive-color) 26%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--adaptive-color) 80%, #000000);
+}
+
+.schedule-day-badge {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 1px 7px;
+  color: color-mix(in srgb, var(--adaptive-color) 25%, #ffffff);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  background: color-mix(in srgb, var(--adaptive-color) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--adaptive-color) 38%, transparent);
+  border-radius: 6px;
+}
+
+.schedule-lessons {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-lesson {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.schedule-lesson:last-child {
+  border-bottom: none;
+}
+
+.schedule-lesson-time {
+  color: rgba(245, 247, 250, 0.62);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4 !important;
+}
+
+.schedule-lesson-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.schedule-lesson-subject {
+  font-size: 13.5px;
+  line-height: 1.35 !important;
+}
+
+.schedule-lesson-kind {
+  align-self: flex-start;
+  padding: 1px 7px;
+  color: rgba(245, 247, 250, 0.72);
+  font-size: 10.5px;
+  line-height: 1.5 !important;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+}
+
+.schedule-lesson-meta {
+  color: rgba(245, 247, 250, 0.52);
+  font-size: 11.5px;
+  line-height: 1.35 !important;
+}
+
+.schedule-empty {
+  padding: 22px 12px;
+  color: rgba(245, 247, 250, 0.6);
+  font-size: 13px;
+  line-height: 1.5 !important;
+  text-align: center;
+}
+
+/* ---------- СВЕТЛАЯ ТЕМА ---------- */
+
+body.theme-light .schedule-fab {
+  color: #2d3748;
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
+}
+
+body.theme-light .schedule-fab:hover,
+body.theme-light .schedule-fab:focus-visible,
+body.theme-light .schedule-fab[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+body.theme-light .schedule-fab:focus-visible {
+  outline-color: rgba(0, 0, 0, 0.6);
+}
+
+body.theme-light .schedule-panel {
+  color: #20242b;
+  background: rgba(246, 248, 252, 0.94);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.16);
+}
+
+body.theme-light .schedule-header,
+body.theme-light .schedule-day,
+body.theme-light .schedule-lesson {
+  border-color: rgba(0, 0, 0, 0.09);
+}
+
+body.theme-light .schedule-drop {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+body.theme-light .schedule-drop:hover,
+body.theme-light .schedule-drop.is-dragover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(53, 122, 232, 0.7);
+}
+
+body.theme-light .schedule-action,
+body.theme-light .schedule-close,
+body.theme-light .schedule-group-btn,
+body.theme-light .schedule-search {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.theme-light .schedule-action:hover,
+body.theme-light .schedule-close:hover,
+body.theme-light .schedule-group-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .schedule-day-title {
+  color: rgba(32, 36, 43, 0.7);
+  background: rgba(246, 248, 252, 0.94);
+  border-bottom-color: rgba(0, 0, 0, 0.09);
+}
+
+body.theme-light .schedule-day.is-next {
+  border-color: color-mix(in srgb, var(--adaptive-color) 50%, transparent);
+  background: color-mix(in srgb, var(--adaptive-color) 5%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--adaptive-color) 28%, transparent);
+}
+
+body.theme-light .schedule-day.is-next .schedule-day-title {
+  color: color-mix(in srgb, var(--adaptive-color) 78%, #000000);
+  background: color-mix(in srgb, var(--adaptive-color) 13%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--adaptive-color) 24%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--adaptive-color) 80%, #000000);
+}
+
+body.theme-light .schedule-day-badge {
+  color: color-mix(in srgb, var(--adaptive-color) 70%, #000000);
+  background: color-mix(in srgb, var(--adaptive-color) 14%, transparent);
+  border-color: color-mix(in srgb, var(--adaptive-color) 34%, transparent);
+}
+
+body.theme-light .schedule-lesson-kind {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .schedule-subtitle,
+body.theme-light .schedule-groups-title,
+body.theme-light .schedule-group-spec,
+body.theme-light .schedule-lesson-time,
+body.theme-light .schedule-lesson-meta,
+body.theme-light .schedule-groups-none,
+body.theme-light .schedule-drop-or,
+body.theme-light .schedule-search::placeholder,
+body.theme-light .schedule-group-count,
+body.theme-light .schedule-search-icon {
+  color: rgba(32, 36, 43, 0.6);
+}
+
+/* Ползунок в светлой теме — серый, не белый */
+body.theme-light .schedule-body {
+  scrollbar-color: rgba(0, 0, 0, 0.24) transparent;
+}
+
+body.theme-light .schedule-body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  background-clip: content-box;
+}
+
+body.theme-light .schedule-body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.34);
+  background-clip: content-box;
+}
+
+body.theme-light .schedule-lesson-kind {
+  color: rgba(32, 36, 43, 0.75);
+}
+
+body.theme-light .schedule-action:focus-visible,
+body.theme-light .schedule-close:focus-visible,
+body.theme-light .schedule-group-btn:focus-visible,
+body.theme-light .schedule-drop:focus-visible,
+body.theme-light .schedule-search:focus-visible {
+  outline-color: rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- АДАПТИВНАЯ ТЕМА ---------- */
+
+body.theme-adaptive .schedule-fab {
+  color: var(--adapt-on-surface);
+  background: rgba(var(--adapt-surface-rgb), 0.72);
+  border-color: rgba(var(--adapt-outline-rgb), 0.42);
+}
+
+body.theme-adaptive .schedule-fab:hover,
+body.theme-adaptive .schedule-fab:focus-visible,
+body.theme-adaptive .schedule-fab[aria-expanded="true"] {
+  background: rgba(var(--adapt-surface-rgb), 0.94);
+}
+
+body.theme-adaptive .schedule-fab:focus-visible {
+  outline-color: var(--adapt-primary);
+}
+
+body.theme-adaptive .schedule-panel {
+  color: var(--adapt-on-surface);
+  background: rgba(var(--adapt-surface-rgb), 0.92);
+  border-color: rgba(var(--adapt-outline-rgb), 0.42);
+}
+
+body.theme-adaptive .schedule-header,
+body.theme-adaptive .schedule-day,
+body.theme-adaptive .schedule-lesson {
+  border-color: rgba(var(--adapt-outline-rgb), 0.28);
+}
+
+body.theme-adaptive .schedule-drop {
+  background: rgba(var(--adapt-on-surface-rgb), 0.045);
+  border-color: rgba(var(--adapt-outline-rgb), 0.42);
+}
+
+body.theme-adaptive .schedule-drop:hover,
+body.theme-adaptive .schedule-drop.is-dragover {
+  border-color: var(--adapt-primary);
+}
+
+body.theme-adaptive .schedule-action,
+body.theme-adaptive .schedule-close,
+body.theme-adaptive .schedule-group-btn,
+body.theme-adaptive .schedule-search {
+  background: rgba(var(--adapt-on-surface-rgb), 0.06);
+  border-color: rgba(var(--adapt-outline-rgb), 0.34);
+}
+
+body.theme-adaptive .schedule-action:hover,
+body.theme-adaptive .schedule-close:hover,
+body.theme-adaptive .schedule-group-btn:hover {
+  background: rgba(var(--adapt-on-surface-rgb), 0.12);
+}
+
+body.theme-adaptive .schedule-day-title {
+  color: var(--adapt-secondary);
+  background: rgba(var(--adapt-surface-rgb), 0.94);
+}
+
+/* В адаптивной теме отдельные правила для подсветки не нужны: --adaptive-color
+   сам подставляет --adapt-primary из палитры Material You, а приглушение
+   выше одинаково работает и на тёмной, и на светлой поверхности. */
+
+body.theme-adaptive .schedule-subtitle,
+body.theme-adaptive .schedule-groups-title,
+body.theme-adaptive .schedule-group-spec,
+body.theme-adaptive .schedule-lesson-time,
+body.theme-adaptive .schedule-lesson-meta,
+body.theme-adaptive .schedule-groups-none,
+body.theme-adaptive .schedule-drop-or,
+body.theme-adaptive .schedule-search::placeholder,
+body.theme-adaptive .schedule-group-count,
+body.theme-adaptive .schedule-search-icon {
+  color: rgba(var(--adapt-on-surface-rgb), 0.62);
+}
+
+body.theme-adaptive .schedule-body {
+  scrollbar-color: rgba(var(--adapt-on-surface-rgb), 0.26) transparent;
+}
+
+body.theme-adaptive .schedule-body::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.22);
+  background-clip: content-box;
+}
+
+body.theme-adaptive .schedule-body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.38);
+  background-clip: content-box;
+}
+
+body.theme-adaptive .schedule-action:focus-visible,
+body.theme-adaptive .schedule-close:focus-visible,
+body.theme-adaptive .schedule-group-btn:focus-visible,
+body.theme-adaptive .schedule-drop:focus-visible,
+body.theme-adaptive .schedule-search:focus-visible {
+  outline-color: var(--adapt-primary);
+}
+
+/* ---------- УЗКИЕ ЭКРАНЫ ---------- */
+
+@media (max-width: 520px) {
+  .schedule-panel {
+    right: 8px;
+    left: 8px;
+    bottom: 78px;
+    width: auto;
+    max-height: calc(100vh - 100px);
+  }
+
+  .schedule-lesson {
+    grid-template-columns: 78px minmax(0, 1fr);
+  }
+}
+
+/* Безопасность: [hidden] должен побеждать display из этого файла */
+.schedule-panel [hidden],
+.schedule-fab[hidden] {
+  display: none !important;
+}

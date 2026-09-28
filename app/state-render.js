@@ -1,7 +1,14 @@
 // --- Р¤РЈРќРљР¦РР РћР‘Р РђР‘РћРўРљР Р”РђРќРќР«РҐ Р РћРўР РРЎРћР’РљР ---
 
+// Легаси-ключи от версий до 1.10.5. После успешной миграции их нужно удалить,
+// иначе удалённые пользователем категории воскресают на каждой новой вкладке
+// пустыми вкладками: migrateToNested восстанавливает папку из categories/
+// folders/groups, которых уже нет среди shortcuts.
+const LEGACY_CATEGORY_KEYS = ['folders', 'categories', 'groups'];
+
 function loadState() {
-  storage.get(['shortcuts', 'categories', 'folders', 'groups', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates', 'layoutZenMode', 'layoutMistMode', 'mistPreset', 'mistPerRow', 'mistHeadOffset'], (result) => {
+  storage.get(['shortcuts', 'categories', 'folders', 'groups', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates', 'layoutZenMode', 'layoutMistMode', 'mistPreset', 'mistPerRow', 'mistHeadOffset', 'scheduleEnabled', 'scheduleGroup'], (result) => {
+  try {
     STATE.shortcuts = migrateToNested(result.shortcuts ?? DEFAULT_SHORTCUTS, extractCategoryMeta(result));
     STATE.customSearchEngines = result.customSearchEngines ?? [];
     STATE.columns = result.columns ?? 10;
@@ -11,9 +18,12 @@ function loadState() {
     if (STATE.customFavicon === null) {
       localStorage.removeItem('customFavicon');
     } else {
-      localStorage.setItem('customFavicon', JSON.stringify(STATE.customFavicon));
+      // Формат СЫРОЙ, как пишет storage/storage.js для строк: favicon-loader.js
+      // читает это значение синхронно в <head> и принимает оба формата, но
+      // два писателя должны использовать один
+      localStorage.setItem('customFavicon', STATE.customFavicon);
     }
-    STATE.language = result.language ?? "en";
+    STATE.language = TRANSLATIONS[result.language] ? result.language : "en";
     STATE.searchEngine = result.searchEngine ?? "duckduckgo";
     STATE.showDate = result.showDate ?? true;
     STATE.format12h = result.format12h ?? false;
@@ -37,6 +47,8 @@ function loadState() {
     STATE.mistPreset = result.mistPreset ?? "center";
     STATE.mistPerRow = result.mistPerRow ?? 6;
     STATE.mistHeadOffset = normalizeMistWidgets(result.mistHeadOffset);
+    STATE.scheduleEnabled = result.scheduleEnabled ?? false;
+    STATE.scheduleGroup = result.scheduleGroup ?? null;
 
     // Р—Р°С‰РёС‚Р° РѕС‚ РєРѕРЅС„Р»РёРєС‚СѓСЋС‰РµРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ РёРјРїРѕСЂС‚РёСЂРѕРІР°РЅРЅРѕР№ СЂРµР·РµСЂРІРЅРѕР№ РєРѕРїРёРё:
     // Zen вЂ” СЃР°РјС‹Р№ СЃС‚СЂРѕРіРёР№ СЂРµР¶РёРј, РїРѕСЌС‚РѕРјСѓ РѕРЅ РёРјРµРµС‚ РїСЂРёРѕСЂРёС‚РµС‚ РЅР°Рґ Mist
@@ -100,6 +112,7 @@ function loadState() {
 
     applyMistPreset();
     syncModeToggles();
+    syncScheduleEnabled();
 
     applyBackground();
     applyFavicon();
@@ -139,7 +152,20 @@ function loadState() {
       checkForUpdates();
     }
 
+    // Миграция выполнена — легаси-ключи больше не нужны. Иначе удалённые
+    // категории восстанавливались бы пустыми на каждой новой вкладке
+    if (LEGACY_CATEGORY_KEYS.some(key => result[key] != null)) {
+      const drop = {};
+      LEGACY_CATEGORY_KEYS.forEach(key => { drop[key] = null; });
+      storage.set(drop);
+    }
+  } catch (error) {
+    // Страница не должна остаться пустой: html.state-loading скрывает всё
+    // содержимое, и без finally любой сбой здесь давал бы вечный чёрный экран
+    console.error('loadState: не удалось применить состояние', error);
+  } finally {
     document.documentElement.classList.remove('state-loading');
+  }
   });
 }
 
@@ -173,6 +199,8 @@ function saveState() {
     layoutMistMode: STATE.layoutMistMode,
     mistPreset: STATE.mistPreset,
     mistPerRow: STATE.mistPerRow,
+    scheduleEnabled: STATE.scheduleEnabled,
+    scheduleGroup: STATE.scheduleGroup,
     mistHeadOffset: normalizeMistWidgets(STATE.mistHeadOffset)
   });
 }

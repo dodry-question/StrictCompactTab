@@ -21,11 +21,14 @@ function extractCategoryMeta(raw) {
     });
   };
 
-  [raw.categories, raw.folders, raw.groups].forEach(src => {
+  // Префикс источника обязателен: idx считается ВНУТРИ каждого ключа,
+  // и без префикса категория из categories и категория из folders
+  // получали один и тот же id cat_0 и сливались в одну
+  [['categories', raw.categories], ['folders', raw.folders], ['groups', raw.groups]].forEach(([sourceName, src]) => {
     if (!Array.isArray(src)) return;
     src.forEach((entry, idx) => {
       if (!entry || typeof entry !== 'object') return;
-      const id = entry.id || ('cat_' + idx);
+      const id = entry.id || ('cat_' + sourceName + '_' + idx);
       const name = entry.name || entry.title || id;
       const items = Array.isArray(entry.items) ? entry.items
         : (Array.isArray(entry.shortcuts) ? entry.shortcuts
@@ -75,7 +78,10 @@ function migrateToNested(flatShortcuts, categoriesOrFolders) {
     flatShortcuts.forEach(item => {
       if (!item || typeof item !== 'object') return;
       if (!item.id) item.id = (item.isFolder ? "f_" : "sc_") + Math.random().toString(36).substr(2, 9);
-      if (item.isFolder && Array.isArray(item.children)) {
+      if (item.isFolder) {
+        // children у папки должен быть массивом ВСЕГДА: moveItemToCategory
+        // делает target.children.push(item) и падает без массива
+        if (!Array.isArray(item.children)) item.children = [];
         item.children.forEach(child => {
           if (child && !child.id) child.id = "sc_" + Math.random().toString(36).substr(2, 9);
         });
@@ -86,7 +92,14 @@ function migrateToNested(flatShortcuts, categoriesOrFolders) {
       if (m.id === 'default') return;
       if (flatShortcuts.some(f => f && f.isFolder && f.id === m.id)) return;
       // Категория существовала, но в списке ярлыков её не было — восстанавливаем
-      flatShortcuts.push({ id: m.id, name: m.name, isFolder: true, children: [] });
+      // вместе с содержимым из m.items, иначе ссылки и иконки терялись
+      const children = m.items.map(raw => ({
+        id: raw && raw.id ? raw.id : generateId('sc_'),
+        name: raw && raw.name,
+        url: raw && raw.url,
+        customIcon: (raw && raw.customIcon) || null
+      }));
+      flatShortcuts.push({ id: m.id, name: m.name, isFolder: true, children });
     });
 
     return flatShortcuts;
@@ -300,14 +313,8 @@ function renderFolderShortcuts(folderId) {
     const img = document.createElement('img');
     img.className = 'shortcut-icon';
     img.alt = '';
-    
-    let hostname = '';
-    try { hostname = new URL(item.url).hostname; } catch (e) { hostname = item.url; }
-    img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
-    
-    img.onerror = () => {
-      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
-    };
+
+    window.ShortcutIcons.attach(img, item, 128);
     
     const span = document.createElement('span');
     span.className = 'shortcut-label';

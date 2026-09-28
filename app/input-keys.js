@@ -23,6 +23,8 @@ function canScrollVertically(startEl, deltaY) {
 window.addEventListener('wheel', (e) => {
   if (!e || !e.deltaY) return;
   if (document.body.classList.contains('weather-drawer-open')) return;
+  // Открытая панель расписания — обычная прокручиваемая область
+  if (document.body.classList.contains('schedule-open')) return;
 
   // Не мешаем прокрутке внутри настроек и модальных окон
   if ((modal && modal.classList.contains('active')) ||
@@ -163,17 +165,23 @@ document.addEventListener('keydown', (e) => {
   //      Работают в любом режиме Layout, пока панель категорий видима
   //      (при одной категории она скрыта), и не мешают вводу текста,
   //      модальным окнам, шторке погоды и режиму редактирования.
+  // activeEl/isInputActive объявлены ЗДЕСЬ, на уровне обработчика. Раньше
+  // isInputActive жил внутри вложенного блока ниже, и обращение к нему выше
+  // бросало ReferenceError — цифровые хоткеи категорий не работали вообще.
   const activeEl = document.activeElement;
+  const isInputActive = !!(activeEl &&
+    (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable));
   const isModalOpen = (modal && modal.classList.contains('active')) ||
     (folderModal && folderModal.classList.contains('active'));
   const weatherDrawerOpen = document.body.classList.contains('weather-drawer-open');
+  const schedulePanelOpen = document.body.classList.contains('schedule-open');
   const categoryButtons = mistTabsEl && mistTabsEl.style.display !== 'none'
     ? Array.from(mistTabsEl.querySelectorAll('.mist-tab'))
     : [];
   const digitIndex = window.ShortcutCategories.getHotkeyIndex(e.key, categoryButtons.length);
 
   if (digitIndex >= 0 && digitIndex < categoryButtons.length &&
-      !isInputActive && !isModalOpen && !weatherDrawerOpen &&
+      !isInputActive && !isModalOpen && !weatherDrawerOpen && !schedulePanelOpen &&
       !document.body.classList.contains('layout-edit-mode') &&
       !e.ctrlKey && !e.altKey && !e.metaKey) {
     e.preventDefault();
@@ -186,9 +194,7 @@ document.addEventListener('keydown', (e) => {
 
   // 4. Р“Р»РѕР±Р°Р»СЊРЅС‹Рµ С…РѕС‚РєРµРё СЂРµР¶РёРјР° Mist (Р±С‹СЃС‚СЂРѕРµ РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РєР°С‚РµРіРѕСЂРёР№/РїР°РїРѕРє)
   if (!document.body.classList.contains('mode-ios') && !document.body.classList.contains('mode-zen')) {
-    const activeEl = document.activeElement;
-    const isInputActive = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
-    const isModalOpen = (modal && modal.classList.contains('active')) || (folderModal && folderModal.classList.contains('active'));
+    // activeEl, isInputActive и isModalOpen уже объявлены выше по обработчику
     // Фокус на панели категорий или на ярлыке — навигацию берут их обработчики
     const inTabs = !!activeEl && !!mistTabsEl && mistTabsEl.contains(activeEl);
     const inGrid = !!activeEl && !!container && container.contains(activeEl);

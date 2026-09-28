@@ -47,28 +47,52 @@ function compressImage(file, maxWidth, maxHeight, quality, callback) {
     callback(null);
     return;
   }
+  // Колбэк вызывается ровно один раз в любом исходе. Раньше он срабатывал
+  // только из img.onload, и нечитаемый файл (.heic, битый PNG, неподдерживаемый
+  // формат) оставлял сценарий навсегда «висящим»: ярлык не добавлялся, форма
+  // не сбрасывалась, фон не менялся — и без единой ошибки в консоли.
+  let done = false;
+  const finish = (result) => {
+    if (done) return;
+    done = true;
+    callback(result);
+  };
+
   const reader = new FileReader();
+  reader.onerror = () => {
+    console.warn('Не удалось прочитать файл');
+    finish(null);
+  };
   reader.onload = (e) => {
     const img = new Image();
+    img.onerror = () => {
+      console.warn('Браузер не смог декодировать изображение');
+      finish(null);
+    };
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
-      
-      if (width > maxWidth || height > maxHeight) {
-        const ratio = Math.min(maxWidth / width, maxHeight / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
+      try {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // toDataURL бросает исключение, если холст больше лимитов браузера
+        finish(canvas.toDataURL('image/jpeg', quality));
+      } catch (error) {
+        console.warn('Не удалось сжать изображение', error);
+        finish(null);
       }
-      
-      canvas.width = width;
-      canvas.height = height;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-      callback(compressedBase64);
     };
     img.src = e.target.result;
   };
@@ -233,7 +257,15 @@ if (faviconResetBtn) {
 function applyFavicon() {
   const faviconLink = document.querySelector('.page-favicon');
   if (faviconLink) {
-    faviconLink.href = STATE.customFavicon || 'assets/favicon.png';
+    // Своя иконка — как есть. Иначе компактная иконка расширения (3,4 КБ), а
+    // не логотип на 78 КБ: браузер декодирует иконку вкладки при КАЖДОМ
+    // открытии. Значение совпадает с тем, что ставит favicon-loader.js в
+    // <head>, поэтому иконка не переключается дважды за одно открытие.
+    // Проверка через getAttribute — чтобы не дёргать href впустую.
+    const target = STATE.customFavicon || 'assets/icon-48.png';
+    if (faviconLink.getAttribute('href') !== target) {
+      faviconLink.setAttribute('href', target);
+    }
   }
 }
 
@@ -267,5 +299,14 @@ function applyLanguage(lang) {
 
   // Названия категорий в выпадающих списках тоже зависят от языка
   populateCategorySelects();
+
+  // Плагин «Расписание»: подписи, которые рисует код, обновляем сразу,
+  // статические (data-i18n) — выше. Панель должна быть открыта.
+  if (typeof refreshSchedulePanel === 'function') refreshSchedulePanel();
+
+  // Страница должна объявлять язык, на который реально переключились:
+  // иначе у англоязычного пользователя остаются <html lang="ru"> и русский <title>
+  document.documentElement.lang = lang;
+  document.title = dict.pageTitle || (lang === 'ru' ? 'Новая вкладка' : 'New Tab');
 }
 

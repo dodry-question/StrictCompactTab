@@ -17,6 +17,12 @@ body.theme-adaptive .date-display {
   text-shadow: 0 1px 5px rgba(var(--adapt-surface-rgb), 0.8), 0 0 3px rgba(var(--adapt-on-surface-rgb), 0.3);
 }
 
+/* Суффикс AM/PM в базовых стилях белый — на светлой подложке обоев исчезал */
+body.theme-adaptive .clock-ampm {
+  color: rgba(var(--adapt-on-surface-rgb), 0.5) !important;
+  text-shadow: none !important;
+}
+
 body.theme-adaptive #clock-subsettings {
   border-left-color: rgba(var(--adapt-outline-rgb), 0.4) !important;
 }
@@ -37,6 +43,16 @@ body.theme-adaptive #weather-subsettings {
 
 body.theme-adaptive .weather-input-status.status-searching {
   color: var(--adapt-secondary);
+}
+
+/* Зелёный и красный статусы заданы в layouts/*.css под тёмный фон —
+   на светлой палитре адаптивной темы они сливались с фоном */
+body.theme-adaptive .weather-input-status.status-success {
+  color: #7bc67e;
+}
+
+body.theme-adaptive .weather-input-status.status-error {
+  color: #ff8a80;
 }
 
 /* Поисковая строка */
@@ -234,6 +250,14 @@ body.theme-adaptive .btn-danger-action:hover {
   background-color: rgba(239, 68, 68, 0.15);
   border-color: rgba(239, 68, 68, 0.35);
   color: #ff6b6b;
+}
+
+/* Баннер новой версии: переменной --text-color в проекте нет, поэтому
+   на светлой подложке обоев текст был почти не виден */
+body.theme-adaptive .update-notification {
+  background: rgba(var(--adapt-surface-rgb), 0.9);
+  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+  color: var(--adapt-on-surface);
 }
 
 /* Список ярлыков в модальном окне */

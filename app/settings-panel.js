@@ -183,7 +183,8 @@ if (addForm) {
         const iconLabel = document.querySelector('.input-icon-upload-label');
         if (iconLabel) {
           iconLabel.style.color = '';
-          iconLabel.title = TRANSLATIONS[STATE.language].uploadIconTitle;
+          // fallback на en, как в остальном проекте: без него невалидный язык роняет панель
+          iconLabel.title = (TRANSLATIONS[STATE.language] || TRANSLATIONS.en).uploadIconTitle;
         }
       };
 

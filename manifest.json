@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "SCT test",
-  "version": "1.11.0",
+  "name": "Strict Compact Tab",
+  "version": "1.11.1",
   "description": "A lightweight, privacy-focused, zero-dependency new tab page designed to run entirely locally.",
   "author": "dodry-question",
-  "homepage_url": "https://github.com/dodry-question/my-new-tab",
+  "homepage_url": "https://github.com/dodry-question/StrictCompactTab",
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
@@ -22,6 +22,8 @@
     "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.github.com;"
   },
   "icons": {
+    "16": "assets/icon16_trans.png",
+    "32": "assets/icon32_trans.png",
     "48": "assets/icon-48.png",
     "128": "assets/icon-128.png"
   },

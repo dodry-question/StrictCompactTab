@@ -38,7 +38,17 @@ function buildBackupPayload(allData) {
     }
   });
 
-  return Object.assign({}, raw, {
+  // Копируем хранилище целиком, но вырезаем то, что не является настройкой:
+  // scheduleData — это разобранный .xlsx (сотни КБ, файл расписания живёт
+  // отдельно и в бэкап не переносится), служебные ключи проверки обновлений
+  // и кэш иконок. Раньше они попадали в JSON, раздувая его в разы.
+  const payload = Object.assign({}, raw);
+  delete payload.scheduleData;
+  delete payload.lastUpdateCheck;
+  delete payload.cachedLatestVersion;
+  delete payload.shortcutIconCache;
+
+  return Object.assign(payload, {
     format: 'strict-compact-tab-backup',
     formatVersion: 2,
     exportedAt: new Date().toISOString(),
@@ -145,6 +155,9 @@ if (btnImport && importFileInput) {
           customBackground = data.customBackground ?? null;
           customFavicon = data.customFavicon ?? null;
           language = data.language ?? 'en';
+          // Чужой бэкап может принести несуществующий язык — ограничиваем до известных,
+          // иначе все строки UI превращаются в undefined и приложение падает
+          if (language !== 'en' && language !== 'ru') language = 'en';
           searchEngine = data.searchEngine ?? 'duckduckgo';
           customSearchEngines = data.customSearchEngines ?? [];
           checkUpdates = data.checkUpdates ?? false;
@@ -190,8 +203,20 @@ if (btnImport && importFileInput) {
           layoutMistMode: data.layoutMistMode ?? false,
           mistPreset: data.mistPreset ?? 'center',
           mistPerRow: data.mistPerRow ?? 6,
-          mistHeadOffset: normalizeMistWidgets(data.mistHeadOffset)
+          mistHeadOffset: normalizeMistWidgets(data.mistHeadOffset),
+          // Плагин «Расписание»: галка и выбранная группа — настройки, значит
+          // они принадлежат бэкапу. Раньше они терялись при импорте, потому
+          // что clearAndSet стирает хранилище целиком.
+          // Сам файл расписания (scheduleData) в бэкап не входит: его заново
+          // загружают перетаскиванием .xlsx.
+          scheduleEnabled: data.scheduleEnabled ?? false,
+          scheduleGroup: data.scheduleGroup ?? null
         };
+
+        // Zen и Mist взаимоисключающи. Раньше оба могли оказаться включены
+        // (особенно из бэкапа), и такая комбинация расходилась с тем, что
+        // потом записывает saveState
+        if (cleanedData.layoutZenMode) cleanedData.layoutMistMode = false;
 
         // РЎРѕС…СЂР°РЅСЏРµРј РІ localStorage / Chrome Storage
         storage.clearAndSet(cleanedData, () => {
@@ -244,7 +269,7 @@ function checkForUpdates() {
     return;
   }
   
-  fetch('https://api.github.com/repos/dodry-question/my-new-tab/releases/latest')
+  fetch('https://api.github.com/repos/dodry-question/StrictCompactTab/releases/latest')
     .then(res => {
       if (!res.ok) throw new Error("GitHub API error");
       return res.json();
@@ -259,8 +284,24 @@ function checkForUpdates() {
     .catch(err => console.error("Error checking updates:", err));
 }
 
+// Версия расширения: берётся из manifest.json, чтобы не расходиться с ним
+// при каждом релизе. Раньше здесь было вписано '1.10.7' — из-за этого баннер
+// «новая версия» показывался ВСЕГДА, даже когда обновление уже стояло.
+function getExtensionVersion() {
+  try {
+    if (typeof chrome !== 'undefined' && chrome.runtime &&
+        typeof chrome.runtime.getManifest === 'function') {
+      const manifest = chrome.runtime.getManifest();
+      if (manifest && manifest.version) return manifest.version;
+    }
+  } catch (err) {
+    // не страница расширения — уходим на запасной вариант
+  }
+  return '1.11.1';
+}
+
 function handleUpdateResult(latestVersion) {
-  const currentVersion = '1.10.7';
+  const currentVersion = getExtensionVersion();
   if (isNewerVersion(currentVersion, latestVersion)) {
     const notification = document.getElementById('update-notification');
     const updateText = document.getElementById('update-text');

@@ -23,7 +23,9 @@ window.SearchUI = {
       fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-          statusText.textContent = translations[state.language].logoLoadedStatus || 'Selected';
+          // fallback на en: в чужом/старом языковом пакете ключа может не быть
+          const dict = translations[state.language] || translations.en;
+          statusText.textContent = dict.logoLoadedStatus || 'Selected';
           statusText.style.color = '#4caf50';
         } else {
           statusText.textContent = '';

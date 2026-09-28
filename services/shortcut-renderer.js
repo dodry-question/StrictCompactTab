@@ -61,13 +61,8 @@ window.ShortcutRenderer = {
       img.className = 'shortcut-icon';
       img.alt = '';
 
-      let hostname = '';
-      try { hostname = new URL(item.url).hostname; } catch (e) { hostname = item.url; }
-      img.src = item.customIcon || `https://www.google.com/s2/favicons?sz=128&domain=${hostname}`;
-
-      img.onerror = () => {
-        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>';
-      };
+      // Иконка рисуется сразу: локальная заглушка + кэш, без пустых плиток
+      window.ShortcutIcons.attach(img, item, 128);
 
       const span = document.createElement('span');
       span.className = 'shortcut-label';

@@ -402,6 +402,21 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   pointer-events: none;
 }
 
+/* Пока иконка едет из сети или берётся из кэша, services/shortcut-icons.js
+   вешает на плитку ЛОКАЛЬНУЮ заглушку и класс icon-pending: плитка выглядит
+   сразу собранной, а не пустым окном. Когда настоящая иконка готова, класс
+   снимается и она мягко проявляется. Правило общее для плиток сетки и
+   пилюль Mist. */
+.shortcut-icon,
+.mist-pill-icon {
+  transition: opacity 0.16s ease;
+}
+
+.shortcut-icon.icon-pending,
+.mist-pill-icon.icon-pending {
+  opacity: 0.5;
+}
+
 .shortcut-label {
   text-align: center;
   white-space: nowrap;

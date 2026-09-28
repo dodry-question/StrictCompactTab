@@ -28,7 +28,9 @@ function handleCityInputChange() {
 
   const cityName = weatherCityInput.value.trim();
   STATE.weatherCity = cityName;
-  saveState();
+  // Пишем только ключ weatherCity: полный saveState() на каждый символ
+  // перезаписывал весь снимок вместе с тяжёлым customBackground (base64 JPEG)
+  storage.set({ weatherCity: cityName });
 
   if (geocodeTimeout) clearTimeout(geocodeTimeout);
 
@@ -44,6 +46,8 @@ function handleCityInputChange() {
   updateStatusText("searching");
 
   geocodeTimeout = setTimeout(() => {
+    // Полный снимок — один раз, уже после паузы ввода, перед геокодированием
+    saveState();
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=${STATE.language === 'ru' ? 'ru' : 'en'}`;
 
     fetch(url)
