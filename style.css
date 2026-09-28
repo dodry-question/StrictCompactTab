@@ -61,6 +61,10 @@ body {
   position: relative;
 }
 
+html.state-loading body > * {
+  visibility: hidden;
+}
+
 /* ==========================================
    📐 КЛАССИЧЕСКИЙ РЕЖИМ (DEFAULT CLASSIC LAYOUT)
    ========================================== */
@@ -71,8 +75,11 @@ body:not(.mode-ios) .clock-container {
   top: 36px;
   left: 40px;
   width: auto; /* Авто-ширина вместо жестких 200px для поддержки секунд и AM/PM */
-  max-width: 450px;
-  height: 110px; /* Увеличиваем высоту до 110px для исключения обрезания */
+  /* Габариты масштабируются тем же --clock-scale, что и шрифт:
+     ресайз в режиме редактирования меняет ОДНУ переменную, поэтому
+     пропорции «часы + дата» сохраняются в любом режиме */
+  max-width: calc(450px * var(--clock-scale, 1));
+  height: calc(110px * var(--clock-scale, 1));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -90,7 +97,7 @@ body:not(.mode-ios) .clock-container {
 }
 
 body:not(.mode-ios) .clock {
-  font-size: 72px;
+  font-size: calc(72px * var(--clock-scale, 1));
   font-weight: 500;
   letter-spacing: -2px;
   color: rgba(255, 255, 255, 0.95);
@@ -101,7 +108,7 @@ body:not(.mode-ios) .clock {
 }
 
 body:not(.mode-ios) .date-display {
-  font-size: 16px;
+  font-size: calc(16px * var(--clock-scale, 1));
   color: rgba(255, 255, 255, 0.45);
   font-weight: 400;
   padding-left: 4px;
@@ -273,16 +280,20 @@ body:not(.mode-ios) .search-btn:hover {
   color: #fff;
 }
 
-/* 4. Контейнер ярлыков быстрого доступа */
+/* 4. Контейнер ярлыков быстрого доступа
+      Панель категорий и сетка жёстко зафиксированы у НИЖНЕГО края экрана:
+      margin-top: auto + постоянная высота сетки исключают «прыжки»
+      при переключении категорий с разным числом ярлыков */
 body:not(.mode-ios) .shortcuts-wrapper {
-  margin-top: 32px;
+  margin-top: auto;
+  margin-bottom: 44px;
   width: 100%;
   padding: 0 40px;
   height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 18px;
   background: none;
   border: none;
   box-shadow: none;
@@ -323,7 +334,7 @@ body.mode-ios .clock-container {
 }
 
 body.mode-ios .clock {
-  font-size: calc(2.2 * var(--grid-size, 20px));
+  font-size: calc(2.2 * var(--grid-size, 20px) * var(--clock-scale, 1));
   font-weight: 600;
   letter-spacing: -1.5px;
   color: rgba(255, 255, 255, 0.95);
@@ -332,7 +343,7 @@ body.mode-ios .clock {
 }
 
 body.mode-ios .date-display {
-  font-size: 13px;
+  font-size: calc(13px * var(--clock-scale, 1));
   color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
   text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
@@ -528,40 +539,6 @@ body.mode-ios .shortcuts-wrapper {
   filter: brightness(0) invert(1);
 }
 
-/* Стили вкладок-категорий на главном экране */
-.main-categories-container {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 8px;
-  width: 100%;
-  max-width: 580px;
-  flex-wrap: wrap;
-}
-
-.main-category-tab {
-  background-color: rgba(14, 14, 14, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 6px 14px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-}
-
-.main-category-tab:hover {
-  color: #fff;
-  background-color: rgba(24, 24, 24, 0.9);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.main-category-tab.active {
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-  font-weight: 500;
-}
 /* Сетка ярлыков быстрого доступа */
 .shortcuts-container {
   display: flex;
@@ -577,6 +554,38 @@ body.mode-ios .shortcuts-wrapper {
   transition: opacity 0.15s ease, transform 0.15s ease;
   opacity: 1;
   transform: scale(1);
+}
+
+/* Постоянная высота области сетки (JS уточняет её под самую длинную категорию):
+      панель вкладок и ярлыки остаются на одном месте при переключении категорий */
+body:not(.mode-ios):not(.mode-mist) #shortcuts-container {
+  flex: 0 0 auto;
+  height: clamp(150px, 34vh, 460px);
+}
+
+/* Чёткая сетка ярлыков: жёсткие равные колонки, одинаковые плитки, gap: 12px.
+      Высота контейнера фиксирована, содержимое прижато к НИЗУ (align-content),
+      поэтому панель категорий СВЕРХУ никогда не «прыгает» при переключении. */
+body:not(.mode-ios):not(.mode-mist) #shortcuts-container {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 6), var(--cell-size, 85px));
+  gap: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  justify-content: center;
+  align-content: start;
+}
+
+body:not(.mode-ios):not(.mode-mist) .shortcuts-wrapper {
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+/* Все плитки одинаковой ширины и строго по колонкам сетки */
+body:not(.mode-ios) #shortcuts-container .shortcut-card {
+  width: 100%;
+  min-width: 0;
 }
 
 .shortcuts-container::-webkit-scrollbar {
@@ -640,6 +649,8 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   color: #fff;
 }
 
+/* Размеры плиток (задаются пользователем в настройках): квадратная плитка
+      одинаковой формы независимо от плотности сетки */
 .shortcut-card.size-small {
   width: 85px;
   aspect-ratio: 1 / 1;
@@ -760,12 +771,14 @@ body.theme-adaptive .shortcuts-container::-webkit-scrollbar-thumb:hover {
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .modal-overlay.active {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
 }
 
 .modal-content {
@@ -1637,25 +1650,6 @@ body.theme-light .search-btn:hover {
   color: #1a202c;
 }
 
-/* Вкладки категорий на главном экране */
-body.theme-light .main-category-tab {
-  background-color: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.06);
-  color: #4a5568;
-}
-
-body.theme-light .main-category-tab:hover {
-  color: #1a202c;
-  background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.12);
-}
-
-body.theme-light .main-category-tab.active {
-  color: #1a202c;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.1);
-}
-
 /* Плитки ярлыков быстрого доступа */
 body.theme-light .shortcut-card {
   background-color: rgba(255, 255, 255, 0.95);
@@ -2029,25 +2023,6 @@ body.theme-adaptive .search-btn:hover {
   color: var(--adapt-primary);
 }
 
-/* Вкладки категорий на главном экране */
-body.theme-adaptive .main-category-tab {
-  background-color: rgba(var(--adapt-surface-rgb), 0.7);
-  border-color: rgba(var(--adapt-outline-rgb), 0.4);
-  color: var(--adapt-on-surface);
-}
-
-body.theme-adaptive .main-category-tab:hover {
-  color: var(--adapt-on-surface);
-  background-color: rgba(var(--adapt-surface-rgb), 0.9);
-  border-color: var(--adapt-primary);
-}
-
-body.theme-adaptive .main-category-tab.active {
-  color: var(--adapt-on-primary);
-  background-color: var(--adapt-primary);
-  border-color: var(--adapt-primary);
-}
-
 /* Плитки ярлыков быстрого доступа */
 body.theme-adaptive .shortcut-card {
   background-color: rgba(var(--adapt-surface-rgb), 0.7);
@@ -2375,6 +2350,14 @@ body.layout-edit-mode .draggable-widget * {
 body.layout-edit-mode .draggable-widget:hover {
   outline-color: #2196f3;
   background-color: rgba(33, 150, 243, 0.05);
+}
+
+/* В режиме Mist редактируются ТОЛЬКО два виджета — «Время» и «Поиск»:
+   сетка ярлыков с категориями остаётся неподвижной */
+body.mode-mist.layout-edit-mode #widget-shortcuts,
+body.mode-mist.layout-edit-mode .weather-container {
+  outline: none !important;
+  cursor: default !important;
 }
 
 /* Ручка изменения размера виджета в режиме iOS */
@@ -2991,12 +2974,14 @@ body.theme-light .folder-icon-grid {
   z-index: 2000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .folder-modal-overlay.active {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
 }
 
 .folder-modal-content {
@@ -3185,3 +3170,1649 @@ body.theme-light .modal-folder-children {
 
 
 
+/* ==========================================
+   🌫️ РЕЖИМ MIST (MIST MODE — GLASS MINIMALISM)
+   Тонкая типографика по центру, «стеклянная» капсула поиска,
+   вкладки категорий и ряд «пилюль» ярлыков. Без внешних зависимостей.
+   ========================================== */
+
+/* 0. Базовая сцена: тёмный фон и мягкая ambient-подсветка */
+body.mode-mist {
+  justify-content: center !important;
+  background-color: #0a0c10;
+  font-family: 'Segoe UI Variable Text', 'Aptos', 'Segoe UI', system-ui, sans-serif;
+}
+
+body.mode-mist::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 46% at 50% -6%, rgba(96, 128, 190, 0.16), transparent 72%),
+    radial-gradient(46% 40% at 88% 104%, rgba(150, 110, 190, 0.10), transparent 72%);
+}
+
+/* Если заданы обои пользователя — не перекрываем их подсветкой */
+body.mode-mist.has-wallpaper::before {
+  display: none;
+}
+
+/* 1. Часы — по центру (крупные, font-weight: 200) */
+body.mode-mist .clock-container {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  /* Два НЕЗАВИСИМЫХ виджета: часы и поиск двигаются и масштабируются
+     каждый по своей CSS-переменной --mist-head-* */
+  transform: translate(var(--mist-head-x, 0px), var(--mist-head-y, 0px)) !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* Часы/поиск — над панелями ярлыков и категорий (без наложения) */
+  z-index: 8;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 0 !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  overflow: visible !important;
+}
+
+body.mode-mist .clock {
+  font-size: calc(clamp(64px, 10vw, 130px) * var(--clock-scale, 1)) !important;
+  font-family: 'Segoe UI Variable Display', 'Aptos Display', 'Segoe UI', sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.02 !important;
+  color: rgba(255, 255, 255, 0.96) !important;
+  text-shadow: 0 6px 40px rgba(0, 0, 0, 0.55) !important;
+}
+
+body.mode-mist .clock-ampm {
+  color: rgba(255, 255, 255, 0.42) !important;
+  font-weight: 200 !important;
+  letter-spacing: 0 !important;
+}
+
+/* Дата в Mist — строго ПОД часами (как в оригинале Mist):
+   шрифт мельче, полупрозрачность opacity: 0.7 */
+body.mode-mist .date-display {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: auto !important;
+  margin-top: 8px !important;
+  padding: 0 !important;
+  font-size: calc(clamp(13px, 1.5vw, 18px) * var(--clock-scale, 1)) !important;
+  font-family: 'Segoe UI Variable Text', 'Aptos', 'Segoe UI', system-ui, sans-serif !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  text-align: center;
+  opacity: 0.7;
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45) !important;
+  white-space: nowrap !important;
+}
+
+/* 2. Поисковая строка — компактная «стеклянная» капсула по центру */
+body.mode-mist .search-form {
+  position: relative !important;
+  /* Поиск и часы всегда ПОВЕРХ панели ярлыков/категорий:
+     панели больше не накладываются на строку поиска (видна/активна) */
+  z-index: 8;
+  margin: 0 !important;
+  /* Ширина не шире центрального блока (700px) */
+  width: min(700px, 100%) !important;
+  max-width: 100% !important;
+  /* Строка чуть выше — крупный Mist-дизайн */
+  height: 46px !important;
+  padding: 0 12px 0 16px !important;
+  border-radius: 12px !important;
+  background-color: rgba(20, 23, 29, 0.42) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+  overflow: hidden !important;
+  /* Независимый сдвиг поиска (свой виджет): переменная задаётся из
+     режима редактирования макета и живёт отдельно от часов */
+  transform: translate(var(--mist-head-x, 0px), var(--mist-head-y, 0px)) !important;
+}
+
+body.mode-mist .search-form:focus-within {
+  background-color: rgba(26, 30, 37, 0.62) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 0 4px rgba(255, 255, 255, 0.03) !important;
+}
+
+body.mode-mist .search-input {
+  font-size: 15px !important;
+  font-weight: 300 !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.mode-mist .search-input::placeholder {
+  color: rgba(255, 255, 255, 0.32) !important;
+  font-weight: 300 !important;
+}
+
+body.mode-mist .search-btn {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+body.mode-mist .search-engine-logo {
+  opacity: 0.85;
+}
+
+/* 2а. ЕДИНЫЙ КОМПОЗИЦИОННЫЙ БЛОК MIST: ПОИСК + СЕТКА + КАТЕГОРИИ.
+   Вне режима Mist обёртка прозрачна (display: contents) — вёрстка
+   классического SCT/iOS остаётся ровно такой же, как была. */
+.mist-module {
+  display: contents;
+}
+
+body.mode-mist:not(.mist-preset-zen) .mist-module {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Плотные внутренние отступы: часы, поиск, категории и ярлыки
+     выглядят сбитым единым блоком, а не раскиданными по экрану */
+  gap: 14px;
+  width: 100%;
+  /* Центральный блок НЕ растягивается на весь экран: компактная
+     максимальная ширина (настройка «Ярлыков в ряду» может сузить её ещё) */
+  max-width: min(700px, var(--mist-max-w, 700px));
+  /* Модуль прижат к нижнему краю экрана: нижняя линия панели категорий
+     фиксирована, сетка и поиск живут только внутри модуля и не двигают
+     интерфейс при смене категории */
+  margin-top: auto;
+  margin-bottom: 5vh;
+}
+
+body.mode-mist.mist-preset-zen .mist-module {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: min(700px, var(--mist-max-w, 700px));
+}
+
+body.mode-mist.mist-preset-center .mist-module {
+  position: relative;
+  margin: auto 0 !important;
+}
+
+/* Отступы внутри модуля задаёт сам модуль (gap), а не поля элементов:
+   пресетные margin/top-bottom иначе сдвигают блок от нижней якорной линии */
+body.mode-mist:not(.mist-preset-zen) .mist-module .search-form,
+body.mode-mist:not(.mist-preset-zen) .mist-module .shortcuts-wrapper {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Два auto-отступа («margin-top: auto» у часов и у обёртки) делили свободное
+   место и разрывали блок «часы → поиск». Часы теперь входят в сам модуль,
+   поэтому внутри него отступы задаёт gap модуля, а не auto-поля — блок
+   идёт одной связанной колонкой и целиком прижат к нижнему краю. */
+body.mode-mist:not(.mist-preset-zen) .mist-module .clock-container {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Пресет «Левосторонний»: модуль прижат к левой колонке */
+body.mode-mist.mist-preset-split:not(.mist-preset-zen) .mist-module {
+  margin-bottom: 7vh;
+  align-items: flex-start;
+}
+
+/* 3. Контейнер ярлыков — компактная колонка под поиском */
+body.mode-mist .shortcuts-wrapper {
+  position: relative !important;
+  z-index: 2;
+  margin-top: 14px !important;
+  /* Без боковых полей: поток ярлыков занимает всю ширину модуля и
+     начинается от той же левой линии, что и строка поиска */
+  padding: 0 !important;
+  gap: 10px !important;
+  /* По левому краю: пилюли, вкладки и строка поиска стоят на ОДНОЙ
+     вертикальной линии. Раньше центрирование сдвигало узкую сетку
+     (max-width по «Ярлыков в ряду») вправо от панели категорий */
+  align-items: flex-start !important;
+  /* Порядок в DOM и визуальный порядок СОВПАДАЮТ (см. syncTabsDomPosition):
+     вкладки снизу → они последние в DOM, вкладки сверху → первые.
+     Благодаря этому Tab и стрелки ведут себя одинаково во всех пресетах.
+     Высота обёртки авто, поэтому flex-start прижимает поток и чипы
+     к общему началу, а нижнюю линию якорит сам модуль #mist-module
+     (margin-bottom: 5vh) — чипы не «улетают» при смене категории */
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+}
+
+/* В Mist в Top Bar остаётся ТОЛЬКО погода — она в ПРАВОМ верхнем углу,
+   дата (день недели) показывается строго под часами */
+body.mode-mist .mist-topbar {
+  left: auto;
+  right: 40px;
+  justify-content: flex-end;
+}
+
+/* 4. Погода — Top Bar: строкой в левом верхнем углу (как в оригинале Mist) */
+body.mode-mist .weather-container {
+  position: fixed !important;
+  top: 48px !important;
+  left: 32px !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  max-width: 480px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 10 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  text-align: left !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  overflow: visible !important;
+  opacity: 1;
+}
+
+/* Если дата выключена, погода встает прямо на её место */
+body.mode-mist:not(:has(.date-display[style*="display: block"])) .weather-container {
+  top: 26px !important;
+}
+
+body.mode-mist .weather-temp-row {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+body.mode-mist .weather-temp {
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.mode-mist .weather-icon {
+  font-size: 14px !important;
+  filter: none !important;
+}
+
+body.mode-mist .weather-details {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
+  white-space: nowrap !important;
+}
+
+/* Разделитель между температурой и описанием погоды */
+body.mode-mist .weather-details:not(:empty)::before {
+  content: '·';
+  margin-right: 8px;
+  opacity: 0.6;
+}
+
+/* 5. Переключатель категорий (вкладки Main / Dev / Media ...)
+      Лёгкий минимализм: без массивных плашек вокруг кнопок —
+      активная вкладка отмечается тонкой линией снизу */
+/* Панель категорий: всегда ОДНА строка фиксированной высоты —
+      благодаря этому ярлыки (снизу) и вкладки (сверху) не двигаются при переключении.
+      Высота 40px — с запасом на обводку фокуса (outline 2px + offset 2px). */
+.mist-tabs {
+  display: none;
+  flex: 0 0 auto;
+  height: 40px;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.mist-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.mist-tab {
+  appearance: none;
+  position: relative;
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.42);
+  font-family: inherit;
+  /* Кегль чипа категории (12–13px) */
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  letter-spacing: 0;
+  padding: 7px 15px;
+  /* Плашка-пилюля: аккуратная форма у активного и наведённого чипа */
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+}
+
+/* Минималистичная нижняя полоска с закруглениями у активной категории */
+.mist-tab::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: calc(100% - 26px);
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+  transform: translateX(-50%) scaleX(0.3);
+  transform-origin: center;
+  pointer-events: none;
+  transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+}
+
+.mist-tab:hover {
+  color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.mist-tab.active {
+  color: rgba(255, 255, 255, 0.96);
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Плавный переход индикатора между чипами */
+.mist-tab.active::after {
+  opacity: 0.9;
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* Компактная плотность панели категорий — ТОЛЬКО режим Mist.
+      В стандартном режиме действуют базовые значения .mist-tabs / .mist-tab */
+body.mode-mist .mist-tabs {
+  height: 38px;
+  gap: 3px;
+  justify-content: flex-start;
+}
+
+body.mode-mist .mist-tab {
+  font-size: 13.5px;
+  font-weight: 550;
+  padding: 5px 13px;
+}
+
+/* 6. Ярлыки: ORGANIC FLEX FLOW — никакой CSS Grid, только перенос строк.
+      Пилюли идут плотным потоком слева направо, без пустот и колонок */
+body.mode-mist .shortcuts-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  /* Не даём высоте панели зависеть от числа пилюль в активной категории:
+     иначе auto-margin родительского модуля сдвигает часы и поиск при переключении. */
+  flex: 0 0 clamp(140px, 42vh, 520px) !important;
+  /* Ряд/колонка контейнера: строки плотно, между пилюлями 10px */
+  gap: 8px 10px !important;
+  align-items: center !important;
+  /* Ряды прижаты к НИЗУ контейнера — сразу над панелью категорий —
+     и при добавлении ярлыков прибавляются ровно ВВЕРХ, не сдвигая
+     нижнюю линию. «safe» включается ТОЛЬКО при переполнении потока:
+     иначе верхние ряды ушли бы за край прокрутки и стали бы
+     недостижимыми для Tab/стрелок */
+  align-content: safe end !important;
+  /* Поток без растяжки: строки начинаются от левого края центрального блока
+     (базовое значение — пресеты Layout могут переопределить) */
+  justify-content: flex-start;
+  width: 100% !important;
+  /* Ограничение по «Ярлыков в ряду» (--mist-max-w задаётся из JS) */
+  max-width: min(100%, var(--mist-max-w, 700px)) !important;
+  /* Постоянная высота: поток не сдвигает панель вкладок при переключении */
+  height: clamp(140px, 42vh, 520px);
+  max-height: 46vh;
+  /* Вертикальный отступ остаётся ради обводки фокуса у крайних рядов,
+     горизонтальный УБИРАЕМ: пилюли начинаются от той же левой линии,
+     что и панель категорий и строка поиска — единый левый край блока */
+  padding: 10px 0 !important;
+  scroll-padding: 12px;
+  overflow-y: auto !important;
+  /* clip вместо hidden: обводка фокуса у левых/правых пилюль не режется */
+  overflow-x: clip !important;
+  overflow-clip-margin: 6px;
+}
+
+/* Ряды-обёртки (.mist-pill-row) больше не используются: пилюли лежат
+   ПРЯМО в контейнере и переносятся потоком flex-wrap без «лесенок» */
+
+/* Появление ярлыков при переключении категории — мягкий эффект всплытия
+   (срабатывает при смене категории мышью, колесом и клавиатурой) */
+@keyframes mist-pill-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body:not(.mode-ios):not(.mode-mist) #shortcuts-container .shortcut-card {
+  animation: mist-pill-in 0.25s ease-in-out;
+}
+
+/* Пилюля: ширина ПОД НАЗВАНИЕ — короткие («VK», «ав») дают короткие пилюли,
+   длинные («Google AI Studio») растут по тексту и укладываются в строки
+   естественным потоком (flow layout), а не в фиксированные колонки */
+.mist-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  /* Полностью динамическая ширина: никакой фиксированной ширины и сетки */
+  width: auto;
+  min-width: 0;
+  /* Длинное название обрезается многоточием, а не растягивает строку */
+  max-width: min(300px, 100%);
+  /* Внутренние отступы крупной пилюли (плотный Mist-дизайн) */
+  padding: 8px 16px;
+  /* Скругления в диапазоне 8–12px */
+  border-radius: 10px;
+  /* Полупрозрачный тёмный фон + лёгкий blur под фоновым рисунком */
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  /* Чистая системная типографика без засечек, кегль 14–15px */
+  font-family: 'Segoe UI Variable Text', 'Aptos', 'Segoe UI', system-ui, sans-serif;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 0.25s ease-in-out, border-color 0.25s ease-in-out,
+              transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+  animation: mist-pill-in 0.25s ease-in-out;
+}
+
+.mist-pill:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+.mist-pill-icon {
+  /* Крупный фавикон пилюли: 18–20px (реально 19px) */
+  width: 19px;
+  height: 19px;
+  border-radius: 5px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mist-pill-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* 7. Светлая тема для режима Mist (сохраняем композицию, меняем палитру) */
+body.mode-mist.theme-light {
+  background-color: #eef1f5;
+}
+
+body.mode-mist.theme-light::before {
+  background:
+    radial-gradient(58% 46% at 50% -6%, rgba(150, 175, 220, 0.35), transparent 72%),
+    radial-gradient(46% 40% at 88% 104%, rgba(200, 175, 220, 0.25), transparent 72%);
+}
+
+body.mode-mist.theme-light .clock {
+  color: rgba(20, 22, 26, 0.92) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-light .clock-ampm {
+  color: rgba(20, 22, 26, 0.45) !important;
+}
+
+body.mode-mist.theme-light .date-display {
+  color: rgba(20, 22, 26, 0.5) !important;
+}
+
+body.mode-mist.theme-light .search-form {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.12) !important;
+}
+
+body.mode-mist.theme-light .search-input {
+  color: rgba(20, 22, 26, 0.9) !important;
+}
+
+body.mode-mist.theme-light .search-input::placeholder {
+  color: rgba(20, 22, 26, 0.35) !important;
+}
+
+body.mode-mist.theme-light .search-btn {
+  color: rgba(20, 22, 26, 0.5) !important;
+}
+
+body.mode-mist.theme-light .mist-pill {
+  background-color: rgba(255, 255, 255, 0.62);
+  border-color: rgba(0, 0, 0, 0.07);
+  color: rgba(20, 22, 26, 0.88);
+}
+
+body.mode-mist.theme-light .mist-pill:hover {
+  background-color: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.mode-mist.theme-light .mist-tabs {
+  background: none;
+  border: none;
+}
+
+body.mode-mist.theme-light .mist-tab {
+  color: rgba(20, 22, 26, 0.45);
+}
+
+body.mode-mist.theme-light .mist-tab:hover {
+  color: rgba(20, 22, 26, 0.8);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+body.mode-mist.theme-light .mist-tab.active {
+  color: rgba(20, 22, 26, 0.95);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 8. Адаптивная тема использует собственные переменные палитры */
+body.mode-mist.theme-adaptive .mist-pill {
+  background-color: rgba(var(--adapt-surface-rgb), 0.5);
+  border-color: rgba(var(--adapt-outline-rgb), 0.35);
+  color: var(--adapt-on-surface);
+}
+
+body.mode-mist.theme-adaptive .mist-tab {
+  color: rgba(var(--adapt-on-surface-rgb), 0.55);
+}
+
+body.mode-mist.theme-adaptive .mist-tab.active {
+  color: var(--adapt-on-surface);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+}
+
+/* ==========================================
+   🌫️ РЕЖИМ MIST — ПРЕСЕТЫ КОМПОНОВКИ (v2)
+   ========================================== */
+
+/* Подразделы режима Mist (пресет + ярлыков в ряду) */
+.mist-subsettings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding-left: 4px;
+}
+
+/* ---------- Пресет: Центральный (Mist Standard) ---------- */
+/* Композиция: часы и поиск отцентрованы по вертикали, а панель категорий
+   вместе с ярлыками жёстко закреплены у нижнего края экрана */
+body.mode-mist.mist-preset-center {
+  justify-content: flex-start !important;
+  align-items: center !important;
+  padding: 0 !important;
+}
+
+body.mode-mist.mist-preset-center .clock-container {
+  margin-top: auto !important;
+}
+
+body.mode-mist.mist-preset-center .search-form {
+  margin: 24px 0 auto 0 !important;
+}
+
+body.mode-mist.mist-preset-center .shortcuts-wrapper {
+  margin: 0 !important;
+}
+
+body.mode-mist.mist-preset-center .mist-tabs,
+body.mode-mist.mist-preset-center .shortcuts-container {
+  /* Поток слева направо (спец: justify-content: flex-start) — панель чипов
+     и ряды пилюлей начинаются от ОДНОЙ левой линии центрального блока */
+  justify-content: flex-start;
+}
+
+/* ---------- Пресет: Левосторонний (Mist Left/Split) ---------- */
+body.mode-mist.mist-preset-split {
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  padding: 0 0 0 6vw !important;
+}
+
+/* Дата и погода (одной строкой) — в ВЕРХНИЙ ПРАВЫЙ угол для баланса */
+body.mode-mist.mist-preset-split .mist-topbar {
+  left: auto;
+  right: 40px;
+  justify-content: flex-end;
+}
+
+/* Часы опущены ниже и отцентрованы по вертикали вместе с поиском */
+body.mode-mist.mist-preset-split .clock-container {
+  align-items: flex-start !important;
+  text-align: left !important;
+  margin-top: auto !important;
+}
+
+body.mode-mist.mist-preset-split .weather-container {
+  justify-content: flex-start !important;
+}
+
+body.mode-mist.mist-preset-split .search-form {
+  width: min(600px, 46vw) !important;
+  max-width: 600px !important;
+  margin: 24px 0 auto 0 !important;
+}
+
+/* Блок ярлыков прижимается к низу левой колонки; вкладки категорий —
+   СВЕРХУ, прямо под поиском (порядок в DOM задаёт syncTabsDomPosition) */
+body.mode-mist.mist-preset-split .shortcuts-wrapper {
+  flex-direction: column !important;
+  margin-top: auto !important;
+  margin-bottom: 7vh !important;
+  padding: 0 !important;
+  align-items: flex-start !important;
+}
+
+/* Левосторонний: вкладки категорий СВЕРХУ (прямо под поиском) →
+   строки ярлыков сразу под чипами, без пустого поля между ними.
+   «safe» включается только при переполнении, чтобы верхние ряды
+   оставались достижимыми для Tab/стрелок */
+body.mode-mist.mist-preset-split .shortcuts-container {
+  align-items: center !important;
+  align-content: safe start !important;
+  /* Общий предел с учётом настройки «Ярлыков в ряду» (--mist-max-w) */
+  max-width: min(62vw, var(--mist-max-w, 62vw)) !important;
+  max-height: 42vh;
+}
+
+/* В левой колонке пилюли — по ширине контента (width: auto), не растянуты */
+body.mode-mist.mist-preset-split .mist-pill {
+  justify-self: start;
+}
+
+body.mode-mist.mist-preset-split .mist-tabs,
+body.mode-mist.mist-preset-split .shortcuts-container {
+  justify-content: start;
+}
+
+/* ---------- Пресет: Ультра-минимал (Zen Drop) ---------- */
+body.mode-mist.mist-preset-zen {
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+body.mode-mist.mist-preset-zen .mist-tabs,
+body.mode-mist.mist-preset-zen .shortcuts-container {
+  justify-content: flex-start;
+}
+
+body.mode-mist.mist-preset-zen .shortcuts-container {
+  align-content: safe start !important;
+}
+
+/* Standard and Zen panels are anchored below the search widget and follow
+   its saved edit-layout offset and width. */
+body.mode-mist.mist-preset-center .shortcuts-wrapper,
+body.mode-mist.mist-preset-zen .shortcuts-wrapper {
+  position: absolute !important;
+  top: calc(100% + 14px + var(--mist-panel-y, 0px)) !important;
+  left: calc(50% + var(--mist-panel-x, 0px)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: min(100%, var(--mist-panel-width, 100%)) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: translate(-50%, 0);
+}
+
+/* Zen keeps its reveal interaction; only the anchor changed. */
+body.mode-mist.mist-preset-zen .shortcuts-wrapper {
+  z-index: 6 !important;
+  opacity: 0;
+  transform: translate(-50%, 28px);
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.mode-mist.mist-preset-zen.mist-zen-revealed .shortcuts-wrapper,
+body.mode-mist.mist-preset-zen .shortcuts-wrapper:focus-within {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+/* Невидимая зона у нижнего края: наведение или клик показывают ярлыки */
+.mist-zen-zone {
+  display: none;
+}
+
+body.mode-mist.mist-preset-zen .mist-zen-zone {
+  display: block;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120px;
+  z-index: 5;
+}
+
+/* ---------- Обводка фокуса (Tab): не обрезается краями контейнеров ---------- */
+.shortcut-card:focus-visible,
+.mist-pill:focus-visible,
+.mist-tab:focus-visible,
+.search-btn:focus-visible,
+.settings-icon-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+body.theme-light .shortcut-card:focus-visible,
+body.theme-light .mist-pill:focus-visible,
+body.theme-light .mist-tab:focus-visible {
+  outline-color: rgba(0, 0, 0, 0.6);
+}
+
+body.theme-adaptive .shortcut-card:focus-visible,
+body.theme-adaptive .mist-pill:focus-visible,
+body.theme-adaptive .mist-tab:focus-visible {
+  outline-color: var(--adapt-primary);
+}
+
+/* Воздух у крайних ярлыков, чтобы обводка фокуса помещалась целиком */
+.shortcuts-container {
+  padding: 12px !important;
+  scroll-padding: 14px;
+}
+
+/* ---------- Светлая тема: погода в режиме Mist ---------- */
+body.mode-mist.theme-light .weather-temp {
+  color: rgba(20, 22, 26, 0.8) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-light .weather-details {
+  color: rgba(20, 22, 26, 0.5) !important;
+  text-shadow: none !important;
+}
+
+/* ---------- Адаптивная тема: погода и часы берут цвета из палитры обоев ---------- */
+body.mode-mist.theme-adaptive .weather-temp {
+  color: rgba(var(--adapt-on-surface-rgb), 0.85) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-adaptive .weather-details {
+  color: rgba(var(--adapt-on-surface-rgb), 0.55) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-adaptive .clock {
+  color: var(--adapt-on-surface) !important;
+  text-shadow: none !important;
+}
+
+body.mode-mist.theme-adaptive .date-display {
+  color: rgba(var(--adapt-on-surface-rgb), 0.6) !important;
+}
+
+
+/* ==========================================
+   TOP BAR — ДАТА И ПОГОДА В ОДНУ ГОРИЗОНТАЛЬНУЮ СТРОКУ
+   Default Mist / SCT: верхний ЛЕВЫЙ угол.
+   Mist Left/Split: верхний ПРАВЫЙ угол (правило задано в пресете split).
+   ========================================== */
+.mist-topbar {
+  position: fixed;
+  top: 30px;
+  left: 40px;
+  right: auto;
+  z-index: 12;
+  display: none;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  max-width: calc(100vw - 80px);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mist-topbar .topbar-part {
+  display: inline-block;
+}
+
+.mist-topbar .topbar-sep {
+  font-size: 11px;
+  opacity: 0.45;
+}
+
+.mist-topbar .topbar-temp {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+}
+
+.mist-topbar .topbar-desc {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+}
+
+.mist-topbar .topbar-temp,
+.mist-topbar .topbar-desc {
+  pointer-events: auto;
+}
+
+/* Дата отображается в Top Bar — исходный блок скрываем.
+   В Mist дата живёт ПОД часами, поэтому там её не прячем */
+body:not(.mode-ios):not(.mode-zen):not(.mode-mist).has-topbar .date-display {
+  display: none !important;
+}
+
+/* Погода показывается СТРОГО в ОДНОМ месте — в Top Bar строкой с датой
+   («ВОСКРЕСЕНЬЕ, 27 СЕНТЯБРЯ • 17°C Пасмурно, Киров»).
+   Старый виджет погоды скрыт во всех не-iOS режимах, в том числе в режиме
+   редактирования макета, чтобы в сетке не дублировался модуль погоды. */
+body:not(.mode-ios) .weather-container {
+  display: none !important;
+}
+
+/* В iOS- и Zen-режимах Top Bar не используется */
+body.mode-ios .mist-topbar,
+body.mode-zen .mist-topbar {
+  display: none !important;
+}
+
+/* ---------- Top Bar: светлая тема ---------- */
+body.theme-light .mist-topbar {
+  color: rgba(20, 22, 26, 0.7);
+  text-shadow: none;
+}
+
+body.theme-light .mist-topbar .topbar-temp {
+  color: rgba(20, 22, 26, 0.9);
+}
+
+body.theme-light .mist-topbar .topbar-desc {
+  color: rgba(20, 22, 26, 0.5);
+}
+
+/* ---------- Top Bar: адаптивная тема ---------- */
+body.theme-adaptive .mist-topbar {
+  color: rgba(var(--adapt-on-surface-rgb), 0.75);
+  text-shadow: none;
+}
+
+body.theme-adaptive .mist-topbar .topbar-temp {
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .mist-topbar .topbar-desc {
+  color: rgba(var(--adapt-on-surface-rgb), 0.55);
+}
+
+/* ---------- Вкладки категорий: светлая тема (классический режим) ---------- */
+body.theme-light .mist-tabs {
+  background: none;
+  border: none;
+}
+
+body.theme-light .mist-tab {
+  color: rgba(20, 22, 26, 0.45);
+}
+
+body.theme-light .mist-tab:hover {
+  color: rgba(20, 22, 26, 0.8);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+body.theme-light .mist-tab.active {
+  color: rgba(20, 22, 26, 0.95);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- Вкладки категорий: адаптивная тема ---------- */
+body.theme-adaptive .mist-tabs {
+  background: none;
+  border: none;
+}
+
+body.theme-adaptive .mist-tab {
+  color: rgba(var(--adapt-on-surface-rgb), 0.55);
+}
+
+body.theme-adaptive .mist-tab:hover {
+  color: var(--adapt-on-surface);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+}
+
+body.theme-adaptive .mist-tab.active {
+  color: var(--adapt-on-surface);
+  background-color: rgba(var(--adapt-on-surface-rgb), 0.08);
+}
+
+/* Мягкие Material-подложки повышают контраст на ярких обоях, не накрывая всю сцену. */
+body.mode-mist.theme-adaptive.has-wallpaper .date-display,
+body.mode-mist.theme-adaptive.has-wallpaper .mist-topbar {
+  color: var(--adapt-on-surface) !important;
+  text-shadow: none !important;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--adapt-surface-rgb), 0.6) 0%,
+    rgba(var(--adapt-surface-rgb), 0.38) 78%,
+    rgba(var(--adapt-surface-rgb), 0) 100%
+  );
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .date-display {
+  padding: 4px 14px 4px 10px !important;
+  border-radius: 6px;
+  opacity: 1;
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-topbar {
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-tab {
+  color: rgba(var(--adapt-on-surface-rgb), 0.88);
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-tab:hover {
+  background-color: rgba(var(--adapt-surface-rgb), 0.28);
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-tab.active {
+  color: var(--adapt-on-surface);
+  background-color: rgba(var(--adapt-surface-rgb), 0.24);
+  box-shadow: none;
+}
+
+body.mode-mist.theme-adaptive.has-wallpaper .mist-tab:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Погодная шторка */
+.weather-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(5, 8, 13, 0.48);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.28s ease, visibility 0s linear 0.28s;
+}
+
+.weather-drawer-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.weather-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1201;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, 100vw);
+  padding: 24px 24px 18px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: rgba(245, 247, 250, 0.96);
+  background: rgba(14, 17, 23, 0.96);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: -24px 0 72px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(28px) saturate(135%);
+  -webkit-backdrop-filter: blur(28px) saturate(135%);
+  transform: translateX(102%);
+  visibility: hidden;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.18s;
+}
+
+.weather-drawer.is-open {
+  transform: translateX(0);
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.weather-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-drawer-header h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.weather-drawer-city {
+  margin: 5px 0 0;
+  color: rgba(245, 247, 250, 0.58);
+  font-size: 13px;
+}
+
+.weather-drawer-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.weather-drawer-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.weather-drawer-content {
+  flex: 1 0 auto;
+  min-height: 0;
+  padding-top: 18px;
+}
+
+.weather-current {
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.weather-current-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.weather-current-icon {
+  flex: 0 0 auto;
+  font-size: 48px;
+  line-height: 1;
+}
+
+.weather-current-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.weather-current-temperature {
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.weather-current-description {
+  color: rgba(245, 247, 250, 0.72);
+  font-size: 14px;
+}
+
+.weather-current-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-current-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.weather-current-stat-label,
+.weather-hourly-precipitation,
+.weather-daily-precipitation {
+  color: rgba(245, 247, 250, 0.52);
+  font-size: 11px;
+}
+
+.weather-current-stat-value {
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.weather-forecast-section {
+  margin-top: 24px;
+}
+
+.weather-forecast-heading {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.weather-hourly-list {
+  display: grid;
+  grid-auto-columns: minmax(58px, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 1px 10px;
+  scrollbar-width: thin;
+}
+
+.weather-hourly-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px 6px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 11px;
+}
+
+.weather-hourly-time {
+  color: rgba(245, 247, 250, 0.68);
+  font-size: 11px;
+}
+
+.weather-hourly-icon {
+  font-size: 20px;
+}
+
+.weather-hourly-temperature {
+  font-size: 13px;
+}
+
+.weather-hourly-precipitation {
+  font-size: 10px;
+}
+
+.weather-daily-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-daily-item {
+  display: grid;
+  grid-template-columns: minmax(74px, 1fr) 28px auto 38px;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.weather-daily-date {
+  color: rgba(245, 247, 250, 0.78);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.weather-daily-icon {
+  font-size: 18px;
+  text-align: center;
+}
+
+.weather-daily-temperatures {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.weather-daily-precipitation {
+  text-align: right;
+}
+
+.weather-drawer-message {
+  margin: 24px 0;
+  color: rgba(245, 247, 250, 0.72);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.weather-drawer-message.is-loading::before {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 9px;
+  border: 2px solid rgba(245, 247, 250, 0.22);
+  border-top-color: rgba(245, 247, 250, 0.9);
+  border-radius: 50%;
+  content: '';
+  vertical-align: -2px;
+  animation: weather-spin 0.8s linear infinite;
+}
+
+@keyframes weather-spin {
+  to { transform: rotate(360deg); }
+}
+
+.weather-drawer-retry {
+  min-height: 38px;
+  padding: 0 14px;
+  color: inherit;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.weather-data-source {
+  margin: 24px 0 0;
+  color: rgba(245, 247, 250, 0.38);
+  font-size: 10px;
+  text-align: right;
+}
+
+body.theme-light .weather-drawer {
+  color: #20242b;
+  background: rgba(246, 248, 252, 0.97);
+  border-left-color: rgba(0, 0, 0, 0.1);
+}
+
+body.theme-light .weather-drawer-header,
+body.theme-light .weather-current-stats,
+body.theme-light .weather-daily-item {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.theme-light .weather-current,
+body.theme-light .weather-hourly-item {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .weather-drawer-city,
+body.theme-light .weather-current-description,
+body.theme-light .weather-current-stat-label,
+body.theme-light .weather-hourly-time,
+body.theme-light .weather-hourly-precipitation,
+body.theme-light .weather-daily-date,
+body.theme-light .weather-daily-precipitation,
+body.theme-light .weather-drawer-message,
+body.theme-light .weather-data-source {
+  color: rgba(32, 36, 43, 0.62);
+}
+
+body.theme-adaptive .weather-drawer {
+  color: var(--adapt-on-surface);
+  background: rgba(var(--adapt-surface-rgb), 0.96);
+  border-left-color: rgba(var(--adapt-outline-rgb), 0.42);
+}
+
+body.theme-adaptive .weather-drawer-header,
+body.theme-adaptive .weather-current-stats,
+body.theme-adaptive .weather-daily-item {
+  border-color: rgba(var(--adapt-outline-rgb), 0.28);
+}
+
+body.theme-adaptive .weather-current,
+body.theme-adaptive .weather-hourly-item {
+  background: rgba(var(--adapt-on-surface-rgb), 0.045);
+  border-color: rgba(var(--adapt-outline-rgb), 0.24);
+}
+
+body.theme-adaptive .weather-drawer-city,
+body.theme-adaptive .weather-current-description,
+body.theme-adaptive .weather-current-stat-label,
+body.theme-adaptive .weather-hourly-time,
+body.theme-adaptive .weather-hourly-precipitation,
+body.theme-adaptive .weather-daily-date,
+body.theme-adaptive .weather-daily-precipitation,
+body.theme-adaptive .weather-drawer-message,
+body.theme-adaptive .weather-data-source {
+  color: rgba(var(--adapt-on-surface-rgb), 0.62);
+}
+
+@media (max-width: 520px) {
+  .weather-drawer {
+    width: 100vw;
+    padding: 18px 18px 14px;
+  }
+}
+
+/* ==========================================
+   СЕТКА ЯРЛЫКОВ: ПЕРЕНОСЫ НА УЗКИХ ЭКРАНАХ
+   Gap сетки фиксирован (12px) — на узких экранах ужимается
+   только доступная ширина, пересчитывает её JS (getGridMetrics).
+   ========================================== */
+@media (max-width: 900px) {
+  body:not(.mode-ios) .shortcuts-wrapper {
+    padding: 0 24px;
+    margin-bottom: 28px;
+  }
+}
+
+/* ==========================================
+   НАСТРОЙКИ: УПРАВЛЕНИЕ КАТЕГОРИЯМИ
+   Вкладки-категории (выбор / создание / порядок),
+   заголовок активной категории и подсказка перетаскивания.
+   ========================================== */
+.category-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.category-tab-chip {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.65);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.category-tab-chip:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.category-tab-chip.active {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 -2px 0 0 rgba(255, 255, 255, 0.65);
+}
+
+/* Ярлык перетаскивается на эту вкладку — перенос в категорию */
+.category-tab-chip.drop-target {
+  color: #fff;
+  border-color: rgba(122, 162, 255, 0.9);
+  background: rgba(122, 162, 255, 0.18);
+}
+
+.category-tab-add {
+  border-style: dashed;
+  opacity: 0.8;
+}
+
+.category-active-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 8px;
+}
+
+.category-header-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-header-count {
+  font-size: 0.72rem;
+  opacity: 0.5;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+
+.category-header-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.category-action-btn {
+  padding: 4px 6px;
+  font-size: 0.72rem;
+  line-height: 1;
+  border-radius: 6px;
+}
+
+.category-action-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.category-hint {
+  font-size: 0.72rem;
+  opacity: 0.45;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.modal-list-empty {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 11px;
+  text-align: center;
+  padding: 12px;
+}
+
+/* ---------- Категории: светлая тема ---------- */
+body.theme-light .category-tab-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.65);
+}
+
+body.theme-light .category-tab-chip:hover {
+  color: #000;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+body.theme-light .category-tab-chip.active {
+  color: #1a202c;
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 -2px 0 0 rgba(0, 0, 0, 0.5);
+}
+
+body.theme-light .category-active-header {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .category-header-count {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.theme-light .category-hint,
+body.theme-light .modal-list-empty {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* ---------- Категории: адаптивная тема ---------- */
+body.theme-adaptive .category-tab-chip {
+  background: rgba(var(--adapt-surface-rgb), 0.7);
+  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .category-tab-chip:hover {
+  background: rgba(var(--adapt-surface-rgb), 0.9);
+  border-color: var(--adapt-primary);
+  color: var(--adapt-on-surface);
+}
+
+body.theme-adaptive .category-tab-chip.active {
+  background: rgba(var(--adapt-surface-rgb), 0.95);
+  border-color: var(--adapt-primary);
+  color: var(--adapt-primary);
+  box-shadow: inset 0 -2px 0 0 var(--adapt-primary);
+}
+
+body.theme-adaptive .category-active-header {
+  background: rgba(var(--adapt-surface-rgb), 0.5);
+  border-color: rgba(var(--adapt-outline-rgb), 0.4);
+}
+
+body.theme-adaptive .category-header-count {
+  border-color: rgba(var(--adapt-outline-rgb), 0.5);
+}
+
+body.theme-adaptive .category-hint,
+body.theme-adaptive .modal-list-empty {
+  color: rgba(var(--adapt-on-surface-rgb), 0.6);
+}
+
+/* ==========================================
+   ЦЕНТР (Default / Mist Standard) И ЛЕВАЯ КОЛОНКА (Mist Split)
+   Поиск, панель категорий и сетка ярлыков выравниваются по горизонтальной
+   оси экрана в классическом режиме и в Mist Standard; в пресете
+   Left/Split та же колонка прижата к левому краю, справа — пусто.
+   ========================================== */
+
+/* Классический режим: элементы по центральной оси */
+body:not(.mode-ios):not(.mode-mist) .search-form {
+  margin-inline: auto;
+}
+
+body:not(.mode-ios):not(.mode-mist) .shortcuts-wrapper {
+  align-items: center;
+}
+
+body:not(.mode-ios):not(.mode-mist) .mist-tabs {
+  justify-content: center;
+}
+
+body:not(.mode-ios):not(.mode-mist) #shortcuts-container {
+  margin-inline: auto;
+}
+
+/* Mist Standard: те же элементы по центру (страховка поверх базовых правил) */
+body.mode-mist.mist-preset-center .shortcuts-wrapper {
+  align-items: flex-start;
+}
+
+body.mode-mist.mist-preset-center .mist-tabs {
+  justify-content: flex-start;
+}
+
+body.mode-mist.mist-preset-center #shortcuts-container {
+  margin-inline: auto;
+}
+
+/* Mist Left/Split: панель категорий и сетка ярлыков — к ЛЕВОМУ краю.
+   Селектор с ID обязателен: базовое `margin-inline: auto` у #shortcuts-container
+   имеет более высокий приоритет, чем правила пресета, и центрировало сетку. */
+body.mode-mist.mist-preset-split #shortcuts-container {
+  margin-inline: 0;
+}
+
+body.mode-mist.mist-preset-split .shortcuts-wrapper {
+  text-align: left;
+}
+
+body.mode-mist.mist-preset-split .mist-tabs {
+  width: 100%;
+  justify-content: flex-start;
+}

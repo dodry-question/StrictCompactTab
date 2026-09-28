@@ -1,0 +1,8 @@
+{
+  "name": "my-new-tab-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/search.test.js"
+  }
+}
