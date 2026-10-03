@@ -89,140 +89,40 @@ if (btnImport && importFileInput) {
       return;
     }
 
+    // Файл-гигант отклоняем ДО чтения: JSON.parse на сотнях мегабайтов
+    // намертво заморозил бы вкладку
+    if (file.size > window.BackupValidate.MAX_FILE_BYTES) {
+      const dictTooLarge = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;
+      alert(dictTooLarge.importTooLarge);
+      importFileInput.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        // РћС‡РёСЃС‚РєР° РѕС‚ BOM-СЃРёРјРІРѕР»РѕРІ (\uFEFF) Рё Р»РёС€РЅРёС… РїСЂРѕР±РµР»РѕРІ
+        // Очистка от BOM-символов (\uFEFF) и лишних пробелов
         const fr = /** @type {FileReader} */ (event.target);
         const cleanText = /** @type {string} */ (fr.result).trim().replace(/^\uFEFF/, '');
         const data = JSON.parse(cleanText);
 
-        if (!data) {
-          throw new Error("Invalid backup format: parsed data is null or empty");
+        // Единая санитизация бэкапа (см. app/backup-validate.js): каждое поле
+        // приводится к известному типу и диапазону, чужие ключи отбрасываются,
+        // небезопасные ссылки (javascript: и т.п.) удаляются вместе с ярлыком.
+        // При отказе хранилище НЕ стирается — старые настройки остаются целы.
+        const result = window.BackupValidate.sanitize(data);
+        if (!result.ok) {
+          console.error('Import rejected:', result.reason);
+          const dictInvalid = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;
+          alert(dictInvalid.importInvalid);
+          importFileInput.value = '';
+          return;
         }
 
-        let shortcuts = [];
-        let columns = 10;
-        let size = 'small';
-        let format12h = false;
-        let showSeconds = false;
-        let showDate = true;
-        let theme = 'dark';
-        let adaptiveThemeData = null;
-        let layoutPositions = null;
-        let layoutGridSnap = false;
-        let layoutGridSize = 20;
-        let showClock = true;
-        let showWeather = false;
-        let weatherCity = '';
-        let weatherCoords = { lat: null, lon: null, resolvedName: '' };
-        let weatherCache = { temp: '', code: null, desc: '', timestamp: 0 };
-        let customBackground = null;
-        let customFavicon = null;
-        let language = 'en';
-        let searchEngine = 'duckduckgo';
-        let customSearchEngines = [];
-        let checkUpdates = false;
-        let layoutZenMode = false;
-
-        // Р•СЃР»Рё РёРјРїРѕСЂС‚РёСЂСѓРµС‚СЃСЏ РїР»РѕСЃРєРёР№ РјР°СЃСЃРёРІ СЏСЂР»С‹РєРѕРІ (СЃС‚Р°СЂС‹Р№ С„РѕСЂРјР°С‚)
-        if (Array.isArray(data)) {
-          shortcuts = data;
-        } else if (typeof data === 'object') {
-          // Р•СЃР»Рё РёРјРїРѕСЂС‚РёСЂСѓРµС‚СЃСЏ СЃР»РѕР¶РЅС‹Р№ РѕР±СЉРµРєС‚ РЅР°СЃС‚СЂРѕРµРє (РЅРѕРІС‹Р№ С„РѕСЂРјР°С‚)
-          shortcuts = Array.isArray(data.shortcuts) ? data.shortcuts : DEFAULT_SHORTCUTS;
-          columns = data.columns ?? 10;
-          size = data.size ?? 'small';
-          
-          if (data.format12h !== undefined && data.format12h !== null) {
-            format12h = data.format12h;
-          } else if (data.timeFormat === '12h') {
-            format12h = true;
-          }
-
-          showSeconds = data.showSeconds ?? false;
-          showDate = data.showDate ?? true;
-          theme = data.theme ?? 'dark';
-          if (theme === 'nord') theme = 'dark';
-          adaptiveThemeData = data.adaptiveThemeData ?? null;
-          layoutPositions = data.layoutPositions ?? null;
-          layoutGridSnap = data.layoutGridSnap ?? false;
-          layoutGridSize = data.layoutGridSize ?? 20;
-          showClock = data.showClock ?? true;
-          showWeather = data.showWeather ?? false;
-          weatherCity = data.weatherCity ?? '';
-          weatherCoords = data.weatherCoords ?? { lat: null, lon: null, resolvedName: '' };
-          weatherCache = data.weatherCache ?? { temp: '', code: null, desc: '', timestamp: 0 };
-          customBackground = data.customBackground ?? null;
-          customFavicon = data.customFavicon ?? null;
-          language = data.language ?? 'en';
-          // Чужой бэкап может принести несуществующий язык — ограничиваем до известных,
-          // иначе все строки UI превращаются в undefined и приложение падает
-          if (language !== 'en' && language !== 'ru') language = 'en';
-          searchEngine = data.searchEngine ?? 'duckduckgo';
-          customSearchEngines = data.customSearchEngines ?? [];
-          checkUpdates = data.checkUpdates ?? false;
-          layoutZenMode = data.layoutZenMode ?? false;
-        } else {
-          throw new Error("Invalid backup format: data must be an object or array");
-        }
-
-        // РћР±СЏР·Р°С‚РµР»СЊРЅР°СЏ С„РёР»СЊС‚СЂР°С†РёСЏ СЏСЂР»С‹РєРѕРІ (РѕС‚СЃРµРёРІР°РµРј null Рё РЅРµ-РѕР±СЉРµРєС‚С‹)
-        shortcuts = shortcuts.filter(s => s && typeof s === 'object');
-        
-        // Миграция: folders / categories / groups любого прошлого формата
-        // автоматически превращаются в текущую структуру категорий
-        const categoryMeta = extractCategoryMeta(data);
-        const migratedShortcuts = migrateToNested(shortcuts, categoryMeta);
-
-        const cleanedData = {
-          shortcuts: migratedShortcuts,
-          columns,
-          size,
-          format12h,
-          showSeconds,
-          showDate,
-          customBackground,
-          customFavicon,
-          language,
-          searchEngine,
-          theme,
-          adaptiveThemeData,
-          layoutPositions,
-          layoutGridSnap,
-          layoutGridSize,
-          showClock,
-          showWeather,
-          weatherCity,
-          weatherCoords,
-          weatherCache,
-          customSearchEngines,
-          checkUpdates,
-          layoutZenMode,
-          layoutIosMode: data.layoutIosMode ?? false,
-          layoutStealthMode: data.layoutStealthMode ?? false,
-          layoutMistMode: data.layoutMistMode ?? false,
-          mistPreset: data.mistPreset ?? 'center',
-          mistPerRow: data.mistPerRow ?? 6,
-          mistHeadOffset: normalizeMistWidgets(data.mistHeadOffset),
-          // Плагин «Расписание»: галка и выбранная группа — настройки, значит
-          // они принадлежат бэкапу. Раньше они терялись при импорте, потому
-          // что clearAndSet стирает хранилище целиком.
-          // Сам файл расписания (scheduleData) в бэкап не входит: его заново
-          // загружают перетаскиванием .xlsx.
-          scheduleEnabled: data.scheduleEnabled ?? false,
-          scheduleGroup: data.scheduleGroup ?? null
-        };
-
-        // Zen и Mist взаимоисключающи. Раньше оба могли оказаться включены
-        // (особенно из бэкапа), и такая комбинация расходилась с тем, что
-        // потом записывает saveState
-        if (cleanedData.layoutZenMode) cleanedData.layoutMistMode = false;
-
-        // РЎРѕС…СЂР°РЅСЏРµРј РІ localStorage / Chrome Storage
-        storage.clearAndSet(cleanedData, () => {
+        // Сохраняем в localStorage / Chrome Storage
+        storage.clearAndSet(result.value, () => {
           const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;
-          alert(dict.importSuccess || "Import successful!");
+          alert(dict.importSuccess);
           window.location.reload();
         });
 

@@ -35,6 +35,8 @@ declare global {
     ShortcutLayout: any;
     ScheduleXlsx: any;
     ScheduleParser: any;
+    // Валидация импортируемого бэкапа (app/backup-validate.js)
+    BackupValidate: any;
     // Внешняя библиотека (загружается динамически в theme-adaptive.js)
     materialColorUtilities: any;
     // Тест-хук

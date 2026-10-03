@@ -374,8 +374,10 @@ test('экспорт бэкапа не тащит файл расписания,
   assert.equal(payload.shortcutIconCache, undefined, 'кэш иконок не должен попадать в бэкап');
   assert.equal(payload.theme, 'dark', 'обычные настройки сохраняются');
 
-  // импорт обязан вернуть галку и выбранную группу
-  const importSource = read('app/backup-updates.js');
-  assert.match(importSource, /scheduleEnabled:\s*data\.scheduleEnabled/);
-  assert.match(importSource, /scheduleGroup:\s*data\.scheduleGroup/);
+  // импорт обязан вернуть галку и выбранную группу. Сторона импорта
+  // целиком переехала в app/backup-validate.js (белый список полей);
+  // функциональная проверка — в tests/backup-validate.test.js
+  const validateSource = read('app/backup-validate.js');
+  assert.match(validateSource, /scheduleEnabled:\s*asBool\(data\.scheduleEnabled, false\)/);
+  assert.match(validateSource, /scheduleGroup:\s*sanitizeScheduleGroup\(data\.scheduleGroup\)/);
 });
