@@ -4,7 +4,8 @@
 #   .\tools\build-release.ps1 -Version 1.11.1
 #
 # Что НЕ попадает в архив и почему:
-#   README.md, package.json   — не нужны браузеру
+#   README.md, package.json,
+#   LICENSE                   — не нужны браузеру
 #   assets\preview_*           — скриншоты для GitHub, расширение их не грузит
 #                                (192 КБ мёртвого веса в каждой установке)
 #   *.zip                     — чтобы архив не включал сам себя
@@ -28,7 +29,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 if (Test-Path $out) { Remove-Item $out -Force }
 
-$skipNames = @('README.md', 'package.json')
+$skipNames = @('README.md', 'package.json', 'LICENSE')
 $files = @()
 $files += Get-ChildItem -Path $root -File |
   Where-Object { $_.Extension -ne '.zip' -and $_.Name -notin $skipNames }
