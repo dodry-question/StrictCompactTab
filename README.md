@@ -47,9 +47,9 @@
 
 | Main view | Settings |
 |---|---|
-| <img src="assets/preview_main.png" alt="Strict Compact Tab main view" width="420"> | <img src="assets/preview_settings.png" alt="Strict Compact Tab settings" width="420"> |
+| <img src="assets/preview_main.jpg" alt="Strict Compact Tab main view" width="420"> | <img src="assets/preview_settings.jpg" alt="Strict Compact Tab settings" width="420"> |
 
-> These two images live in `assets/` for this page only. They are **excluded from the release archive** (`tools/build-release.ps1`) — the extension never loads them, and shipping 492 KB of unused screenshots in every install would break the "lightweight" promise.
+> These two images live in `assets/` for this page only. They are **excluded from the release archive** (`tools/build-release.ps1`) — the extension never loads them, and shipping ~192 KB of unused screenshots in every install would break the "lightweight" promise.
 
 ---
 

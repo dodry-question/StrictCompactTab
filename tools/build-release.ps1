@@ -5,8 +5,8 @@
 #
 # Что НЕ попадает в архив и почему:
 #   README.md, package.json   — не нужны браузеру
-#   assets\preview_*.png       — скриншоты для GitHub, расширение их не грузит
-#                                (492 КБ мёртвого веса в каждой установке)
+#   assets\preview_*           — скриншоты для GitHub, расширение их не грузит
+#                                (192 КБ мёртвого веса в каждой установке)
 #   *.zip                     — чтобы архив не включал сам себя
 #
 # Compress-Archive в PowerShell 5.1 пишет обратные слэши в путях записей,
@@ -34,7 +34,7 @@ $files += Get-ChildItem -Path $root -File |
   Where-Object { $_.Extension -ne '.zip' -and $_.Name -notin $skipNames }
 foreach ($dir in @('app', 'assets', 'css', 'i18n', 'services', 'state', 'storage', 'src')) {
   $files += Get-ChildItem -Path (Join-Path $root $dir) -Recurse -File |
-    Where-Object { $_.Name -notlike 'preview_*.png' }
+    Where-Object { $_.BaseName -notlike 'preview_*' }
 }
 
 $zip = [System.IO.Compression.ZipFile]::Open($out, [System.IO.Compression.ZipArchiveMode]::Create)
