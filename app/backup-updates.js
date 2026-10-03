@@ -16,7 +16,7 @@ async function isBraveBrowser() {
   return false;
 }
 
-// --- Р­РљРЎРџРћР Рў Р РРњРџРћР Рў РќРђРЎРўР РћР•Рљ (JSON-Р‘Р­РљРђРџ) ---
+// --- Р­РљРЎРџРћР Рў Р РРњРџРћР Рў РќРђРЎРўР РћР•Рљ (JSON-Р‘Р­РљРђРџ) ---
 // Структурированная экспортная форма: категории со своими ярлыками
 // + вложенный список shortcuts (обратно совместим со старыми версиями,
 //   которым нужны ключи shortcuts и folders).
@@ -83,7 +83,7 @@ if (btnImport && importFileInput) {
   });
 
   importFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
+    const file = /** @type {HTMLInputElement} */ (e.target).files[0];
     if (!file) {
       importFileInput.value = '';
       return;
@@ -93,7 +93,8 @@ if (btnImport && importFileInput) {
     reader.onload = (event) => {
       try {
         // РћС‡РёСЃС‚РєР° РѕС‚ BOM-СЃРёРјРІРѕР»РѕРІ (\uFEFF) Рё Р»РёС€РЅРёС… РїСЂРѕР±РµР»РѕРІ
-        const cleanText = event.target.result.trim().replace(/^\uFEFF/, '');
+        const fr = /** @type {FileReader} */ (event.target);
+        const cleanText = /** @type {string} */ (fr.result).trim().replace(/^\uFEFF/, '');
         const data = JSON.parse(cleanText);
 
         if (!data) {
@@ -260,7 +261,7 @@ function checkForUpdates() {
   if (!STATE.checkUpdates) return;
   
   const now = Date.now();
-  const lastCheck = localStorage.getItem('lastUpdateCheck') || 0;
+  const lastCheck = Number(localStorage.getItem('lastUpdateCheck')) || 0;
   const cachedVersion = localStorage.getItem('cachedLatestVersion');
   
   // РљСЌС€ РЅР° 1 С‡Р°СЃ РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ Р»РёРјРёС‚РѕРІ Р·Р°РїСЂРѕСЃРѕРІ GitHub API
@@ -276,7 +277,7 @@ function checkForUpdates() {
     })
     .then(data => {
       if (data && data.tag_name) {
-        localStorage.setItem('lastUpdateCheck', now);
+        localStorage.setItem('lastUpdateCheck', String(now));
         localStorage.setItem('cachedLatestVersion', data.tag_name);
         handleUpdateResult(data.tag_name);
       }

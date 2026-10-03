@@ -7,15 +7,15 @@ const weatherWidget = document.getElementById('weather-widget');
 const weatherTemp = document.getElementById('weather-temp');
 const weatherIcon = document.getElementById('weather-icon');
 const weatherDetails = document.getElementById('weather-details');
-const showWeatherCb = document.getElementById('show-weather-checkbox');
-const weatherCityInput = document.getElementById('weather-city-input');
+const showWeatherCb = /** @type {HTMLInputElement} */ (document.getElementById('show-weather-checkbox'));
+const weatherCityInput = /** @type {HTMLInputElement} */ (document.getElementById('weather-city-input'));
 const weatherInputStatus = document.getElementById('weather-input-status');
 const weatherSubsettings = document.getElementById('weather-subsettings');
 
-// --- Р Р•Р–РРњ MIST (РЎС‚РµРєР»СЏРЅРЅС‹Р№ РјРёРЅРёРјР°Р»РёР·Рј) ---
+// --- Р Р•Р–РРњ MIST (РЎС‚РµРєР»СЏРЅРЅС‹Р№ РјРёРЅРёРјР°Р»РёР·Рј) ---
 const mistTabsEl = document.getElementById('mist-tabs');
-const mistPresetSelect = document.getElementById('mist-preset-select');
-const mistPerRowSelect = document.getElementById('mist-per-row-select');
+const mistPresetSelect = /** @type {HTMLSelectElement} */ (document.getElementById('mist-preset-select'));
+const mistPerRowSelect = /** @type {HTMLSelectElement} */ (document.getElementById('mist-per-row-select'));
 const mistZenZone = document.getElementById('mist-zen-zone');
 // Top Bar: единая строка «дата • температура, описание, город» в верхнем углу
 const mistTopbarEl = document.getElementById('mist-topbar');
@@ -107,9 +107,9 @@ function updateClockAndDate() {
     hours = hours % 12;
     hours = hours ? hours : 12;
   }
-  hours = String(hours).padStart(2, '0');
+  const hoursStr = String(hours).padStart(2, '0');
 
-  let timeString = `${hours}:${minutes}`;
+  let timeString = `${hoursStr}:${minutes}`;
   if (STATE.showSeconds) {
     timeString += `:${seconds}`;
   }

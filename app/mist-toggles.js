@@ -1,12 +1,12 @@
-// --- РЈРџР РђР’Р›Р•РќРР• РўРЈРњР‘Р›Р•Р РђРњР Р§РђРЎРћР’ Р Р”РђРўР« ---
-const showClockCb = document.getElementById('show-clock-checkbox');
-const showDateCb = document.getElementById('show-date-checkbox');
-const timeFormatCb = document.getElementById('time-format-checkbox');
-const showSecondsCb = document.getElementById('show-seconds-checkbox');
+// --- РЈРџР РђР’Р›Р•РќРР• РўРЈРњР‘Р›Р•Р РђРњР Р§РђРЎРћР’ Р Р”РђРўР« ---
+const showClockCb = /** @type {HTMLInputElement} */ (document.getElementById('show-clock-checkbox'));
+const showDateCb = /** @type {HTMLInputElement} */ (document.getElementById('show-date-checkbox'));
+const timeFormatCb = /** @type {HTMLInputElement} */ (document.getElementById('time-format-checkbox'));
+const showSecondsCb = /** @type {HTMLInputElement} */ (document.getElementById('show-seconds-checkbox'));
 
 if (showClockCb) {
   showClockCb.addEventListener('change', (e) => {
-    STATE.showClock = e.target.checked;
+    STATE.showClock = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     applyClockVisibility();
   });
@@ -14,7 +14,7 @@ if (showClockCb) {
 
 if (showDateCb) {
   showDateCb.addEventListener('change', (e) => {
-    STATE.showDate = e.target.checked;
+    STATE.showDate = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     updateClockAndDate();
   });
@@ -22,16 +22,16 @@ if (showDateCb) {
 
 if (timeFormatCb) {
   timeFormatCb.addEventListener('change', (e) => {
-    STATE.format12h = e.target.checked;
+    STATE.format12h = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     updateClockAndDate();
   });
 }
 
-const layoutIosModeCb = document.getElementById('layout-ios-mode');
+const layoutIosModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-ios-mode'));
 if (layoutIosModeCb) {
   layoutIosModeCb.addEventListener('change', (e) => {
-    STATE.layoutIosMode = e.target.checked;
+    STATE.layoutIosMode = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     if (STATE.layoutIosMode) {
       document.body.classList.add('mode-ios');
@@ -45,10 +45,10 @@ if (layoutIosModeCb) {
 
 
 
-const layoutStealthModeCb = document.getElementById('layout-stealth-mode');
+const layoutStealthModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-stealth-mode'));
 if (layoutStealthModeCb) {
   layoutStealthModeCb.addEventListener('change', (e) => {
-    STATE.layoutStealthMode = e.target.checked;
+    STATE.layoutStealthMode = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     if (STATE.layoutStealthMode) {
       document.body.classList.add('stealth-mode');
@@ -58,10 +58,10 @@ if (layoutStealthModeCb) {
   });
 }
 
-const checkUpdatesCb = document.getElementById('check-updates-checkbox');
+const checkUpdatesCb = /** @type {HTMLInputElement} */ (document.getElementById('check-updates-checkbox'));
 if (checkUpdatesCb) {
   checkUpdatesCb.addEventListener('change', (e) => {
-    STATE.checkUpdates = e.target.checked;
+    STATE.checkUpdates = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     if (STATE.checkUpdates) {
       checkForUpdates();
@@ -72,10 +72,10 @@ if (checkUpdatesCb) {
   });
 }
 
-const layoutZenModeCb = document.getElementById('layout-zen-mode');
+const layoutZenModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-zen-mode'));
 if (layoutZenModeCb) {
   layoutZenModeCb.addEventListener('change', (e) => {
-    STATE.layoutZenMode = e.target.checked;
+    STATE.layoutZenMode = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     
     if (STATE.layoutZenMode) {
@@ -88,18 +88,18 @@ if (layoutZenModeCb) {
   });
 }
 
-// --- РџР•Р Р•РљР›Р®Р§РђРўР•Р›Р¬ Р Р•Р–РРњРђ MIST ---
-const layoutMistModeCb = document.getElementById('layout-mist-mode');
+// --- РџР•Р Р•РљР›Р®Р§РђРўР•Р›Р¬ Р Р•Р–РРњРђ MIST ---
+const layoutMistModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-mist-mode'));
 if (layoutMistModeCb) {
   layoutMistModeCb.addEventListener('change', (e) => {
-    STATE.layoutMistMode = e.target.checked;
+    STATE.layoutMistMode = /** @type {HTMLInputElement} */ (e.target).checked;
 
     if (STATE.layoutMistMode) {
       // Mist РЅРµСЃРѕРІРјРµСЃС‚РёРј СЃРѕ РЎС‚РµР»СЃ- Рё iOS-СЂРµР¶РёРјР°РјРё (Сѓ РЅРёС… РєРѕРЅС„Р»РёРєС‚СѓСЋС‰РёРµ СЃС‚РёР»Рё)
       STATE.layoutIosMode = false;
       STATE.layoutStealthMode = false;
-      const iosCb = document.getElementById('layout-ios-mode');
-      const stealthCb = document.getElementById('layout-stealth-mode');
+      const iosCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-ios-mode'));
+      const stealthCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-stealth-mode'));
       if (iosCb) iosCb.checked = false;
       if (stealthCb) stealthCb.checked = false;
       document.body.classList.remove('mode-ios', 'stealth-mode');
@@ -111,10 +111,10 @@ if (layoutMistModeCb) {
   });
 }
 
-// --- РЈРџР РђР’Р›Р•РќРР• РџР Р•РЎР•РўРђРњР РљРћРњРџРћРќРћР’РљР MIST ---
+// --- РЈРџР РђР’Р›Р•РќРР• РџР Р•РЎР•РўРђРњР РљРћРњРџРћРќРћР’РљР MIST ---
 if (mistPresetSelect) {
   mistPresetSelect.addEventListener('change', (e) => {
-    STATE.mistPreset = e.target.value;
+    STATE.mistPreset = /** @type {HTMLSelectElement} */ (e.target).value;
     applyMistPreset();
     // Смена пресета — абсолютные кастомные координаты сбрасываем
     // до значений нового пресета, чтобы элементы не «уезжали»
@@ -134,7 +134,7 @@ if (mistPresetSelect) {
 
 if (mistPerRowSelect) {
   mistPerRowSelect.addEventListener('change', (e) => {
-    STATE.mistPerRow = parseInt(e.target.value, 10) || 6;
+    STATE.mistPerRow = parseInt(/** @type {HTMLSelectElement} */ (e.target).value, 10) || 6;
     saveState();
     renderShortcuts();
   });
@@ -174,7 +174,7 @@ function revealMistZenByWheel() {
   if (mistZenWheelHideTimer) clearTimeout(mistZenWheelHideTimer);
   mistZenWheelHideTimer = setTimeout(() => {
     mistZenWheelHideTimer = null;
-    let overPanel = false;
+    let overPanel;
     try {
       overPanel = (mistShortcutsWrapper && mistShortcutsWrapper.matches(':hover')) ||
         (mistZenZone && mistZenZone.matches(':hover'));
@@ -198,7 +198,7 @@ if (mistShortcutsWrapper) {
 
 if (showSecondsCb) {
   showSecondsCb.addEventListener('change', (e) => {
-    STATE.showSeconds = e.target.checked;
+    STATE.showSeconds = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     updateClockAndDate();
   });

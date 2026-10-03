@@ -1,4 +1,4 @@
-// --- Р¤РЈРќРљР¦РР РћР‘Р РђР‘РћРўРљР Р”РђРќРќР«РҐ Р РћРўР РРЎРћР’РљР ---
+// --- Р¤РЈРќРљР¦РР РћР‘Р РђР‘РћРўРљР Р”РђРќРќР«РҐ Р РћРўР РРЎРћР’РљР ---
 
 // Легаси-ключи от версий до 1.10.5. После успешной миграции их нужно удалить,
 // иначе удалённые пользователем категории воскресают на каждой новой вкладке
@@ -69,13 +69,13 @@ function loadState() {
     if (showWeatherCb) showWeatherCb.checked = STATE.showWeather;
     if (weatherCityInput) weatherCityInput.value = STATE.weatherCity;
     if (layoutIosModeCb) layoutIosModeCb.checked = STATE.layoutIosMode;
-    const layoutStealthModeCb = document.getElementById('layout-stealth-mode');
+    const layoutStealthModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-stealth-mode'));
     if (layoutStealthModeCb) layoutStealthModeCb.checked = STATE.layoutStealthMode;
-    const checkUpdatesCb = document.getElementById('check-updates-checkbox');
+    const checkUpdatesCb = /** @type {HTMLInputElement} */ (document.getElementById('check-updates-checkbox'));
     if (checkUpdatesCb) checkUpdatesCb.checked = STATE.checkUpdates;
-    const layoutZenModeCb = document.getElementById('layout-zen-mode');
+    const layoutZenModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-zen-mode'));
     if (layoutZenModeCb) layoutZenModeCb.checked = STATE.layoutZenMode;
-    const layoutMistModeCb = document.getElementById('layout-mist-mode');
+    const layoutMistModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-mist-mode'));
     if (layoutMistModeCb) layoutMistModeCb.checked = STATE.layoutMistMode;
     if (mistPresetSelect) mistPresetSelect.value = STATE.mistPreset;
     if (mistPerRowSelect) mistPerRowSelect.value = STATE.mistPerRow;

@@ -1,10 +1,10 @@
-// --- РЈРџР РђР’Р›Р•РќРР• РћР‘РћРЇРњР ---
-const bgFileInput = document.getElementById('bg-file-input');
+// --- РЈРџР РђР’Р›Р•РќРР• РћР‘РћРЇРњР ---
+const bgFileInput = /** @type {HTMLInputElement} */ (document.getElementById('bg-file-input'));
 const bgResetBtn = document.getElementById('bg-reset-btn');
 
 if (bgFileInput) {
   bgFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
+    const file = /** @type {HTMLInputElement} */ (e.target).files[0];
     if (file) {
       compressImage(file, 2560, 1440, 0.8, (result) => {
         STATE.customBackground = result;
@@ -94,7 +94,7 @@ function compressImage(file, maxWidth, maxHeight, quality, callback) {
         finish(null);
       }
     };
-    img.src = e.target.result;
+    img.src = /** @type {string} */ (e.target.result);
   };
   reader.readAsDataURL(file);
 }
@@ -128,7 +128,7 @@ function applyTheme() {
   }
 }
 
-// --- Р Р•Р–РРњ MIST: РџР РРњР•РќР•РќРР• Р РЎРРќРҐР РћРќРР—РђР¦РРЇ РўРЈРњР‘Р›Р•Р РћР’ ---
+// --- Р Р•Р–РРњ MIST: РџР РРњР•РќР•РќРР• Р РЎРРќРҐР РћРќРР—РђР¦РРЇ РўРЈРњР‘Р›Р•Р РћР’ ---
 function applyMistMode() {
   document.body.classList.toggle('mode-mist', STATE.layoutMistMode);
   applyMistPreset();
@@ -185,14 +185,14 @@ function syncClockDomPosition() {
 
 // РЎР»РµРґРёС‚ Р·Р° РІР·Р°РёРјРѕРёСЃРєР»СЋС‡РµРЅРёРµРј СЂРµР¶РёРјРѕРІ Рё Р±Р»РѕРєРёСЂСѓРµС‚ РЅРµСЃРѕРІРјРµСЃС‚РёРјС‹Рµ РїРµСЂРµРєР»СЋС‡Р°С‚РµР»Рё
 function syncModeToggles() {
-  const iosCb = document.getElementById('layout-ios-mode');
-  const stealthCb = document.getElementById('layout-stealth-mode');
-  const zenCb = document.getElementById('layout-zen-mode');
-  const mistCb = document.getElementById('layout-mist-mode');
-  const editLayoutBtn = document.getElementById('btn-edit-layout');
-  const resetLayoutBtn = document.getElementById('btn-reset-layout');
-  const sizeSelect = document.getElementById('shortcut-size-select');
-  const columnsSelect = document.getElementById('shortcut-columns-select');
+  const iosCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-ios-mode'));
+  const stealthCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-stealth-mode'));
+  const zenCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-zen-mode'));
+  const mistCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-mist-mode'));
+  const editLayoutBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-edit-layout'));
+  const resetLayoutBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-reset-layout'));
+  const sizeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('shortcut-size-select'));
+  const columnsSelect = /** @type {HTMLSelectElement} */ (document.getElementById('shortcut-columns-select'));
 
   const zenOn = STATE.layoutZenMode;
   const mistOn = STATE.layoutMistMode;
@@ -215,7 +215,7 @@ function syncModeToggles() {
 }
 
 function applyClockVisibility() {
-  const clockContainer = document.querySelector('.clock-container');
+  const clockContainer = /** @type {HTMLElement} */ (document.querySelector('.clock-container'));
   const clockSubsettings = document.getElementById('clock-subsettings');
   
   if (STATE.showClock) {
@@ -229,13 +229,13 @@ function applyClockVisibility() {
   renderTopbar();
 }
 
-// --- РЈРџР РђР’Р›Р•РќРР• Р”РРќРђРњРР§Р•РЎРљРћР™ РРљРћРќРљРћР™ Р’РљР›РђР”РљР ---
-const faviconFileInput = document.getElementById('favicon-file-input');
+// --- РЈРџР РђР’Р›Р•РќРР• Р”РРќРђРњРР§Р•РЎРљРћР™ РРљРћРќРљРћР™ Р’РљР›РђР”РљР ---
+const faviconFileInput = /** @type {HTMLInputElement} */ (document.getElementById('favicon-file-input'));
 const faviconResetBtn = document.getElementById('favicon-reset-btn');
 
 if (faviconFileInput) {
   faviconFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
+    const file = /** @type {HTMLInputElement} */ (e.target).files[0];
     if (file) {
       compressImage(file, 128, 128, 0.85, (result) => {
         STATE.customFavicon = result;
@@ -269,7 +269,7 @@ function applyFavicon() {
   }
 }
 
-// --- Р”РРќРђРњРР§Р•РЎРљРђРЇ Р›РћРљРђР›РР—РђР¦РРЇ РРќРўР•Р Р¤Р•Р™РЎРђ ---
+// --- Р”РРќРђРњРР§Р•РЎРљРђРЇ Р›РћРљРђР›РР—РђР¦РРЇ РРќРўР•Р Р¤Р•Р™РЎРђ ---
 function applyLanguage(lang) {
   const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
   
@@ -280,14 +280,14 @@ function applyLanguage(lang) {
     }
   });
 
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+  /** @type {NodeListOf<HTMLInputElement>} */ (document.querySelectorAll('[data-i18n-placeholder]')).forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     if (dict[key]) {
       el.placeholder = dict[key];
     }
   });
 
-  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+  /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('[data-i18n-title]')).forEach(el => {
     const key = el.getAttribute('data-i18n-title');
     if (dict[key]) {
       el.title = dict[key];

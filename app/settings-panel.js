@@ -1,6 +1,6 @@
-// --- РџРћРРЎРљ РЎ Р”РРќРђРњРР§Р•РЎРљРРњ РџР•Р Р•РќРђРџР РђР’Р›Р•РќРР•Рњ ---
+// --- РџРћРРЎРљ РЎ Р”РРќРђРњРР§Р•РЎРљРРњ РџР•Р Р•РќРђРџР РђР’Р›Р•РќРР•Рњ ---
 const searchForm = document.getElementById('search-form');
-const searchInput = document.getElementById('search-input');
+const searchInput = /** @type {HTMLInputElement} */ (document.getElementById('search-input'));
 if (searchForm && searchInput) {
   searchForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -18,7 +18,7 @@ if (searchForm && searchInput) {
 // Открытие подробного прогноза во внутренней выдвижной панели.
 if (weatherWidget) window.WeatherDrawer.init(STATE, TRANSLATIONS);
 
-// --- РЈРџР РђР’Р›Р•РќРР• РРќРўР•Р Р¤Р•Р™РЎРћРњ Р РњРћР”РђР›Р¬РќР«Рњ РћРљРќРћРњ ---
+// --- РЈРџР РђР’Р›Р•РќРР• РРќРўР•Р Р¤Р•Р™РЎРћРњ Р РњРћР”РђР›Р¬РќР«Рњ РћРљРќРћРњ ---
 const modal = document.getElementById('settings-modal');
 const openBtn = document.getElementById('settings-open-btn');
 const closeBtn = document.getElementById('settings-close-btn');
@@ -56,15 +56,15 @@ if (closeBtn && modal) {
 }
 
 // РќР°СЃС‚СЂРѕР№РєРё СЃРµС‚РєРё РјР°РєРµС‚Р°
-const sizeSelect = document.getElementById('shortcut-size-select');
-const columnsSelect = document.getElementById('shortcut-columns-select');
-const languageSelect = document.getElementById('language-select');
-const searchEngineSelect = document.getElementById('search-engine-select');
-const themeSelect = document.getElementById('theme-select');
+const sizeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('shortcut-size-select'));
+const columnsSelect = /** @type {HTMLSelectElement} */ (document.getElementById('shortcut-columns-select'));
+const languageSelect = /** @type {HTMLSelectElement} */ (document.getElementById('language-select'));
+const searchEngineSelect = /** @type {HTMLSelectElement} */ (document.getElementById('search-engine-select'));
+const themeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('theme-select'));
 
 if (sizeSelect) {
   sizeSelect.addEventListener('change', (e) => {
-    STATE.size = e.target.value;
+    STATE.size = /** @type {HTMLSelectElement} */ (e.target).value;
     saveState();
     renderShortcuts();
   });
@@ -72,7 +72,7 @@ if (sizeSelect) {
 
 if (columnsSelect) {
   columnsSelect.addEventListener('change', (e) => {
-    STATE.columns = parseInt(e.target.value, 10);
+    STATE.columns = parseInt(/** @type {HTMLSelectElement} */ (e.target).value, 10);
     saveState();
     renderShortcuts();
   });
@@ -80,7 +80,7 @@ if (columnsSelect) {
 
 if (languageSelect) {
   languageSelect.addEventListener('change', (e) => {
-    STATE.language = e.target.value;
+    STATE.language = /** @type {HTMLSelectElement} */ (e.target).value;
     saveState();
     applyLanguage(STATE.language);
     updateClockAndDate();
@@ -97,7 +97,7 @@ if (languageSelect) {
 
 if (searchEngineSelect) {
   searchEngineSelect.addEventListener('change', (e) => {
-    STATE.searchEngine = e.target.value;
+    STATE.searchEngine = /** @type {HTMLSelectElement} */ (e.target).value;
     saveState();
     updateSearchEngineUI();
   });
@@ -105,7 +105,7 @@ if (searchEngineSelect) {
 
 if (themeSelect) {
   themeSelect.addEventListener('change', (e) => {
-    STATE.theme = e.target.value;
+    STATE.theme = /** @type {HTMLSelectElement} */ (e.target).value;
     if (STATE.theme === 'adaptive' && STATE.customBackground && !STATE.adaptiveThemeData) {
       AdaptiveThemeManager.generateThemeFromWallpaper(STATE.customBackground)
         .then(themeData => {
@@ -127,11 +127,11 @@ if (themeSelect) {
 }
 
 // Р¤РѕСЂРјР° СЃРѕР·РґР°РЅРёСЏ РЅРѕРІРѕРіРѕ СЏСЂР»С‹РєР°
-const newIconInput = document.getElementById('new-shortcut-icon-file');
-const addForm = document.getElementById('add-shortcut-form');
-const newNameInput = document.getElementById('new-shortcut-name');
-const newUrlInput = document.getElementById('new-shortcut-url');
-const newCatSelect = document.getElementById('new-shortcut-category');
+const newIconInput = /** @type {HTMLInputElement} */ (document.getElementById('new-shortcut-icon-file'));
+const addForm = /** @type {HTMLFormElement} */ (document.getElementById('add-shortcut-form'));
+const newNameInput = /** @type {HTMLInputElement} */ (document.getElementById('new-shortcut-name'));
+const newUrlInput = /** @type {HTMLInputElement} */ (document.getElementById('new-shortcut-url'));
+const newCatSelect = /** @type {HTMLSelectElement} */ (document.getElementById('new-shortcut-category'));
 
 // Селект категории формы добавления: по умолчанию всегда следует за категорией,
 // открытой в настройках; после ручного выбора пользователем — держит его,
@@ -162,7 +162,7 @@ if (addForm) {
           customIcon
         };
         // Категория выбирается в выпадающем списке формы добавления
-        const catSelect = document.getElementById('new-shortcut-category');
+        const catSelect = /** @type {HTMLSelectElement} */ (document.getElementById('new-shortcut-category'));
         const catId = (catSelect && catSelect.value) || settingsCategoryId || 'main';
         const targetCategory = catId === 'main' ? null : findCategoryById(catId);
         if (targetCategory) {
@@ -180,7 +180,7 @@ if (addForm) {
 
         renderModalShortcutsList();
         
-        const iconLabel = document.querySelector('.input-icon-upload-label');
+        const iconLabel = /** @type {HTMLElement} */ (document.querySelector('.input-icon-upload-label'));
         if (iconLabel) {
           iconLabel.style.color = '';
           // fallback на en, как в остальном проекте: без него невалидный язык роняет панель
@@ -202,8 +202,8 @@ if (addForm) {
 
 if (newIconInput) {
   newIconInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    const iconLabel = document.querySelector('.input-icon-upload-label');
+    const file = /** @type {HTMLInputElement} */ (e.target).files[0];
+    const iconLabel = /** @type {HTMLElement} */ (document.querySelector('.input-icon-upload-label'));
     if (file && iconLabel) {
       iconLabel.title = file.name;
       iconLabel.style.color = '#4caf50';

@@ -6,7 +6,7 @@
   // «как есть», а loadState писал через JSON.stringify (с кавычками). Наивный
   // JSON.parse падал на «сыром» data-URL, и вкладка на долю секунды показывала
   // иконку расширения вместо пользовательской. Поэтому принимаем оба формата.
-  var raw = null;
+  var raw;
   try { raw = localStorage.getItem('customFavicon'); } catch (e) { raw = null; }
 
   if (raw) {

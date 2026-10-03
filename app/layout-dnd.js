@@ -190,7 +190,7 @@ function onDragMove(e) {
   const viewportCenterX = window.innerWidth / 2;
   const viewportCenterY = window.innerHeight / 2;
   
-  const snapThreshold = 15; // Р Р°СЃСЃС‚РѕСЏРЅРёРµ РїСЂРёС‚СЏР¶РµРЅРёСЏ РІ РїРёРєСЃРµР»СЏС… (РєР°Рє РІ PowerPoint/Figma)
+  const snapThreshold = 15; // Р Р°СЃСЃС‚РѕСЏРЅРёРµ РїСЂРёС‚СЏР¶РµРЅРёСЏ РІ РїРёРєСЃРµР»СЏС… (РєР°Рє РІ PowerPoint/Figma)
   let snappedX = false;
   let snappedY = false;
   
@@ -207,9 +207,9 @@ function onDragMove(e) {
       if (minDistX === distCenterX) {
         newLeft = viewportCenterX - widgetWidth / 2; // РџСЂРёРјР°РіРЅРёС‚РёС‚СЊ РїРѕ С†РµРЅС‚СЂСѓ
       } else if (minDistX === distLeftX) {
-        newLeft = viewportCenterX; // Р Р°Р·РјРµСЃС‚РёС‚СЊ СЃРїСЂР°РІР° РѕС‚ РѕСЃРё (Р»РµРІС‹Р№ РєСЂР°Р№ РЅР° РѕСЃРё)
+        newLeft = viewportCenterX; // Р Р°Р·РјРµСЃС‚РёС‚СЊ СЃРїСЂР°РІР° РѕС‚ РѕСЃРё (Р»РµРІС‹Р№ РєСЂР°Р№ РЅР° РѕСЃРё)
       } else {
-        newLeft = viewportCenterX - widgetWidth; // Р Р°Р·РјРµСЃС‚РёС‚СЊ СЃР»РµРІР° РѕС‚ РѕСЃРё (РїСЂР°РІС‹Р№ РєСЂР°Р№ РЅР° РѕСЃРё)
+        newLeft = viewportCenterX - widgetWidth; // Р Р°Р·РјРµСЃС‚РёС‚СЊ СЃР»РµРІР° РѕС‚ РѕСЃРё (РїСЂР°РІС‹Р№ РєСЂР°Р№ РЅР° РѕСЃРё)
       }
       snappedX = true;
     }
@@ -227,9 +227,9 @@ function onDragMove(e) {
     if (minDistY === distCenterY) {
       newTop = viewportCenterY - widgetHeight / 2; // РџСЂРёРјР°РіРЅРёС‚РёС‚СЊ РїРѕ С†РµРЅС‚СЂСѓ
     } else if (minDistY === distTopY) {
-      newTop = viewportCenterY; // Р Р°Р·РјРµСЃС‚РёС‚СЊ РїРѕРґ РѕСЃСЊСЋ (РІРµСЂС…РЅРёР№ РєСЂР°Р№ РЅР° РѕСЃРё)
+      newTop = viewportCenterY; // Р Р°Р·РјРµСЃС‚РёС‚СЊ РїРѕРґ РѕСЃСЊСЋ (РІРµСЂС…РЅРёР№ РєСЂР°Р№ РЅР° РѕСЃРё)
     } else {
-      newTop = viewportCenterY - widgetHeight; // Р Р°Р·РјРµСЃС‚РёС‚СЊ РЅР°Рґ РѕСЃСЊСЋ (РЅРёР¶РЅРёР№ РєСЂР°Р№ РЅР° РѕСЃРё)
+      newTop = viewportCenterY - widgetHeight; // Р Р°Р·РјРµСЃС‚РёС‚СЊ РЅР°Рґ РѕСЃСЊСЋ (РЅРёР¶РЅРёР№ РєСЂР°Р№ РЅР° РѕСЃРё)
     }
     snappedY = true;
   }

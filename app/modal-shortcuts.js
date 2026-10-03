@@ -50,7 +50,7 @@ function renderShortcutRow(item, isChild, parentId) {
   row.dataset.id = item.id;
 
   if (editingIndex === item.id) {
-    row.setAttribute('draggable', false);
+    row.setAttribute('draggable', 'false');
     let tempIconBase64 = item.customIcon;
 
     const editContainer = document.createElement('div');
@@ -131,7 +131,7 @@ function renderShortcutRow(item, isChild, parentId) {
     });
 
     inlineIconInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
+      const file = /** @type {HTMLInputElement} */ (e.target).files[0];
       if (file) {
         inlineIconLabel.title = file.name;
         inlineIconLabel.style.borderColor = 'rgba(255, 255, 255, 0.3)';
@@ -181,7 +181,7 @@ function renderShortcutRow(item, isChild, parentId) {
     row.appendChild(editContainer);
 
   } else {
-    row.setAttribute('draggable', true);
+    row.setAttribute('draggable', 'true');
     setupDragAndDropListeners(row, item, isChild);
 
     const info = document.createElement('div');
@@ -373,13 +373,13 @@ function setupDragAndDropListeners(element, item, isChild) {
 const settingsModalList = document.getElementById('modal-shortcuts-list');
 if (settingsModalList) {
   settingsModalList.addEventListener('dragover', (e) => {
-    const targetRow = e.target.closest('.modal-shortcut-item, .modal-folder-row');
+    const targetRow = /** @type {Element} */ (e.target).closest('.modal-shortcut-item, .modal-folder-row');
     if (!targetRow && draggedId) {
       e.preventDefault();
     }
   });
   settingsModalList.addEventListener('drop', (e) => {
-    const targetRow = e.target.closest('.modal-shortcut-item, .modal-folder-row');
+    const targetRow = /** @type {Element} */ (e.target).closest('.modal-shortcut-item, .modal-folder-row');
     if (!targetRow && draggedId) {
       e.preventDefault();
       // Пустое место списка — перенос ярлыка в текущую категорию (в конец)

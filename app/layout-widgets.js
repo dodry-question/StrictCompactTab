@@ -1,4 +1,4 @@
-// --- Р РђРЎРџРћР›РћР–Р•РќРР• Р­Р›Р•РњР•РќРўРћР’ (LAYOUT DRAG & DROP) ---
+// --- Р РђРЎРџРћР›РћР–Р•РќРР• Р­Р›Р•РњР•РќРўРћР’ (LAYOUT DRAG & DROP) ---
 let activeDragElement = null;
 let dragOffset = { x: 0, y: 0 };
 let hasDragged = false;
@@ -70,9 +70,9 @@ const CUSTOM_POSITION_PROPS = ['position', 'top', 'left', 'right', 'bottom', 'tr
 // у поиска, часов, погоды, панели категорий и сетки ярлыков —
 // элементы возвращаются в дефолтную сетку Flex/Grid текущего пресета
 function clearCustomLayoutStyles() {
-  const targets = document.querySelectorAll(
+  const targets = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(
     '.draggable-widget, .clock-container, .weather-container, .search-form, .shortcuts-wrapper, #mist-tabs, #shortcuts-container'
-  );
+  ));
   targets.forEach(el => {
     CUSTOM_POSITION_PROPS.forEach(prop => el.style.removeProperty(prop));
     // Сдвиги и размеры независимых виджетов в режиме Mist
@@ -86,11 +86,12 @@ function clearCustomLayoutStyles() {
 // Сдвиг каждого виджета живёт в СВОЕЙ CSS-переменной, размер — в
 // инлайн-стиле, масштаб часов — в --clock-scale. Ничего не связано
 // с соседним виджетом, поэтому верстка не «уезжает» у второго.
+/** @returns {HTMLElement[]} */
 function mistHeadElements() {
-  return [
+  return /** @type {HTMLElement[]} */ ([
     document.querySelector('.clock-container'),
     document.getElementById('search-form')
-  ].filter(Boolean);
+  ].filter(Boolean));
 }
 
 // Применяет карту { clock: {...}, search: {...} } к обоим виджетам
@@ -153,7 +154,7 @@ function applyLayoutPositions() {
   // сохранённые в классическом режиме, здесь СБРАСЫВАЕМ до пресетных значений,
   // иначе элементы «уезжают» и ломают верстку при переключении
   const isMist = document.body.classList.contains('mode-mist');
-  const widgets = document.querySelectorAll('.draggable-widget');
+  const widgets = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.draggable-widget'));
   widgets.forEach(widget => {
     const key = getWidgetKey(widget);
     const pos = (!isMist && key && STATE.layoutPositions && STATE.layoutPositions[key])

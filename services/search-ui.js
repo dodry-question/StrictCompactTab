@@ -2,10 +2,10 @@ window.SearchUI = {
   initCustomSearchEngines(state, translations, actions) {
     const toggleBtn = document.getElementById('btn-toggle-custom-engines');
     const panel = document.getElementById('custom-engines-panel');
-    const form = document.getElementById('add-custom-engine-form');
-    const nameInput = document.getElementById('custom-engine-name');
-    const queryInput = document.getElementById('custom-engine-query');
-    const fileInput = document.getElementById('custom-engine-logo-file');
+    const form = /** @type {HTMLFormElement} */ (document.getElementById('add-custom-engine-form'));
+    const nameInput = /** @type {HTMLInputElement} */ (document.getElementById('custom-engine-name'));
+    const queryInput = /** @type {HTMLInputElement} */ (document.getElementById('custom-engine-query'));
+    const fileInput = /** @type {HTMLInputElement} */ (document.getElementById('custom-engine-logo-file'));
     const statusText = document.getElementById('custom-engine-logo-status');
 
     if (toggleBtn && panel) {
@@ -21,7 +21,7 @@ window.SearchUI = {
 
     if (fileInput && statusText) {
       fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
+        const file = /** @type {HTMLInputElement} */ (e.target).files[0];
         if (file) {
           // fallback на en: в чужом/старом языковом пакете ключа может не быть
           const dict = translations[state.language] || translations.en;
@@ -158,7 +158,7 @@ window.SearchUI = {
   },
 
   populateSearchEnginesSelect(state, saveState) {
-    const select = document.getElementById('search-engine-select');
+    const select = /** @type {HTMLSelectElement} */ (document.getElementById('search-engine-select'));
     if (!select) return;
 
     const currentVal = state.searchEngine;
@@ -200,7 +200,7 @@ window.SearchUI = {
   },
 
   updateSearchEngineUI(state) {
-    const select = document.getElementById('search-engine-select');
+    const select = /** @type {HTMLSelectElement} */ (document.getElementById('search-engine-select'));
     if (select) {
       select.value = state.searchEngine;
     }
@@ -217,7 +217,7 @@ window.SearchUI = {
       }
     }
 
-    const logo = document.getElementById('search-engine-logo');
+    const logo = /** @type {HTMLImageElement} */ (document.getElementById('search-engine-logo'));
     if (logo) {
       logo.src = isCustom ? customLogo : logoSrc;
       if (state.searchEngine === 'brave') {
@@ -227,7 +227,7 @@ window.SearchUI = {
       }
     }
 
-    const settingsSearchLogo = document.getElementById('settings-search-logo');
+    const settingsSearchLogo = /** @type {HTMLImageElement} */ (document.getElementById('settings-search-logo'));
     if (settingsSearchLogo) {
       settingsSearchLogo.src = isCustom ? customLogo : logoSrc;
       if (state.searchEngine === 'brave') {

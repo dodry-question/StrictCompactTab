@@ -198,7 +198,7 @@ window.WeatherDrawer = {
     trigger.addEventListener('click', openFromWeather);
     if (topbar) {
       topbar.addEventListener('click', event => {
-        if (!event.target.closest('.topbar-temp, .topbar-desc')) return;
+        if (!/** @type {Element} */ (event.target).closest('.topbar-temp, .topbar-desc')) return;
         openFromWeather();
       });
     }

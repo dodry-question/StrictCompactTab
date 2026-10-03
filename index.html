@@ -6,20 +6,28 @@
   <!-- Подключение фавиконки вкладки -->
   <link class="page-favicon" rel="icon" type="image/png" href="assets/icon16_trans.png">
   <script src="favicon-loader.js"></script>
-  <script src="i18n/translations.js"></script>
-  <script src="state/defaults.js"></script>
-  <script src="storage/storage.js"></script>
-  <script src="services/search.js"></script>
-  <script src="services/search-ui.js"></script>
-  <script src="services/shortcut-renderer.js"></script>
-  <script src="services/shortcut-icons.js"></script>
-  <script src="services/shortcut-categories.js"></script>
-  <script src="services/shortcut-layout.js"></script>
-  <script src="services/weather.js"></script>
-  <script src="services/weather-drawer.js"></script>
+  <!-- Всё ниже — defer: браузер не блокирует разбор документа и не откладывает
+       загрузку CSS (link идут ниже), а скрипты исполняются после разбора строго
+       в порядке документа — ровно как раньше, только без ожидания.
+       Относительный порядок сохранён:
+       i18n → state → storage → services → src/utils.js (module) → app/*,
+       поэтому window.STATE/storage/AppUtils готовы к моменту чтения в app/*.
+       favicon-loader.js намеренно остаётся синхронным: он ставит фавиконку
+       прямо в <head> до первой отрисовки, иначе вкладка мигает дефолтной. -->
+  <script defer src="i18n/translations.js"></script>
+  <script defer src="state/defaults.js"></script>
+  <script defer src="storage/storage.js"></script>
+  <script defer src="services/search.js"></script>
+  <script defer src="services/search-ui.js"></script>
+  <script defer src="services/shortcut-renderer.js"></script>
+  <script defer src="services/shortcut-icons.js"></script>
+  <script defer src="services/shortcut-categories.js"></script>
+  <script defer src="services/shortcut-layout.js"></script>
+  <script defer src="services/weather.js"></script>
+  <script defer src="services/weather-drawer.js"></script>
   <!-- Плагин «Расписание»: чтение .xlsx и разбор листа в группы/занятия -->
-  <script src="services/schedule-xlsx.js"></script>
-  <script src="services/schedule-parser.js"></script>
+  <script defer src="services/schedule-xlsx.js"></script>
+  <script defer src="services/schedule-parser.js"></script>
   <!-- Стили: порядок подключения = порядок каскада (бывший style.css) -->
   <link rel="stylesheet" href="css/base/variables-and-reset.css">
   <link rel="stylesheet" href="css/layouts/classic.css">

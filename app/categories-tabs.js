@@ -95,8 +95,8 @@ function stabilizeShortcutsHeight(tabs) {
   const isMist = document.body.classList.contains('mode-mist');
   const list = tabs || [];
   let rows = 0;
-  let rowHeight = 0;
-  let padding = 24; // двойной внутренний отступ контейнера
+  let rowHeight;
+  let padding;
 
   if (isMist) {
     // --- Mist: органичный Flex-поток, высоту задаёт ТОЛЬКО CSS ---
@@ -115,7 +115,7 @@ function stabilizeShortcutsHeight(tabs) {
     // --- Стандартный режим: классическая CSS-сетка, ряды = колонки ---
     // Высота ряда: измеряем уже отрисованную плитку (браузер), без layout —
     // квадратная плитка (width === height) + gap: 12px.
-    const card = container.querySelector('.shortcut-card');
+    const card = /** @type {HTMLElement} */ (container.querySelector('.shortcut-card'));
     if (card && card.offsetHeight) {
       cachedClassicRowHeight = card.offsetHeight + 12;
     }
@@ -190,7 +190,7 @@ function selectCategory(tabId, index, focusTab) {
 
 function focusTabByIndex(index) {
   if (!mistTabsEl) return;
-  const buttons = mistTabsEl.querySelectorAll('.mist-tab');
+  const buttons = /** @type {NodeListOf<HTMLButtonElement>} */ (mistTabsEl.querySelectorAll('.mist-tab'));
   if (buttons[index]) buttons[index].focus();
 }
 

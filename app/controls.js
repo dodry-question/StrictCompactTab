@@ -1,4 +1,4 @@
-// --- РРќРР¦РРђР›РР—РђР¦РРЇ РљРќРћРџРћРљ Р РђРЎРџРћР›РћР–Р•РќРРЇ ---
+// --- РРќРР¦РРђР›РР—РђР¦РРЇ РљРќРћРџРћРљ Р РђРЎРџРћР›РћР–Р•РќРРЇ ---
 const btnEditLayout = document.getElementById('btn-edit-layout');
 const btnResetLayout = document.getElementById('btn-reset-layout');
 const layoutSaveBtn = document.getElementById('layout-save-btn');
@@ -68,7 +68,7 @@ if (btnEditLayout) {
       applyMistWidgets(tempMistWidgets);
     }
 
-    const widgets = document.querySelectorAll('.draggable-widget');
+    const widgets = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.draggable-widget'));
     
     // РЎРЅР°С‡Р°Р»Р° РёР·РјРµСЂСЏРµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ Р’РЎР•РҐ СЌР»РµРјРµРЅС‚РѕРІ, РїРѕРєР° РѕРЅРё РЅР°С…РѕРґСЏС‚СЃСЏ РІ РµСЃС‚РµСЃС‚РІРµРЅРЅРѕРј РїРѕС‚РѕРєРµ!
     // Р­С‚Рѕ РїРѕР»РЅРѕСЃС‚СЊСЋ РїСЂРµРґРѕС‚РІСЂР°С‰Р°РµС‚ СЃС…Р»РѕРїС‹РІР°РЅРёРµ РІС‹СЃРѕС‚С‹ СЃС‚СЂР°РЅРёС†С‹ Рё РїСЂРµР¶РґРµРІСЂРµРјРµРЅРЅС‹Р№ СЃРґРІРёРі РїРѕСЃР»РµРґСѓСЋС‰РёС… СЌР»РµРјРµРЅС‚РѕРІ.
@@ -131,7 +131,7 @@ if (layoutSaveBtn) {
     } else {
       if (!STATE.layoutPositions) STATE.layoutPositions = {};
 
-      const widgets = document.querySelectorAll('.draggable-widget');
+      const widgets = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.draggable-widget'));
       widgets.forEach(widget => {
         const key = getWidgetKey(widget);
         if (key && tempPositions[key]) {
@@ -195,7 +195,7 @@ if (btnResetLayout) {
   });
 }
 
-// --- РЈРџР РђР’Р›Р•РќРР• РџРћР›Р¬Р—РћР’РђРўР•Р›Р¬РЎРљРРњР РџРћРРЎРљРћР’РРљРђРњР ---
+// --- РЈРџР РђР’Р›Р•РќРР• РџРћР›Р¬Р—РћР’РђРўР•Р›Р¬РЎРљРРњР РџРћРРЎРљРћР’РРљРђРњР ---
 function populateSearchEnginesSelect() {
   window.SearchUI.populateSearchEnginesSelect(STATE, saveState);
 }

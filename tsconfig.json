@@ -1,0 +1,41 @@
+{
+  // Этап P0: типовая проверка существующего JS-кода БЕЗ переписывания в .ts и
+  // без сборки. tsc читает .js (allowJs) и проверяет их (checkJs) ровно так,
+  // как это делает редактор. `strict` пока выключен осознанно: включим его на
+  // этапе P2, когда файлы будут переведены в .ts по одному.
+  //
+  // ОБЛАСТЬ ПРОВЕРКИ: весь проект (P1 — DOM-типизация app/* и UI-сервисов
+  // выполнена: getElementById/querySelector приведены к HTMLInputElement/
+  // HTMLSelectElement/HTMLButtonElement/HTMLFormElement/HTMLImageElement,
+  // e.target и результаты querySelectorAll — типизированы JSDoc-кастами).
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["chrome"],
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    // Ловит реально неиспользуемый код по всей программе (см. комментарий в
+    // eslint.config.js про отключённый no-unused-vars у ESLint).
+    "noUnusedLocals": true
+  },
+  "include": [
+    "favicon-loader.js",
+    "src/**/*.js",
+    "services/**/*.js",
+    "app/**/*.js",
+    "state/**/*.js",
+    "storage/**/*.js",
+    "i18n/**/*.js",
+    "types/**/*.d.ts"
+  ],
+  "exclude": ["node_modules", "tests", "tools"]
+}

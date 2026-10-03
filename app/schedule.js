@@ -14,18 +14,18 @@ const scheduleFab = document.getElementById('schedule-fab');
 const schedulePanel = document.getElementById('schedule-panel');
 const scheduleSubtitle = document.getElementById('schedule-subtitle');
 const scheduleDrop = document.getElementById('schedule-drop');
-const scheduleFileInput = document.getElementById('schedule-file-input');
+const scheduleFileInput = /** @type {HTMLInputElement} */ (document.getElementById('schedule-file-input'));
 const scheduleError = document.getElementById('schedule-error');
 const scheduleGroupsView = document.getElementById('schedule-groups');
 const scheduleGroupsList = document.getElementById('schedule-groups-list');
-const scheduleGroupsSearch = document.getElementById('schedule-group-search');
+const scheduleGroupsSearch = /** @type {HTMLInputElement} */ (document.getElementById('schedule-group-search'));
 const scheduleGroupsNone = document.getElementById('schedule-groups-none');
 const scheduleView = document.getElementById('schedule-view');
 const scheduleChangeBtn = document.getElementById('schedule-change-group');
 const scheduleDeleteBtn = document.getElementById('schedule-delete');
 const scheduleVkLink = document.getElementById('schedule-vk');
 const scheduleCloseBtn = document.getElementById('schedule-close');
-const scheduleEnabledCb = document.getElementById('schedule-enabled');
+const scheduleEnabledCb = /** @type {HTMLInputElement} */ (document.getElementById('schedule-enabled'));
 
 const SCHEDULE_VK_URL = 'https://vk.ru/kollegevyatsu';
 const SCHEDULE_STORAGE_KEY = 'scheduleData';
@@ -573,7 +573,7 @@ if (schedulePanel) {
     schedulePanel.classList.add('is-dragover');
   });
   schedulePanel.addEventListener('dragleave', event => {
-    if (!event.relatedTarget || !schedulePanel.contains(event.relatedTarget)) {
+    if (!event.relatedTarget || !schedulePanel.contains(/** @type {Node} */ (event.relatedTarget))) {
       schedulePanel.classList.remove('is-dragover');
     }
   });
@@ -592,7 +592,7 @@ document.addEventListener('dragover', event => {
 document.addEventListener('drop', event => {
   if (!isSchedulePanelOpen()) return;
   event.preventDefault();
-  if (schedulePanel && schedulePanel.contains(event.target)) return;   // панель уже обработала
+  if (schedulePanel && schedulePanel.contains(/** @type {Node} */ (event.target))) return;   // панель уже обработала
   handleScheduleFile(scheduleDroppedFile(event));
 });
 
@@ -600,8 +600,8 @@ document.addEventListener('drop', event => {
 // панелью остаётся живой, поэтому закрытие и есть «клик мимо».
 document.addEventListener('click', event => {
   if (!isSchedulePanelOpen()) return;
-  if (schedulePanel.contains(event.target)) return;
-  if (scheduleFab && scheduleFab.contains(event.target)) return;
+  if (schedulePanel.contains(/** @type {Node} */ (event.target))) return;
+  if (scheduleFab && scheduleFab.contains(/** @type {Node} */ (event.target))) return;
   closeSchedulePanel();
 });
 
@@ -621,7 +621,7 @@ document.addEventListener('keydown', event => {
 
 // Смена режима макета закрывает панель: в Дзене кнопки расписания не видно
 document.addEventListener('change', event => {
-  const id = event.target && event.target.id;
+  const id = event.target && /** @type {HTMLElement} */ (event.target).id;
   if (id === 'layout-zen-mode' || id === 'layout-mist-mode' ||
       id === 'layout-ios-mode' || id === 'layout-stealth-mode') {
     closeSchedulePanel();

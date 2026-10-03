@@ -56,7 +56,7 @@ function buildCategoryOptions(select, selectedId) {
 
 // Обновляет все выпадающие списки категорий (создание/переименование/удаление)
 function populateCategorySelects() {
-  const addSelect = document.getElementById('new-shortcut-category');
+  const addSelect = /** @type {HTMLSelectElement} */ (document.getElementById('new-shortcut-category'));
   if (addSelect) {
     // Категория в настройках сменилась — список снова следует за ней
     if (addCatSelectedFor !== settingsCategoryId) {
@@ -68,7 +68,7 @@ function populateCategorySelects() {
       : (settingsCategoryId || 'main');
     buildCategoryOptions(addSelect, (preferred === 'main' || findCategoryById(preferred)) ? preferred : 'main');
   }
-  document.querySelectorAll('.edit-category-select').forEach(sel => {
+  /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.edit-category-select')).forEach(sel => {
     buildCategoryOptions(sel, sel.dataset.current || 'main');
   });
 }

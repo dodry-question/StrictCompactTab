@@ -40,7 +40,7 @@ window.addEventListener('wheel', (e) => {
   if (!mistTabsEl || mistTabsEl.style.display === 'none') return;
   if (canScrollVertically(e.target, e.deltaY)) return;
 
-  const buttons = Array.from(mistTabsEl.querySelectorAll('.mist-tab'));
+  const buttons = Array.from(/** @type {NodeListOf<HTMLElement>} */ (mistTabsEl.querySelectorAll('.mist-tab')));
   if (buttons.length < 2) return;
 
   // Один «щелчок» колеса — одна категория, без проскоков
@@ -58,7 +58,7 @@ window.addEventListener('wheel', (e) => {
 
 loadState();
 
-// --- РЈРџР РђР’Р›Р•РќРР• Р¤РћРљРЈРЎРћРњ Р Р”РћРЎРўРЈРџРќРћРЎРўР¬Р® (TAB / ESCAPE) ---
+// --- РЈРџР РђР’Р›Р•РќРР• Р¤РћРљРЈРЎРћРњ Р Р”РћРЎРўРЈРџРќРћРЎРўР¬Р® (TAB / ESCAPE) ---
 function getKeyboardFocusableElements(container) {
   return Array.from(container.querySelectorAll(
     'a[href], area[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]'
@@ -79,7 +79,7 @@ document.addEventListener('keydown', (e) => {
       closeFolder();
       if (folderId) {
         setTimeout(() => {
-          const card = document.querySelector(`.folder-card[data-folder-id="${folderId}"]`);
+          const card = /** @type {HTMLElement} */ (document.querySelector(`.folder-card[data-folder-id="${folderId}"]`));
           if (card) card.focus();
         }, 50);
       }
@@ -148,7 +148,7 @@ document.addEventListener('keydown', (e) => {
 
   // 3. Р’С‹С…РѕРґ РёР· СЂРµР¶РёРјР° РІРІРѕРґР° (blur input/textarea) РїСЂРё РЅР°Р¶Р°С‚РёРё Escape
   if (e.key === 'Escape') {
-    const activeEl = document.activeElement;
+    const activeEl = /** @type {HTMLElement} */ (document.activeElement);
     if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.hasAttribute('contenteditable'))) {
       e.preventDefault();
       activeEl.blur();
@@ -168,7 +168,7 @@ document.addEventListener('keydown', (e) => {
   // activeEl/isInputActive объявлены ЗДЕСЬ, на уровне обработчика. Раньше
   // isInputActive жил внутри вложенного блока ниже, и обращение к нему выше
   // бросало ReferenceError — цифровые хоткеи категорий не работали вообще.
-  const activeEl = document.activeElement;
+  const activeEl = /** @type {HTMLElement} */ (document.activeElement);
   const isInputActive = !!(activeEl &&
     (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable));
   const isModalOpen = (modal && modal.classList.contains('active')) ||
@@ -176,7 +176,7 @@ document.addEventListener('keydown', (e) => {
   const weatherDrawerOpen = document.body.classList.contains('weather-drawer-open');
   const schedulePanelOpen = document.body.classList.contains('schedule-open');
   const categoryButtons = mistTabsEl && mistTabsEl.style.display !== 'none'
-    ? Array.from(mistTabsEl.querySelectorAll('.mist-tab'))
+    ? Array.from(/** @type {NodeListOf<HTMLElement>} */ (mistTabsEl.querySelectorAll('.mist-tab')))
     : [];
   const digitIndex = window.ShortcutCategories.getHotkeyIndex(e.key, categoryButtons.length);
 
@@ -200,7 +200,7 @@ document.addEventListener('keydown', (e) => {
     const inGrid = !!activeEl && !!container && container.contains(activeEl);
 
     if (!isInputActive && !isModalOpen && !inTabs && !inGrid && mistTabsEl && mistTabsEl.style.display !== 'none') {
-      const buttons = Array.from(mistTabsEl.querySelectorAll('.mist-tab'));
+      const buttons = Array.from(/** @type {NodeListOf<HTMLElement>} */ (mistTabsEl.querySelectorAll('.mist-tab')));
       if (buttons.length >= 2) {
         const currentIndex = buttons.findIndex(b => b.classList.contains('active'));
 

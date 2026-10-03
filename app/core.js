@@ -1,12 +1,12 @@
 const { formatDateLine, getTopbarCityName, normalizeMistWidgets } = window.AppUtils;
 
-// --- РЎР›РћР’РђР Р¬ РџР•Р Р•Р’РћР”РћР’ (Р›РћРљРђР›РР—РђР¦РРЇ) ---
+// --- РЎР›РћР’РђР Р¬ РџР•Р Р•Р’РћР”РћР’ (Р›РћРљРђР›РР—РђР¦РРЇ) ---
 const TRANSLATIONS = window.TRANSLATIONS;
 
-// --- Р РђРЎРЁРР Р•РќРќРђРЇ РЎРРЎРўР•РњРђ РҐР РђРќР•РќРРЇ (СЃ РїРѕРґРґРµСЂР¶РєРѕР№ Р±СЌРєР°РїРѕРІ) ---
+// --- Р РђРЎРЁРР Р•РќРќРђРЇ РЎРРЎРўР•РњРђ РҐР РђРќР•РќРРЇ (СЃ РїРѕРґРґРµСЂР¶РєРѕР№ Р±СЌРєР°РїРѕРІ) ---
 const storage = window.storage;
 
-// --- Р§РРЎРўР«Р™ РЎРўРђР РўРћР’Р«Р™ РЁРђР±Р›РћРќ ---
+// --- Р§РРЎРўР«Р™ РЎРўРђР РўРћР’Р«Р™ РЁРђР±Р›РћРќ ---
 const DEFAULT_SHORTCUTS = window.DEFAULT_SHORTCUTS;
 const STATE = window.STATE;
 const MIST_WIDGET_KEYS = window.MIST_WIDGET_KEYS;
@@ -40,8 +40,8 @@ let editingIndex = -1;
 let dragSrcIndex = null;
 let dragCategorySrcId = null;
 
-// --- РРќРР¦РРђР›РР—РђР¦РРЇ Р­Р›Р•РњР•РќРўРћР’ РРњРџРћР РўРђ / Р­РљРЎРџРћР РўРђ ---
+// --- РРќРР¦РРђР›РР—РђР¦РРЇ Р­Р›Р•РњР•РќРўРћР’ РРњРџРћР РўРђ / Р­РљРЎРџРћР РўРђ ---
 const btnExport = document.getElementById('btn-export');
 const btnImport = document.getElementById('btn-import');
-const importFileInput = document.getElementById('import-file-input');
+const importFileInput = /** @type {HTMLInputElement} */ (document.getElementById('import-file-input'));
 

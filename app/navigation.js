@@ -270,7 +270,7 @@ function navHandleKeydown(e) {
     const col = ii % perRow;
     const rowStart = ii - col;
     const rowEnd = Math.min(rowStart + perRow, items.length) - 1;
-    let target = -1;
+    let target;
     if (key === 'ArrowRight') {
       target = ii < rowEnd ? ii + 1 : (rowEnd + 1 < items.length ? rowEnd + 1 : -1);
     } else {

@@ -76,13 +76,13 @@
   }
 
   function cacheKey(item, size) {
-    let hostname = '';
+    let hostname;
     try { hostname = new URL(item.url).hostname; } catch (e) { hostname = String(item.url || ''); }
     return size + '|' + hostname;
   }
 
   function remoteUrl(item, size) {
-    let hostname = '';
+    let hostname;
     try { hostname = new URL(item.url).hostname; } catch (e) { hostname = String(item.url || ''); }
     return 'https://www.google.com/s2/favicons?sz=' + size + '&domain=' + encodeURIComponent(hostname);
   }

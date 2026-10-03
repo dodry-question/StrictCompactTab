@@ -23,7 +23,7 @@ window.storage = {
     }
   },
   set: (data, callback) => {
-    if (data && data.hasOwnProperty('customFavicon')) {
+    if (data && Object.prototype.hasOwnProperty.call(data, 'customFavicon')) {
       if (data.customFavicon === null) {
         localStorage.removeItem('customFavicon');
       } else {
@@ -64,7 +64,7 @@ window.storage = {
     }
   },
   clearAndSet: (data, callback) => {
-    if (data && data.hasOwnProperty('customFavicon')) {
+    if (data && Object.prototype.hasOwnProperty.call(data, 'customFavicon')) {
       if (data.customFavicon === null) {
         localStorage.removeItem('customFavicon');
       } else {

@@ -1,7 +1,7 @@
-// --- РЈРџР РђР’Р›Р•РќРР• РџРћР“РћР”РћР™ ---
+// --- РЈРџР РђР’Р›Р•РќРР• РџРћР“РћР”РћР™ ---
 if (showWeatherCb) {
   showWeatherCb.addEventListener('change', (e) => {
-    STATE.showWeather = e.target.checked;
+    STATE.showWeather = /** @type {HTMLInputElement} */ (e.target).checked;
     saveState();
     applyWeatherVisibility();
     
@@ -176,7 +176,6 @@ function updateWeatherWidget() {
       if (current) {
         const temp = Math.round(current.temperature) + '°C';
         const code = current.weathercode;
-        const emoji = getWeatherEmoji(code);
         const desc = getWeatherDescription(code, STATE.language);
 
         STATE.weatherCache = {
@@ -223,7 +222,7 @@ function getWeatherDescription(code, lang) {
   return window.WeatherService.getWeatherDescription(code, lang);
 }
 
-// --- РЈРџР РђР’Р›Р•РќРР• РџРђРџРљРђРњР (Р”Р Р•Р’РћР’РР”РќРђРЇ РР•Р РђР РҐРРЇ) ---
+// --- РЈРџР РђР’Р›Р•РќРР• РџРђРџРљРђРњР (Р”Р Р•Р’РћР’РР”РќРђРЇ РР•Р РђР РҐРРЇ) ---
 const expandedFolders = new Set();
 let draggedId = null;
 let justDroppedId = null;

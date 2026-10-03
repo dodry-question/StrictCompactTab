@@ -238,7 +238,7 @@
 
       const headerRow = findHeaderRow(at, sheet);
       if (!headerRow) {
-        const error = new Error('Не найден столбец «День недели»');
+        const error = /** @type {Error & { code: string }} */ (new Error('Не найден столбец «День недели»'));
         error.code = 'no-header';
         throw error;
       }
