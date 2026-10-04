@@ -251,6 +251,7 @@ const { renderModalShortcutsList } = await import('../app/modal-shortcuts.js');
 const { initLayoutDragAndDrop } = await import('../app/layout-dnd.js');
 const { navHandleKeydown } = await import('../app/navigation.js');
 const { initCustomSearchEngines } = await import('../app/controls.js');
+const { applyFavicon } = await import('../app/appearance.js');
 
 test('общая область видимости разделённых файлов сохранилась', () => {
   // функции из разных частей бывшего script.js
@@ -287,11 +288,11 @@ test('иконка вкладки: по умолчанию компактная,
   assert.equal(href(), 'assets/icon-48.png');
 
   STATE.customFavicon = 'data:image/png;base64,myicon';
-  probe('applyFavicon()');
+  applyFavicon();
   assert.equal(href(), 'data:image/png;base64,myicon');
 
   STATE.customFavicon = null;
-  probe('applyFavicon()');
+  applyFavicon();
   assert.equal(href(), 'assets/icon-48.png');
 });
 

@@ -1,3 +1,5 @@
+import { applyLanguage, applyTheme, compressImage } from './appearance.js';
+
 import { renderModalShortcutsList } from './modal-shortcuts.js';
 
 import { AdaptiveThemeManager } from './theme-adaptive.js';

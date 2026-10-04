@@ -1,3 +1,5 @@
+import { compressImage } from './appearance.js';
+
 import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';

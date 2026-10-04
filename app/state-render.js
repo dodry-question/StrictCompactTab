@@ -1,3 +1,5 @@
+import { applyMistPreset, syncModeToggles, applyBackground, applyFavicon, applyTheme, applyClockVisibility, applyLanguage } from './appearance.js';
+
 import { sizeSelect, columnsSelect, languageSelect, searchEngineSelect, themeSelect } from './settings-panel.js';
 
 import { syncScheduleEnabled } from './schedule.js';

@@ -1,3 +1,5 @@
+import { compressImage } from './appearance.js';
+
 import { saveState } from './state-render.js';
 import { initLayoutDragAndDrop, onResizeStart, removeResizeHandles } from './layout-dnd.js';
 

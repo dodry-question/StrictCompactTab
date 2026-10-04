@@ -272,6 +272,7 @@ for (const tag of scriptTags) {
 
 const app = globalThis;
 const { syncScheduleEnabled, handleScheduleFile, isSchedulePanelOpen, closeSchedulePanel } = await import('../app/schedule.js');
+const { applyLanguage } = await import('../app/appearance.js');
 // Пауз нужна для цепочек промисов (открытие панели читает файл из хранилища).
 // Реальный таймер node:timers/promises, а не globalThis.setTimeout — тот в стабе
 // заглушен. Разбор .xlsx — тоже асинхронный, поэтому там ждём по условию.
@@ -668,20 +669,20 @@ test('смена языка перерисовывает содержимое о
   const dayTitle = findByClass(view, 'schedule-day-text').textContent;
 
   STATE.language = 'en';
-  app.applyLanguage('en');
+  applyLanguage('en');
   assert.equal(isSchedulePanelOpen(), true, 'панель не должна закрываться при смене языка');
   assert.equal(findByClass(view, 'schedule-day-text').textContent, dayTitle);
 
   // в списке групп placeholder рисуется кодом — он должен обновиться
   byId('schedule-change-group').dispatch('click');
   STATE.language = 'ru';
-  app.applyLanguage('ru');
+  applyLanguage('ru');
   assert.equal(search.placeholder, 'Название или номер группы');
 
   // вернуть группу и английский, чтобы следующие тесты шли в известном состоянии
   findAllByClass(groupsView, 'schedule-group-btn')[0].dispatch('click');
   STATE.language = 'en';
-  app.applyLanguage('en');
+  applyLanguage('en');
   assert.equal(view.hidden, false);
 });
 
