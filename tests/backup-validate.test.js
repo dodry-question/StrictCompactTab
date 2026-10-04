@@ -43,7 +43,8 @@ vm.runInThisContext('const { formatDateLine, getTopbarCityName, normalizeMistWid
   filename: 'core-destructure'
 });
 vm.runInThisContext(read('app/shortcuts-migration.js'), { filename: 'app/shortcuts-migration.js' });
-vm.runInThisContext(read('app/backup-validate.js'), { filename: 'app/backup-validate.js' });
+// app/backup-validate.js — модуль (шаг «в»): грузится через import
+await import(pathToFileURL(path.join(ROOT, 'app/backup-validate.js')).href);
 
 // app/backup-updates.js на верхнем уровне читает btnExport/btnImport/
 // importFileInput из core.js — здесь заглушаем их null, чтобы блоки

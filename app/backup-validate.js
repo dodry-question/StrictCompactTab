@@ -303,3 +303,7 @@
 
   window.BackupValidate = { MAX_FILE_BYTES, sanitize };
 })();
+
+// Экспорт для будущих import (шаг «в»); мост window.BackupValidate задаётся внутри IIFE.
+const BackupValidate = window.BackupValidate;
+export { BackupValidate };
