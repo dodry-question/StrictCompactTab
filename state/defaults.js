@@ -4,6 +4,9 @@
 // Начальные ЗНАЧЕНИЯ и владение живым объектом — в state/store.js (этап «б»:
 // store вместо window.STATE).
 // По мере типизации (этап P2) эти типы переедут в .ts и станут импортируемыми.
+// Рантайм-значения (DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS) переехали в
+// state/values.js (модуль, фаза 3) — здесь только типы, тег <script> в
+// index.html убран.
 
 /**
  * @typedef {object} Shortcut
@@ -69,9 +72,3 @@
  * @property {object|null} scheduleGroup
  * @property {{ clock: MistWidgetBox, search: MistWidgetBox }} mistHeadOffset
  */
-
-/** @type {Shortcut[]} */
-window.DEFAULT_SHORTCUTS = [];
-
-/** @type {string[]} */
-window.MIST_WIDGET_KEYS = ['clock', 'search'];

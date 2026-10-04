@@ -1,3 +1,5 @@
+import { DEFAULT_SHORTCUTS } from '../state/values.js';
+
 import { showWeatherCb, weatherCityInput, mistPresetSelect, mistPerRowSelect, updateClockAndDate } from './clock-topbar.js';
 
 import { clearCustomLayoutStyles, applyLayoutPositions } from './layout-widgets.js';

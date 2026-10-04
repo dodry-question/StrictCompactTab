@@ -1,3 +1,4 @@
+import { DEFAULT_SHORTCUTS, MIST_WIDGET_KEYS } from '../state/values.js';
 import { TRANSLATIONS } from '../i18n/translations.js';
 
 // AppUtils (formatDateLine, getTopbarCityName, normalizeMistWidgets) больше не
@@ -10,9 +11,7 @@ import { TRANSLATIONS } from '../i18n/translations.js';
 // storage: потребители импортируют напрямую из storage/storage.js — фаза 3.
 
 // --- Р§РРЎРўР«Р™ РЎРўРђР РўРћР’Р«Р™ РЁРђР±Р›РћРќ ---
-const DEFAULT_SHORTCUTS = window.DEFAULT_SHORTCUTS;
 // STATE/store (state/store.js) потребители импортируют напрямую — фаза 3.
-const MIST_WIDGET_KEYS = window.MIST_WIDGET_KEYS;
 
 // Геометрия Flex-потока пилюль — ТОЛЬКО режим Mist (в стандартном режиме
 // работает исходная CSS-сетка, см. getGridMetrics) — должна совпадать с CSS:
@@ -48,9 +47,9 @@ const importFileInput = /** @type {HTMLInputElement} */ (document.getElementById
 // --- navModel/editingIndex: запись снаружи через сеттеры (часть 3) ----------
 // navModel пишет navigation (rebuildNavModel), editingIndex — modal-shortcuts,
 // settings-panel, categories-settings; чтение снаружи — import (live binding).
-// Остальные 9 мостов (MIST_*/NAV_*/btn*) сняты — фаза 3. storage/
-// DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS опубликованы своими модулями (window.X) —
-// здесь только export; TRANSLATIONS — на import.
+// Остальные 9 мостов (MIST_*/NAV_*/btn*) сняты — фаза 3. storage — через
+// import из storage/storage.js; DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS — из
+// state/values.js; TRANSLATIONS — на import.
 function setNavModel(value) { navModel = value; }
 function setEditingIndex(value) { editingIndex = value; }
 export {

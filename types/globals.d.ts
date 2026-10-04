@@ -14,10 +14,8 @@
 // (пока они не переведены на import), `Window.X` — присвоения `window.X = ...`.
 declare global {
   interface Window {
-    // Локализация и дефолты (TRANSLATIONS переведён на import в фазе 3)
-    DEFAULT_SHORTCUTS: any;
-    // Геометрия mist-виджетов
-    MIST_WIDGET_KEYS: any;
+    // Локализация и дефолты (TRANSLATIONS и DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS
+    // переведены на import в фазе 3)
     // Внешняя библиотека (загружается динамически в theme-adaptive.js)
     materialColorUtilities: any;
     // Тест-хук
@@ -42,9 +40,7 @@ declare global {
 var getWeatherDescription: any;
 // app/categories-settings.js — 9 мостов + accessor settingsCategoryId сняты (часть 3)
 // app/clock-topbar.js — 14 мостов + accessor activeCategory сняты (часть 3)
-// app/core.js — 9 мостов + accessors navModel/editingIndex сняты (часть 3); алиасы
-var DEFAULT_SHORTCUTS: any;
-var MIST_WIDGET_KEYS: any;
+// app/core.js — 9 мостов + accessors navModel/editingIndex сняты (часть 3)
 }
 
 export {};
