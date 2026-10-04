@@ -222,3 +222,6 @@ document.addEventListener('keydown', (e) => {
     }
   }
 });
+
+// Внешних потребителей нет (проверено по поиску) — мосты window.* не нужны.
+export { canScrollVertically, getKeyboardFocusableElements };
