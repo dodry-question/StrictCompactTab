@@ -227,3 +227,35 @@ const expandedFolders = new Set();
 let draggedId = null;
 let justDroppedId = null;
 
+// draggedId/justDroppedId переприсваивают modal-shortcuts и categories-settings
+// (draggedId = item.id; justDroppedId = null) — закрыты ACCESSORS, иначе десинк.
+Object.defineProperty(window, 'draggedId', {
+  get: () => draggedId,
+  set: (value) => { draggedId = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'justDroppedId', {
+  get: () => justDroppedId,
+  set: (value) => { justDroppedId = value; },
+  configurable: true
+});
+// Мосты функций для потребителей (clock-topbar, settings-panel, state-render) —
+// уберём в фазе 3 шага «в».
+window.getWeatherDescription = getWeatherDescription;
+window.updateStatusText = updateStatusText;
+window.updateWeatherWidget = updateWeatherWidget;
+window.handleCityInputChange = handleCityInputChange;
+window.applyWeatherVisibility = applyWeatherVisibility;
+export {
+  handleCityInputChange,
+  updateStatusText,
+  applyWeatherVisibility,
+  updateWeatherWidget,
+  renderWeatherFromCache,
+  getWeatherEmoji,
+  getWeatherDescription,
+  expandedFolders,
+  draggedId,
+  justDroppedId
+};
+

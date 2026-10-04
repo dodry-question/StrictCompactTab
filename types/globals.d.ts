@@ -157,6 +157,14 @@ var getWidgetKey: any;
 var clearCustomLayoutStyles: any;
 var mistWidgetKey: any;
 var applyClockScale: any;
+// app/weather.js — модуль (шаг «в»): 2 accessors + 5 мостов функций
+var draggedId: any;
+var justDroppedId: any;
+var getWeatherDescription: any;
+var updateStatusText: any;
+var updateWeatherWidget: any;
+var handleCityInputChange: any;
+var applyWeatherVisibility: any;
 }
 
 export {};
