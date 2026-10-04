@@ -1,4 +1,4 @@
-# Сборка релизного архива расширения.
+﻿# Сборка релизного архива расширения.
 #
 #   .\tools\build-release.ps1              # версия берётся из manifest.json
 #   .\tools\build-release.ps1 -Version 1.11.2
@@ -10,12 +10,18 @@
 #
 # Что НЕ попадает в архив и почему:
 #   *.md (README.md, СВОДКА.md),
-#   package.json,
+#   package.json, package-lock.json — зависимости рантайму не нужны,
 #   LICENSE                   — не нужны браузеру; рабочая сводка и вовсе
 #                               не должна покидать проект
 #   assets\preview_*          — скриншоты для GitHub, расширение их не грузит
 #                                (192 КБ мёртвого веса в каждой установке)
 #   *.zip                     — чтобы архив не включал сам себя
+#   файлы инструментов разработки (tsconfig.json, eslint.config.js,
+#   .prettierrc.json, .prettierignore, .editorconfig, .gitignore,
+#   .gitattributes)           — браузер их не читает вообще. Раньше они
+#                               уезжали в релиз: корневые файлы копировались
+#                               все подряд, кроме явного списка ниже, а
+#                               dotfiles и конфиги в него не входили.
 #
 # Compress-Archive в PowerShell 5.1 пишет обратные слэши в путях записей,
 # поэтому архив собирается через System.IO.Compression с явным '/'.
@@ -40,7 +46,14 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 if (Test-Path $out) { Remove-Item $out -Force }
 
-$skipNames = @('README.md', 'package.json', 'LICENSE')
+# Файлы, которых в релизе быть не должно (по имени, в корне проекта).
+$skipNames = @(
+  'README.md', 'СВОДКА.md', 'LICENSE',
+  'package.json', 'package-lock.json',
+  'tsconfig.json', 'eslint.config.js',
+  '.prettierrc.json', '.prettierignore',
+  '.editorconfig', '.gitignore', '.gitattributes'
+)
 $files = @()
 $files += Get-ChildItem -Path $root -File |
   Where-Object { $_.Extension -notin '.zip', '.md' -and $_.Name -notin $skipNames }
