@@ -107,6 +107,16 @@ var syncModeToggles: any;
 var applyClockVisibility: any;
 var applyFavicon: any;
 var applyLanguage: any;
+// app/categories-tabs.js — модуль (шаг «в»)
+var buildTabs: any;
+var getActiveTab: any;
+var getGridMetrics: any;
+var stabilizeShortcutsHeight: any;
+var renderMistPills: any;
+var selectCategory: any;
+var renderCategoryTabs: any;
+var tabsPanelAboveGrid: any;
+var syncTabsDomPosition: any;
 }
 
 export {};
