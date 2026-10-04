@@ -12,7 +12,8 @@
        ожидания (module без async имеет defer-семантику, порядок сохраняется).
        Относительный порядок сохранён:
        i18n → state → storage → services → src/utils.js (module) → app/*,
-       поэтому window.store/storage/AppUtils готовы к моменту чтения в app/*.
+       поэтому window.store/storage готовы к моменту чтения в app/*, а AppUtils
+        (src/utils.js) app/* берёт через import — фаза 3.
        favicon-loader.js намеренно остаётся синхронным: он ставит фавиконку
        прямо в <head> до первой отрисовки, иначе вкладка мигает дефолтной. -->
   <script type="module" src="i18n/translations.js"></script>

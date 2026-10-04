@@ -1,3 +1,5 @@
+import { normalizeMistWidgets } from '../src/utils.js';
+
 // --- Р РђРЎРџРћР›РћР–Р•РќРР• Р­Р›Р•РњР•РќРўРћР’ (LAYOUT DRAG & DROP) ---
 let activeDragElement = null;
 let dragOffset = { x: 0, y: 0 };

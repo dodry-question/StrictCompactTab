@@ -1,3 +1,5 @@
+import { normalizeMistWidgets } from '../src/utils.js';
+
 // --- РЈРџР РђР’Р›Р•РќРР• РўРЈРњР‘Р›Р•Р РђРњР Р§РђРЎРћР’ Р Р”РђРўР« ---
 const showClockCb = /** @type {HTMLInputElement} */ (document.getElementById('show-clock-checkbox'));
 const showDateCb = /** @type {HTMLInputElement} */ (document.getElementById('show-date-checkbox'));

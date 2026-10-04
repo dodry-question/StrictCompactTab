@@ -1,6 +1,7 @@
 import { TRANSLATIONS } from '../i18n/translations.js';
 
-const { formatDateLine, getTopbarCityName, normalizeMistWidgets } = window.AppUtils;
+// AppUtils (formatDateLine, getTopbarCityName, normalizeMistWidgets) больше не
+// публикуется в window — потребители импортируют функции из src/utils.js напрямую.
 
 // --- РЎР›РћР’РђР Р¬ РџР•Р Р•Р’РћР”РћР’ (Р›РћРљРђР›РР—РђР¦РРЇ) ---
 // TRANSLATIONS приходит через import в первой строке файла
@@ -63,9 +64,6 @@ Object.defineProperty(window, 'editingIndex', {
   configurable: true
 });
 window.STATE = STATE;
-window.formatDateLine = formatDateLine;
-window.getTopbarCityName = getTopbarCityName;
-window.normalizeMistWidgets = normalizeMistWidgets;
 window.MIST_CELL_GAP = MIST_CELL_GAP;
 window.MIST_PAD = MIST_PAD;
 window.MIST_MAX_W = MIST_MAX_W;
@@ -76,9 +74,6 @@ window.btnExport = btnExport;
 window.btnImport = btnImport;
 window.importFileInput = importFileInput;
 export {
-  formatDateLine,
-  getTopbarCityName,
-  normalizeMistWidgets,
   TRANSLATIONS,
   storage,
   DEFAULT_SHORTCUTS,

@@ -43,10 +43,3 @@ export function getTopbarCityName(state) {
   if (cityName.includes('(')) cityName = cityName.split('(')[0].trim();
   return cityName;
 }
-
-globalThis.AppUtils = {
-  normalizeMistHeadOffset,
-  normalizeMistWidgets,
-  formatDateLine,
-  getTopbarCityName
-};

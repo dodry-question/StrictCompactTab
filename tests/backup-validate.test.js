@@ -36,12 +36,6 @@ globalThis.document = {
   querySelector: () => null
 };
 
-// src/utils.js — ESM-модуль, публикует себя в globalThis.AppUtils
-await import(pathToFileURL(path.join(ROOT, 'src/utils.js')).href);
-// app/core.js делает то же самое деструктурированием в classic-скоупе
-vm.runInThisContext('const { formatDateLine, getTopbarCityName, normalizeMistWidgets } = window.AppUtils;', {
-  filename: 'core-destructure'
-});
 // app/shortcuts-migration.js — модуль (шаг «в»): грузится через import
 // после document-заглушек (файл на верхнем уровне вешает обработчики)
 await import(pathToFileURL(path.join(ROOT, 'app/shortcuts-migration.js')).href);

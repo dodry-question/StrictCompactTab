@@ -1,4 +1,5 @@
 import { TRANSLATIONS } from '../i18n/translations.js';
+import { formatDateLine } from '../src/utils.js';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -259,7 +260,7 @@ test('общая область видимости разделённых фай
   assert.equal(probe('typeof activeCategory'), 'string');             // core.js (let activeCategory)
   assert.equal(probe('typeof mistTabsEl'), 'object');                 // core.js (const mistTabsEl)
   assert.equal(typeof TRANSLATIONS, 'object');                       // i18n/translations.js (import)
-  assert.equal(probe('typeof AppUtils'), 'object');                   // src/utils.js (module)
+  assert.equal(typeof formatDateLine, 'function');                    // src/utils.js (import)
   assert.equal(probe('typeof ShortcutCategories'), 'object');         // services/shortcut-categories.js
 });
 

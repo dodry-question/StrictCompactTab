@@ -1,3 +1,5 @@
+import { formatDateLine, getTopbarCityName } from '../src/utils.js';
+
 // --- Р§РђРЎР« Р Р”РђРўРђ ---
 const clockElement = document.getElementById('clock');
 const dateElement = document.getElementById('date-display');

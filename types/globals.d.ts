@@ -53,10 +53,8 @@ declare global {
     };
   }
 
-  // src/utils.js — это ESM-модуль, он публикует себя в globalThis (а значит и
-  // как window.AppUtils). Объявляем глобальную переменную, чтобы работали обе
-  // формы обращения.
-  var AppUtils: any;
+  // src/utils.js — чистый ESM-модуль (фаза 3): публикаций в globalThis больше
+  // нет, потребители берут функции через import.
 // app/backup-updates.js — модуль (шаг «в»): мосты window.* для классических
 // потребителей. Объявление как global var даёт и голое имя, и window.X.
 var buildBackupPayload: any;
@@ -201,9 +199,6 @@ var storage: any;
 var DEFAULT_SHORTCUTS: any;
 var store: any;
 var MIST_WIDGET_KEYS: any;
-var formatDateLine: any;
-var getTopbarCityName: any;
-var normalizeMistWidgets: any;
 var MIST_CELL_GAP: any;
 var MIST_PAD: any;
 var MIST_MAX_W: any;

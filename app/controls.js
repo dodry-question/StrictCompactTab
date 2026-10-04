@@ -1,3 +1,5 @@
+import { normalizeMistWidgets } from '../src/utils.js';
+
 import { TRANSLATIONS } from '../i18n/translations.js';
 
 // --- РРќРР¦РРђР›РР—РђР¦РРЇ РљРќРћРџРћРљ Р РђРЎРџРћР›РћР–Р•РќРРЇ ---
