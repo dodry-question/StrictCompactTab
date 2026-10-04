@@ -19,7 +19,10 @@
 // авто-сохранение на каждую запись дало бы лишние записи в storage при
 // перетаскивании и вводе.
 
-window.store = (function () {
+// Этап «в» (ESM): файл — модуль, экспортирует store; window.store остаётся
+// временным «мостом» для классических app/* до их перехода на import.
+
+const store = (function () {
   /** @type {AppState} Шаблон начальных значений — не мутировать. */
   const DEFAULT_STATE = {
     shortcuts: [],
@@ -162,3 +165,8 @@ window.store = (function () {
     }
   };
 })();
+
+// Мост для классических app/* (core.js: const store = window.store) — уберём
+// в фазе 3, когда потребители перейдут на import { store }.
+window.store = store;
+export { store };

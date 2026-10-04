@@ -1,9 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import path from 'node:path';
-import vm from 'node:vm';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // ---------------------------------------------------------------------------
 // Тесты store (state/store.js) — владельца состояния и единого списка ключей
@@ -12,11 +10,10 @@ import { fileURLToPath } from 'node:url';
 // Главный страховочный смысл — PERSIST_KEYS: раньше список был продублирован
 // (массив в loadState для storage.get и объект в saveState для storage.set),
 // и расхождение списков молча теряло бы поле при сохранении. Здесь скрипт
-// грузится в общий vm-контекст, как в браузере, поверх заглушки storage.
+// грузится как модуль (этап «в») поверх заглушки storage.
 // ---------------------------------------------------------------------------
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 
 globalThis.window = globalThis;
 
@@ -33,7 +30,7 @@ globalThis.storage = {
   }
 };
 
-vm.runInThisContext(read('state/store.js'), { filename: path.join(ROOT, 'state/store.js') });
+await import(pathToFileURL(path.join(ROOT, 'state/store.js')).href);
 
 const store = globalThis.store;
 
