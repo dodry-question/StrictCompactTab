@@ -185,6 +185,16 @@ body.mode-mist.mist-preset-zen .mist-module {
 body.mode-mist.mist-preset-center .mist-module {
   position: relative;
   margin: auto 0 !important;
+  /* Панель (вкладки + ярлыки) позиционируется АБСОЛЮТНО под модулем
+     (см. mist-presets.css: «Standard … anchored below the search widget»),
+     в потоке модуля она не участвует — auto-отступы центрировали ТОЛЬКО
+     часы+поиск, и вся композиция уходила за нижний край экрана: пилюли
+     (align-content: end у контейнера) оказывались за экраном, и в
+     категориях с немногими ярлыками их не было видно вообще.
+     Выделяем под панель место тем же расчётом, что и её высота:
+     gap модуля до панели 14px + вкладки 38px + gap обёртки 10px +
+     контейнер clamp(140px, 42vh, 520px). Итого stack центрируется целиком. */
+  margin-bottom: calc(14px + 38px + 10px + clamp(140px, 42vh, 520px)) !important;
 }
 
 /* Отступы внутри модуля задаёт сам модуль (gap), а не поля элементов:
