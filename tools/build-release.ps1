@@ -1,19 +1,25 @@
 # Сборка релизного архива расширения.
 #
 #   .\tools\build-release.ps1              # версия берётся из manifest.json
-#   .\tools\build-release.ps1 -Version 1.11.1
+#   .\tools\build-release.ps1 -Version 1.11.2
+#   .\tools\build-release.ps1 -OutDir D:\releases
+#
+# Архив кладётся ЗА пределы репо (по умолчанию — Рабочий стол): zip релиза
+# не должен появляться в папке проекта. Место релизных архивов — GitHub
+# Releases и загрузка в сторы, не репозиторий.
 #
 # Что НЕ попадает в архив и почему:
 #   README.md, package.json,
 #   LICENSE                   — не нужны браузеру
-#   assets\preview_*           — скриншоты для GitHub, расширение их не грузит
+#   assets\preview_*          — скриншоты для GitHub, расширение их не грузит
 #                                (192 КБ мёртвого веса в каждой установке)
 #   *.zip                     — чтобы архив не включал сам себя
 #
 # Compress-Archive в PowerShell 5.1 пишет обратные слэши в путях записей,
 # поэтому архив собирается через System.IO.Compression с явным '/'.
 param(
-  [string]$Version = ''
+  [string]$Version = '',
+  [string]$OutDir = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,7 +28,10 @@ $root = Split-Path -Parent $PSScriptRoot
 if (-not $Version) {
   $Version = (Get-Content (Join-Path $root 'manifest.json') -Raw | ConvertFrom-Json).version
 }
-$out = Join-Path $root "strict-compact-tab-v$Version.zip"
+if (-not $OutDir) {
+  $OutDir = [Environment]::GetFolderPath('Desktop')
+}
+$out = Join-Path $OutDir "strict-compact-tab-v$Version.zip"
 
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
