@@ -147,27 +147,13 @@ setInterval(updateClockAndDate, 1000);
 updateClockAndDate();
 
 // activeCategory переприсваивают categories-tabs и mist-toggles — ACCESSOR.
-// mistTabsEl и weather/visibility-константы читаются снаружи (read-only) —
-// обычные мосты. Всё уберём в фазе 3 шага «в».
+// Остальные 14 мостов (mistTabsEl/weather-элементы/renderTopbar/
+// updateClockAndDate) сняты — фаза 3, потребители импортируют.
 Object.defineProperty(window, 'activeCategory', {
   get: () => activeCategory,
   set: (value) => { activeCategory = value; },
   configurable: true
 });
-window.mistTabsEl = mistTabsEl;
-window.mistPresetSelect = mistPresetSelect;
-window.mistPerRowSelect = mistPerRowSelect;
-window.mistZenZone = mistZenZone;
-window.showWeatherCb = showWeatherCb;
-window.weatherCityInput = weatherCityInput;
-window.weatherInputStatus = weatherInputStatus;
-window.weatherSubsettings = weatherSubsettings;
-window.weatherTemp = weatherTemp;
-window.weatherDetails = weatherDetails;
-window.weatherWidget = weatherWidget;
-window.weatherIcon = weatherIcon;
-window.renderTopbar = renderTopbar;
-window.updateClockAndDate = updateClockAndDate;
 export {
   clockElement,
   dateElement,

@@ -252,6 +252,7 @@ const { initLayoutDragAndDrop } = await import('../app/layout-dnd.js');
 const { navHandleKeydown } = await import('../app/navigation.js');
 const { initCustomSearchEngines } = await import('../app/controls.js');
 const { applyFavicon } = await import('../app/appearance.js');
+const { updateClockAndDate, mistTabsEl } = await import('../app/clock-topbar.js');
 
 test('общая область видимости разделённых файлов сохранилась', () => {
   // функции из разных частей бывшего script.js
@@ -260,7 +261,7 @@ test('общая область видимости разделённых фай
   assert.equal(typeof renderModalShortcutsList, 'function');            // modal-shortcuts.js (import)
   assert.equal(typeof navHandleKeydown, 'function');         // navigation.js
   assert.equal(typeof initLayoutDragAndDrop, 'function');    // layout-dnd.js
-  assert.equal(probe('typeof updateClockAndDate'), 'function');       // clock-topbar.js
+  assert.equal(typeof updateClockAndDate, 'function');            // clock-topbar.js
   assert.equal(typeof initCustomSearchEngines, 'function');  // controls.js
   // let/const-состояние, разъехавшееся по файлам (фаза 3: прямые import)
   assert.equal(typeof STATE, 'object');                               // state/store.js (import)
@@ -268,7 +269,7 @@ test('общая область видимости разделённых фай
   assert.equal(STATE === store.state, true);                          // alias указывает на store
   assert.ok(Array.isArray(store.persistKeys), 'нет PERSIST_KEYS');    // единственный список ключей
   assert.equal(probe('typeof activeCategory'), 'string');             // core.js (let activeCategory)
-  assert.equal(probe('typeof mistTabsEl'), 'object');                 // core.js (const mistTabsEl)
+  assert.equal(typeof mistTabsEl, 'object');                      // clock-topbar.js (const mistTabsEl)
   assert.equal(typeof TRANSLATIONS, 'object');                       // i18n/translations.js (import)
   assert.equal(typeof formatDateLine, 'function');                    // src/utils.js (import)
   assert.equal(typeof ShortcutCategories, 'object');                   // services/shortcut-categories.js (import)

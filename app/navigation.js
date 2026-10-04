@@ -1,3 +1,5 @@
+import { mistTabsEl } from './clock-topbar.js';
+
 import { NAV_ZONE_ROOTS, NAV_KEYS } from './core.js';
 
 import { tabsPanelAboveGrid, selectCategory } from './categories-tabs.js';

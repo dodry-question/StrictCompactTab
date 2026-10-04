@@ -61,22 +61,8 @@ var draggedId: any;
 var justDroppedId: any;
 // app/categories-settings.js — 9 мостов сняты (фаза 3); accessor settingsCategoryId остался
 var settingsCategoryId: any;
-// app/clock-topbar.js — модуль (шаг «в»): accessor activeCategory + 12 DOM-мостов
+// app/clock-topbar.js — 14 мостов сняты (фаза 3); accessor activeCategory остался
 var activeCategory: any;
-var mistTabsEl: any;
-var mistPresetSelect: any;
-var mistPerRowSelect: any;
-var mistZenZone: any;
-var showWeatherCb: any;
-var weatherCityInput: any;
-var weatherInputStatus: any;
-var weatherSubsettings: any;
-var weatherTemp: any;
-var weatherDetails: any;
-var weatherWidget: any;
-var weatherIcon: any;
-var renderTopbar: any;
-var updateClockAndDate: any;
 // app/core.js — 9 мостов сняты (фаза 3); accessors navModel/editingIndex + алиасы
 var DEFAULT_SHORTCUTS: any;
 var MIST_WIDGET_KEYS: any;

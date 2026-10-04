@@ -1,3 +1,5 @@
+import { renderTopbar } from './clock-topbar.js';
+
 import { applyLayoutPositions } from './layout-widgets.js';
 
 import { populateCategorySelects } from './categories-settings.js';

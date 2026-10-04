@@ -1,3 +1,5 @@
+import { mistTabsEl } from './clock-topbar.js';
+
 import { MIST_PAD, MIST_MAX_W, MIST_CELL_GAP, MIST_CELL_W } from './core.js';
 
 import { createMistPill } from './navigation.js';

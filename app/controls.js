@@ -1,3 +1,5 @@
+import { renderTopbar } from './clock-topbar.js';
+
 import { applyMistWidgets, isMistHeadWidget, getWidgetKey, applyLayoutPositions, clearCustomLayoutStyles } from './layout-widgets.js';
 
 import { compressImage } from './appearance.js';

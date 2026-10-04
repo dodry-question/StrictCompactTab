@@ -1,3 +1,5 @@
+import { weatherWidget, updateClockAndDate } from './clock-topbar.js';
+
 import { updateStatusText, updateWeatherWidget, handleCityInputChange } from './weather.js';
 
 import { findCategoryById } from './categories-settings.js';

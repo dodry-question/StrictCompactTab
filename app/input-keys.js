@@ -1,3 +1,5 @@
+import { mistTabsEl } from './clock-topbar.js';
+
 import { folderModal, closeFolder } from './shortcuts-migration.js';
 
 import { selectCategory } from './categories-tabs.js';
