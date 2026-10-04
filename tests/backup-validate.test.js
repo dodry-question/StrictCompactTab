@@ -42,7 +42,9 @@ await import(pathToFileURL(path.join(ROOT, 'src/utils.js')).href);
 vm.runInThisContext('const { formatDateLine, getTopbarCityName, normalizeMistWidgets } = window.AppUtils;', {
   filename: 'core-destructure'
 });
-vm.runInThisContext(read('app/shortcuts-migration.js'), { filename: 'app/shortcuts-migration.js' });
+// app/shortcuts-migration.js — модуль (шаг «в»): грузится через import
+// после document-заглушек (файл на верхнем уровне вешает обработчики)
+await import(pathToFileURL(path.join(ROOT, 'app/shortcuts-migration.js')).href);
 // app/backup-validate.js — модуль (шаг «в»): грузится через import
 await import(pathToFileURL(path.join(ROOT, 'app/backup-validate.js')).href);
 

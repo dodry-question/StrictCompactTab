@@ -337,3 +337,29 @@ if (folderCloseBtn && folderModal) {
   });
 }
 
+// Мосты для потребителей (categories-settings, state-render — классические;
+// backup-validate, backup-updates, input-keys, modal-shortcuts — уже модули) —
+// уберём в фазе 3 шага «в».
+window.extractCategoryMeta = extractCategoryMeta;
+window.generateId = generateId;
+window.migrateToNested = migrateToNested;
+window.moveNestedItem = moveNestedItem;
+window.findShortcutOrFolderById = findShortcutOrFolderById;
+window.isFolderContainingTarget = isFolderContainingTarget;
+window.closeFolder = closeFolder;
+window.folderModal = folderModal;
+export {
+  extractCategoryMeta,
+  normalizeCategoryMeta,
+  generateId,
+  migrateToNested,
+  moveNestedItem,
+  findShortcutOrFolderById,
+  isFolderContainingTarget,
+  openFolder,
+  closeFolder,
+  renderFolderShortcuts,
+  folderModal,
+  folderCloseBtn
+};
+

@@ -88,6 +88,15 @@ var createMistPill: any;
 var rebuildNavModel: any;
 // app/modal-shortcuts.js — модуль (шаг «в»)
 var renderModalShortcutsList: any;
+// app/shortcuts-migration.js — модуль (шаг «в»)
+var extractCategoryMeta: any;
+var generateId: any;
+var migrateToNested: any;
+var moveNestedItem: any;
+var findShortcutOrFolderById: any;
+var isFolderContainingTarget: any;
+var closeFolder: any;
+var folderModal: any;
 }
 
 export {};
