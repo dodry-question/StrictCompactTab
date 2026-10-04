@@ -1,3 +1,5 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 // --- РџРћРРЎРљ РЎ Р”РРќРђРњРР§Р•РЎРљРРњ РџР•Р Р•РќРђРџР РђР’Р›Р•РќРР•Рњ ---
 const searchForm = document.getElementById('search-form');
 const searchInput = /** @type {HTMLInputElement} */ (document.getElementById('search-input'));

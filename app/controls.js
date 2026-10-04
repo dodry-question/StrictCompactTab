@@ -1,3 +1,5 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 // --- РРќРР¦РРђР›РР—РђР¦РРЇ РљРќРћРџРћРљ Р РђРЎРџРћР›РћР–Р•РќРРЇ ---
 const btnEditLayout = document.getElementById('btn-edit-layout');
 const btnResetLayout = document.getElementById('btn-reset-layout');

@@ -1,7 +1,9 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 const { formatDateLine, getTopbarCityName, normalizeMistWidgets } = window.AppUtils;
 
 // --- РЎР›РћР’РђР Р¬ РџР•Р Р•Р’РћР”РћР’ (Р›РћРљРђР›РР—РђР¦РРЇ) ---
-const TRANSLATIONS = window.TRANSLATIONS;
+// TRANSLATIONS приходит через import в первой строке файла
 
 // --- Р РђРЎРЁРР Р•РќРќРђРЇ РЎРРЎРўР•РњРђ РҐР РђРќР•РќРРЇ (СЃ РїРѕРґРґРµСЂР¶РєРѕР№ Р±СЌРєР°РїРѕРІ) ---
 const storage = window.storage;

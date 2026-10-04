@@ -1,3 +1,5 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 function renderModalShortcutsList() {
   const modalList = document.getElementById('modal-shortcuts-list');
   if (!modalList) return;

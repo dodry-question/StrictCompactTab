@@ -1,3 +1,5 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 // --- Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ РґР»СЏ РїСЂРѕРІРµСЂРєРё Р±СЂР°СѓР·РµСЂР° Brave ---
 async function isBraveBrowser() {
   // РџРµСЂРІРёС‡РЅР°СЏ РїСЂРѕРІРµСЂРєР° С‡РµСЂРµР· API Brave

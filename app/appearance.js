@@ -1,3 +1,5 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 // --- РЈРџР РђР’Р›Р•РќРР• РћР‘РћРЇРњР ---
 const bgFileInput = /** @type {HTMLInputElement} */ (document.getElementById('bg-file-input'));
 const bgResetBtn = document.getElementById('bg-reset-btn');

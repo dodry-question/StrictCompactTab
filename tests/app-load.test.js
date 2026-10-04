@@ -1,3 +1,5 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -256,7 +258,7 @@ test('общая область видимости разделённых фай
   assert.equal(probe('Array.isArray(window.store.persistKeys)'), true); // единственный список ключей
   assert.equal(probe('typeof activeCategory'), 'string');             // core.js (let activeCategory)
   assert.equal(probe('typeof mistTabsEl'), 'object');                 // core.js (const mistTabsEl)
-  assert.equal(probe('typeof TRANSLATIONS'), 'object');               // core.js
+  assert.equal(typeof TRANSLATIONS, 'object');                       // i18n/translations.js (import)
   assert.equal(probe('typeof AppUtils'), 'object');                   // src/utils.js (module)
   assert.equal(probe('typeof ShortcutCategories'), 'object');         // services/shortcut-categories.js
 });

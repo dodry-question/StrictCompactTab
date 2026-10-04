@@ -1,3 +1,5 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 // --- РЈРџР РђР’Р›Р•РќРР• РџРћР“РћР”РћР™ ---
 if (showWeatherCb) {
   showWeatherCb.addEventListener('change', (e) => {

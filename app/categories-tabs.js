@@ -1,3 +1,5 @@
+import { TRANSLATIONS } from '../i18n/translations.js';
+
 // ---------- КАТЕГОРИИ (ВКЛАДКИ) ----------
 
 function buildTabs() {

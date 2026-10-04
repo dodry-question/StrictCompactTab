@@ -9,19 +9,16 @@
 // после чего этот файл можно будет удалить. Профиль данных состояния описан
 // JSDoc @typedef'ами в state/defaults.js.
 //
-// ВНИМАНИЕ: `store`, `storage`, `TRANSLATIONS`, `DEFAULT_SHORTCUTS` и
-// `MIST_WIDGET_KEYS` объявлены ТОЛЬКО через интерфейс Window (а не как `var`),
-// потому что те же имена уже объявлены как top-level `const` в app/core.js
-// (`const STATE = window.store.state;` и т.п.) — иначе tsc ругался бы на
-// «Cannot redeclare block-scoped variable».
+// ВНИМАНИЕ (обновлено в фазе 3): интерфейс Window и `var` ниже — два разных
+// пространства имён tsc, конфликта нет. `var X` даёт голое имя потребителям
+// (пока они не переведены на import), `Window.X` — присвоения `window.X = ...`.
 declare global {
   interface Window {
     // Состояние (владелец — state/store.js, этап «б»: store вместо window.STATE)
     // и слой хранения
     store: any;
     storage: any;
-    // Локализация и дефолты
-    TRANSLATIONS: any;
+    // Локализация и дефолты (TRANSLATIONS переведён на import в фазе 3)
     DEFAULT_SHORTCUTS: any;
     // Геометрия mist-виджетов
     MIST_WIDGET_KEYS: any;
@@ -200,7 +197,6 @@ var isSchedulePanelOpen: any;
 var closeSchedulePanel: any;
 // app/core.js — модуль (шаг «в», фаза 2): глобальный хаб алиасов
 var STATE: any;
-var TRANSLATIONS: any;
 var storage: any;
 var DEFAULT_SHORTCUTS: any;
 var store: any;
