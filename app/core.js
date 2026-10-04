@@ -11,10 +11,7 @@ const storage = window.storage;
 
 // --- Р§РРЎРўР«Р™ РЎРўРђР РўРћР’Р«Р™ РЁРђР±Р›РћРќ ---
 const DEFAULT_SHORTCUTS = window.DEFAULT_SHORTCUTS;
-// Состояние принадлежит store (state/store.js): здесь берём только ссылку
-// на живой объект — прямые записи STATE.x работают как раньше
-const store = window.store;
-const STATE = window.store.state;
+// STATE/store (state/store.js) потребители импортируют напрямую — фаза 3.
 const MIST_WIDGET_KEYS = window.MIST_WIDGET_KEYS;
 
 // Геометрия Flex-потока пилюль — ТОЛЬКО режим Mist (в стандартном режиме
@@ -51,8 +48,8 @@ const importFileInput = /** @type {HTMLInputElement} */ (document.getElementById
 // --- Мосты (шаг «в», фаза 2 завершена: все app/* — модули) -------------------
 // navModel/editingIndex переписывают navigation/modal-shortcuts/settings-panel/
 // categories-settings — ACCESSORS. Остальное — обычные мосты для голых имён.
-// TRANSLATIONS/storage/DEFAULT_SHORTCUTS/store/MIST_WIDGET_KEYS уже опубликованы
-// своими модулями (window.X) — здесь только export, мост не нужен.
+// storage/DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS опубликованы своими модулями
+// (window.X) — здесь только export; TRANSLATIONS и store — уже на import.
 Object.defineProperty(window, 'navModel', {
   get: () => navModel,
   set: (value) => { navModel = value; },
@@ -63,7 +60,6 @@ Object.defineProperty(window, 'editingIndex', {
   set: (value) => { editingIndex = value; },
   configurable: true
 });
-window.STATE = STATE;
 window.MIST_CELL_GAP = MIST_CELL_GAP;
 window.MIST_PAD = MIST_PAD;
 window.MIST_MAX_W = MIST_MAX_W;
@@ -77,8 +73,6 @@ export {
   TRANSLATIONS,
   storage,
   DEFAULT_SHORTCUTS,
-  store,
-  STATE,
   MIST_WIDGET_KEYS,
   MIST_CELL_GAP,
   MIST_PAD,

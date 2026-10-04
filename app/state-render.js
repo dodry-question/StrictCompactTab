@@ -1,3 +1,5 @@
+import { STATE, store } from '../state/store.js';
+
 import { normalizeMistWidgets } from '../src/utils.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';

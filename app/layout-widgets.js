@@ -1,3 +1,5 @@
+import { STATE } from '../state/store.js';
+
 import { normalizeMistWidgets } from '../src/utils.js';
 
 // --- Р РђРЎРџРћР›РћР–Р•РќРР• Р­Р›Р•РњР•РќРўРћР’ (LAYOUT DRAG & DROP) ---

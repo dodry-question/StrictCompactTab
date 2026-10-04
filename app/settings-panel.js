@@ -1,3 +1,5 @@
+import { STATE } from '../state/store.js';
+
 import { TRANSLATIONS } from '../i18n/translations.js';
 
 // --- РџРћРРЎРљ РЎ Р”РРќРђРњРР§Р•РЎРљРРњ РџР•Р Р•РќРђРџР РђР’Р›Р•РќРР•Рњ ---

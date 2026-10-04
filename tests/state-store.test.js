@@ -30,9 +30,7 @@ globalThis.storage = {
   }
 };
 
-await import(pathToFileURL(path.join(ROOT, 'state/store.js')).href);
-
-const store = globalThis.store;
+const { store } = await import(pathToFileURL(path.join(ROOT, 'state/store.js')).href);
 
 test('store.state — живое состояние с начальными значениями из шаблона', () => {
   assert.equal(typeof store, 'object');

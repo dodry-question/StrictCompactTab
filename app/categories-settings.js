@@ -1,3 +1,5 @@
+import { STATE } from '../state/store.js';
+
 import { TRANSLATIONS } from '../i18n/translations.js';
 
 // ---------- УПРАВЛЕНИЕ КАТЕГОРИЯМИ (раздел настроек «Категории») ----------

@@ -1,5 +1,6 @@
 import { TRANSLATIONS } from '../i18n/translations.js';
 import { formatDateLine } from '../src/utils.js';
+import { STATE, store } from '../state/store.js';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -251,12 +252,11 @@ test('общая область видимости разделённых фай
   assert.equal(probe('typeof initLayoutDragAndDrop'), 'function');    // layout-dnd.js
   assert.equal(probe('typeof updateClockAndDate'), 'function');       // clock-topbar.js
   assert.equal(probe('typeof initCustomSearchEngines'), 'function');  // controls.js
-  // let/const-состояние, разъехавшееся по файлам
-  assert.equal(probe('typeof STATE'), 'object');                      // core.js (const STATE = store.state)
-  assert.equal(probe('typeof window.store'), 'object');               // state/store.js
-  assert.equal(probe('typeof window.store.state'), 'object');         // владелец состояния (этап «б»)
-  assert.equal(probe('STATE === window.store.state'), true);          // alias указывает на store
-  assert.equal(probe('Array.isArray(window.store.persistKeys)'), true); // единственный список ключей
+  // let/const-состояние, разъехавшееся по файлам (фаза 3: прямые import)
+  assert.equal(typeof STATE, 'object');                               // state/store.js (import)
+  assert.equal(typeof store.state, 'object');                         // владелец состояния
+  assert.equal(STATE === store.state, true);                          // alias указывает на store
+  assert.ok(Array.isArray(store.persistKeys), 'нет PERSIST_KEYS');    // единственный список ключей
   assert.equal(probe('typeof activeCategory'), 'string');             // core.js (let activeCategory)
   assert.equal(probe('typeof mistTabsEl'), 'object');                 // core.js (const mistTabsEl)
   assert.equal(typeof TRANSLATIONS, 'object');                       // i18n/translations.js (import)
@@ -277,10 +277,12 @@ test('иконка вкладки: по умолчанию компактная,
   const href = () => probe("document.querySelector('.page-favicon').getAttribute('href')");
   assert.equal(href(), 'assets/icon-48.png');
 
-  probe('STATE.customFavicon = "data:image/png;base64,myicon"; applyFavicon()');
+  STATE.customFavicon = 'data:image/png;base64,myicon';
+  probe('applyFavicon()');
   assert.equal(href(), 'data:image/png;base64,myicon');
 
-  probe('STATE.customFavicon = null; applyFavicon()');
+  STATE.customFavicon = null;
+  probe('applyFavicon()');
   assert.equal(href(), 'assets/icon-48.png');
 });
 

@@ -1,3 +1,5 @@
+import { STATE } from '../state/store.js';
+
 import { formatDateLine, getTopbarCityName } from '../src/utils.js';
 
 // --- Р§РђРЎР« Р Р”РђРўРђ ---

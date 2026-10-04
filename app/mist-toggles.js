@@ -1,3 +1,5 @@
+import { STATE } from '../state/store.js';
+
 import { normalizeMistWidgets } from '../src/utils.js';
 
 // --- РЈРџР РђР’Р›Р•РќРР• РўРЈРњР‘Р›Р•Р РђРњР Р§РђРЎРћР’ Р Р”РђРўР« ---
