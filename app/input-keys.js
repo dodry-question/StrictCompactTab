@@ -1,3 +1,5 @@
+import { navHandleKeydown } from './navigation.js';
+
 import { ShortcutCategories } from '../services/shortcut-categories.js';
 
 // --- ГЛОБАЛЬНОЕ ПЕРЕКЛЮЧЕНИЕ КАТЕГОРИЙ КОЛЕСИКОМ МЫШИ ---

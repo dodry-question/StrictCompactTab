@@ -1,3 +1,5 @@
+import { rebuildNavModel } from './navigation.js';
+
 import { removeResizeHandles } from './layout-dnd.js';
 
 import { checkForUpdates } from './backup-updates.js';

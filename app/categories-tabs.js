@@ -1,3 +1,5 @@
+import { createMistPill } from './navigation.js';
+
 import { ShortcutCategories } from '../services/shortcut-categories.js';
 import { ShortcutLayout } from '../services/shortcut-layout.js';
 import { ShortcutRenderer } from '../services/shortcut-renderer.js';

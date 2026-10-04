@@ -249,13 +249,14 @@ const probe = (expr) => vm.runInThisContext(expr);
 // верхнем уровне читает document)
 const { renderModalShortcutsList } = await import('../app/modal-shortcuts.js');
 const { initLayoutDragAndDrop } = await import('../app/layout-dnd.js');
+const { navHandleKeydown } = await import('../app/navigation.js');
 
 test('общая область видимости разделённых файлов сохранилась', () => {
   // функции из разных частей бывшего script.js
   assert.equal(probe('typeof loadState'), 'function');                // state-render.js
   assert.equal(probe('typeof renderShortcuts'), 'function');          // state-render.js
   assert.equal(typeof renderModalShortcutsList, 'function');            // modal-shortcuts.js (import)
-  assert.equal(probe('typeof navHandleKeydown'), 'function');         // navigation.js
+  assert.equal(typeof navHandleKeydown, 'function');         // navigation.js
   assert.equal(typeof initLayoutDragAndDrop, 'function');    // layout-dnd.js
   assert.equal(probe('typeof updateClockAndDate'), 'function');       // clock-topbar.js
   assert.equal(probe('typeof initCustomSearchEngines'), 'function');  // controls.js
