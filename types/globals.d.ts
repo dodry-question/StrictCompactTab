@@ -176,6 +176,22 @@ var renderCategoryTabsBar: any;
 var renderCategoryHeader: any;
 var getCategoryItems: any;
 var buildCategoryOptions: any;
+// app/clock-topbar.js — модуль (шаг «в»): accessor activeCategory + 12 DOM-мостов
+var activeCategory: any;
+var mistTabsEl: any;
+var mistPresetSelect: any;
+var mistPerRowSelect: any;
+var mistZenZone: any;
+var showWeatherCb: any;
+var weatherCityInput: any;
+var weatherInputStatus: any;
+var weatherSubsettings: any;
+var weatherTemp: any;
+var weatherDetails: any;
+var weatherWidget: any;
+var weatherIcon: any;
+var renderTopbar: any;
+var updateClockAndDate: any;
 }
 
 export {};
