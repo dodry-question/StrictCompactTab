@@ -9,8 +9,10 @@
 # Releases и загрузка в сторы, не репозиторий.
 #
 # Что НЕ попадает в архив и почему:
-#   README.md, package.json,
-#   LICENSE                   — не нужны браузеру
+#   *.md (README.md, СВОДКА.md),
+#   package.json,
+#   LICENSE                   — не нужны браузеру; рабочая сводка и вовсе
+#                               не должна покидать проект
 #   assets\preview_*          — скриншоты для GitHub, расширение их не грузит
 #                                (192 КБ мёртвого веса в каждой установке)
 #   *.zip                     — чтобы архив не включал сам себя
@@ -41,7 +43,7 @@ if (Test-Path $out) { Remove-Item $out -Force }
 $skipNames = @('README.md', 'package.json', 'LICENSE')
 $files = @()
 $files += Get-ChildItem -Path $root -File |
-  Where-Object { $_.Extension -ne '.zip' -and $_.Name -notin $skipNames }
+  Where-Object { $_.Extension -notin '.zip', '.md' -and $_.Name -notin $skipNames }
 foreach ($dir in @('app', 'assets', 'css', 'i18n', 'services', 'state', 'storage', 'src')) {
   $files += Get-ChildItem -Path (Join-Path $root $dir) -Recurse -File |
     Where-Object { $_.BaseName -notlike 'preview_*' }
