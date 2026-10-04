@@ -205,8 +205,8 @@ function renderCategoryTabs(tabs) {
 
 // Клавиатура чипа категории: Left/Right — соседние категории (циклически),
 // Где панель категорий лежит физически относительно сетки ярлыков.
-// Классика и Mist-сплит: вкладки СВЕРХУ (сплит — прямо под поиском),
-// Mist-центр и Zen: вкладки СНИЗУ под сеткой.
+// Классика и все три Mist-пресета (split/center/zen): вкладки СВЕРХУ —
+// у split прямо под поиском, у center/zen сразу под ним же
 function tabsPanelAboveGrid() {
   if (!document.body.classList.contains('mode-mist')) return true;
   return document.body.classList.contains('mist-preset-split') ||
