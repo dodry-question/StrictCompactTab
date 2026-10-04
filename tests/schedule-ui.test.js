@@ -271,6 +271,7 @@ for (const tag of scriptTags) {
 }
 
 const app = globalThis;
+const { syncScheduleEnabled, handleScheduleFile, isSchedulePanelOpen, closeSchedulePanel } = await import('../app/schedule.js');
 // Пауз нужна для цепочек промисов (открытие панели читает файл из хранилища).
 // Реальный таймер node:timers/promises, а не globalThis.setTimeout — тот в стабе
 // заглушен. Разбор .xlsx — тоже асинхронный, поэтому там ждём по условию.
@@ -337,7 +338,7 @@ test('все скрипты index.html загрузились без ошибо�
 });
 
 test('модуль плагина загрузился и подключён ДО вызова loadState()', () => {
-  assert.equal(typeof app.syncScheduleEnabled, 'function');
+  assert.equal(typeof syncScheduleEnabled, 'function');
   const scheduleIndex = scriptTags.findIndex((t) => t.src === 'app/schedule.js');
   const inputKeysIndex = scriptTags.findIndex((t) => t.src === 'app/input-keys.js');
   assert.ok(scheduleIndex >= 0, 'app/schedule.js не подключён');
@@ -376,8 +377,8 @@ test('включение галки подмешивает стили ровно
   assert.equal(isReady(), false, 'нельзя открывать панель до применения стилей');
 
   // повторные вызовы не плодят дубли <link>
-  app.syncScheduleEnabled();
-  app.syncScheduleEnabled();
+  syncScheduleEnabled();
+  syncScheduleEnabled();
   assert.equal(styleLinks().length, 1, 'дублей <link> быть не должно');
 
   // таблица применилась — панель разрешена
@@ -417,7 +418,7 @@ test('файл не-xlsx даёт понятную ошибку и не лома
     lastModified: Date.now(),
     arrayBuffer: async () => new TextEncoder().encode('not a zip').buffer
   };
-  await app.handleScheduleFile(bogus);
+  await handleScheduleFile(bogus);
   await settle();
 
   assert.equal(byId('schedule-error').hidden, false, 'ошибка не показана');
@@ -437,7 +438,7 @@ test('загрузка файла переносит на выбор групп�
     arrayBuffer: async () => buffer
   };
 
-  await app.handleScheduleFile(file);
+  await handleScheduleFile(file);
   await settle();
 
   assert.equal(byId('schedule-error').hidden, true, `ошибка: ${byId('schedule-error').textContent}`);
@@ -542,7 +543,7 @@ test('выбор группы показывает расписание по д�
 
 test('подсвечивается день СЛЕДУЮЩИХ пар, а не «сегодня»', async () => {
   const buffer = await new Blob([fs.readFileSync(FIXTURE)]).arrayBuffer();
-  await app.handleScheduleFile({ name: '5_28_09-03_10.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
+  await handleScheduleFile({ name: '5_28_09-03_10.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
   await settle();
 
   // ИСПк-302: пары в понедельник 28.09 с 8.20
@@ -594,7 +595,7 @@ test('группа переживает замену файла — не при�
   const buffer = await new Blob([bytes]).arrayBuffer();
 
   // «свежая неделя»: тот же файл, но id групп генерируются заново
-  await app.handleScheduleFile({ name: '12_05-10_10.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
+  await handleScheduleFile({ name: '12_05-10_10.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
   await settle();
 
   assert.equal(STATE.scheduleGroup, before, 'группа сбросилась после замены файла');
@@ -610,7 +611,7 @@ test('группа, которой нет в новом файле, сбрасы
   // выдумываем несуществующую группу, как если бы файл сменился
   STATE.scheduleGroup = 'Группа НЕТ-ТАКОЙ-999';
   app.saveState();
-  await app.handleScheduleFile({ name: 'test.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
+  await handleScheduleFile({ name: 'test.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
   await settle();
   assert.equal(STATE.scheduleGroup, null);
   assert.equal(groupsView.hidden, false, 'должен показаться список групп');
@@ -619,7 +620,7 @@ test('группа, которой нет в новом файле, сбрасы
 test('удаление файла возвращает окно переноса и чистит хранилище', async () => {
   // заново выбираем группу, чтобы было что удалять
   const buffer = await new Blob([fs.readFileSync(FIXTURE)]).arrayBuffer();
-  await app.handleScheduleFile({ name: '5_28_09-03_10.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
+  await handleScheduleFile({ name: '5_28_09-03_10.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
   await settle();
   const search = byId('schedule-group-search');
   search.value = 'ИСПк-302';
@@ -668,7 +669,7 @@ test('смена языка перерисовывает содержимое о
 
   STATE.language = 'en';
   app.applyLanguage('en');
-  assert.equal(app.isSchedulePanelOpen(), true, 'панель не должна закрываться при смене языка');
+  assert.equal(isSchedulePanelOpen(), true, 'панель не должна закрываться при смене языка');
   assert.equal(findByClass(view, 'schedule-day-text').textContent, dayTitle);
 
   // в списке групп placeholder рисуется кодом — он должен обновиться
@@ -685,7 +686,7 @@ test('смена языка перерисовывает содержимое о
 });
 
 test('кнопка переключает панель, Escape и клик мимо закрывают', async () => {
-  app.closeSchedulePanel();
+  closeSchedulePanel();
 
   byId('schedule-fab').dispatch('click');
   await settle();

@@ -143,12 +143,6 @@ var weatherWidget: any;
 var weatherIcon: any;
 var renderTopbar: any;
 var updateClockAndDate: any;
-// app/schedule.js — модуль (шаг «в»): 5 мостов, внутренние let не тронуты
-var syncScheduleEnabled: any;
-var refreshSchedulePanel: any;
-var handleScheduleFile: any;
-var isSchedulePanelOpen: any;
-var closeSchedulePanel: any;
 // app/core.js — модуль (шаг «в», фаза 2): глобальный хаб алиасов
 var DEFAULT_SHORTCUTS: any;
 var MIST_WIDGET_KEYS: any;

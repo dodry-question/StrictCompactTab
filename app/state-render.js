@@ -1,3 +1,5 @@
+import { syncScheduleEnabled } from './schedule.js';
+
 import { showClockCb, showDateCb, timeFormatCb, showSecondsCb, layoutIosModeCb } from './mist-toggles.js';
 
 import { layoutEditControls, populateSearchEnginesSelect } from './controls.js';

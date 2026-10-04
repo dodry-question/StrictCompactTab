@@ -1,3 +1,5 @@
+import { refreshSchedulePanel } from './schedule.js';
+
 import { AdaptiveThemeManager } from './theme-adaptive.js';
 
 import { STATE } from '../state/store.js';
