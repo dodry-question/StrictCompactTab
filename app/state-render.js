@@ -1,3 +1,5 @@
+import { migrateToNested, extractCategoryMeta } from './shortcuts-migration.js';
+
 import { buildTabs, getActiveTab, getGridMetrics, stabilizeShortcutsHeight, renderMistPills, renderCategoryTabs, syncTabsDomPosition } from './categories-tabs.js';
 
 import { applyMistPreset, syncModeToggles, applyBackground, applyFavicon, applyTheme, applyClockVisibility, applyLanguage } from './appearance.js';

@@ -1,3 +1,5 @@
+import { migrateToNested, extractCategoryMeta } from './shortcuts-migration.js';
+
 import { storage } from '../storage/storage.js';
 import { BackupValidate } from './backup-validate.js';
 

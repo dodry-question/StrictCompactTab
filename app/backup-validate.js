@@ -1,3 +1,5 @@
+import { generateId, migrateToNested, extractCategoryMeta } from './shortcuts-migration.js';
+
 import { normalizeMistWidgets } from '../src/utils.js';
 
 // --- ВАЛИДАЦИЯ ИМПОРТИРУЕМОГО БЭКАПА ----------------------------------------

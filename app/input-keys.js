@@ -1,3 +1,5 @@
+import { folderModal, closeFolder } from './shortcuts-migration.js';
+
 import { selectCategory } from './categories-tabs.js';
 
 import { modal, closeSettings } from './settings-panel.js';

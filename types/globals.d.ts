@@ -39,15 +39,6 @@ declare global {
 // app/settings-panel.js — 10 мостов сняты (фаза 3); осталось 2 accessors ниже
 var addCatCustom: any;
 var addCatSelectedFor: any;
-// app/shortcuts-migration.js — модуль (шаг «в»)
-var extractCategoryMeta: any;
-var generateId: any;
-var migrateToNested: any;
-var moveNestedItem: any;
-var findShortcutOrFolderById: any;
-var isFolderContainingTarget: any;
-var closeFolder: any;
-var folderModal: any;
 // app/state-render.js — модуль (шаг «в»)
 var loadState: any;
 var saveState: any;

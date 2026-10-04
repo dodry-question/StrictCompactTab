@@ -1,3 +1,5 @@
+import { generateId } from './shortcuts-migration.js';
+
 import { renderModalShortcutsList } from './modal-shortcuts.js';
 
 import { STATE } from '../state/store.js';
