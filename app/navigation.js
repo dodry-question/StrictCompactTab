@@ -1,3 +1,5 @@
+import { ShortcutIcons } from '../services/shortcut-icons.js';
+
 // ---------- НАВИГАЦИЯ ПО СЕТКЕ ЯРЛЫКОВ СТРЕЛКАМИ ----------
 
 function gridShortcutItems() {
@@ -300,7 +302,7 @@ function createMistPill(item) {
   img.className = 'mist-pill-icon';
   img.alt = '';
 
-  window.ShortcutIcons.attach(img, item, 64);
+  ShortcutIcons.attach(img, item, 64);
 
   const span = document.createElement('span');
   span.className = 'mist-pill-label';

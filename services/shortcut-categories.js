@@ -44,6 +44,4 @@ const ShortcutCategories = {
   }
 };
 
-// Мост для классических app/* — уберём в фазе 3 шага «в».
-window.ShortcutCategories = ShortcutCategories;
 export { ShortcutCategories };

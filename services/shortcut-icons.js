@@ -18,7 +18,7 @@
 //      не ждёт promises);
 //   3) реальная иконка дорисовывается мягким проявлением, без «щелчка»;
 //   4) кэш ограничен по размеру, при переполнении молча отключается.
-(function () {
+const ShortcutIcons = (function () {
   'use strict';
 
   const CACHE_KEY = 'shortcutIconCache';
@@ -87,7 +87,7 @@
     return 'https://www.google.com/s2/favicons?sz=' + size + '&domain=' + encodeURIComponent(hostname);
   }
 
-  window.ShortcutIcons = {
+  return {
     PLACEHOLDER,
     FALLBACK,
 
@@ -144,6 +144,4 @@
   };
 })();
 
-// Экспорт для будущих import (шаг «в»); мост window.ShortcutIcons задаётся внутри IIFE.
-const ShortcutIcons = window.ShortcutIcons;
 export { ShortcutIcons };

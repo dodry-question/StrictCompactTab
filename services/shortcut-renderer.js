@@ -1,3 +1,5 @@
+import { ShortcutIcons } from './shortcut-icons.js';
+
 const ShortcutRenderer = {
   renderCategoryTabs(element, tabs, activeCategory, onSelect) {
     if (!element) return;
@@ -62,7 +64,7 @@ const ShortcutRenderer = {
       img.alt = '';
 
       // Иконка рисуется сразу: локальная заглушка + кэш, без пустых плиток
-      window.ShortcutIcons.attach(img, item, 128);
+      ShortcutIcons.attach(img, item, 128);
 
       const span = document.createElement('span');
       span.className = 'shortcut-label';
@@ -77,6 +79,4 @@ const ShortcutRenderer = {
   }
 };
 
-// Мост для классических app/* — уберём в фазе 3 шага «в».
-window.ShortcutRenderer = ShortcutRenderer;
 export { ShortcutRenderer };

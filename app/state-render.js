@@ -1,3 +1,5 @@
+import { ShortcutRenderer } from '../services/shortcut-renderer.js';
+
 import { SearchUI } from '../services/search-ui.js';
 
 import { storage } from '../storage/storage.js';
@@ -256,7 +258,7 @@ function renderShortcuts() {
     container.style.setProperty('--cell-size', `${metrics.itemWidth}px`);
   }
 
-  window.ShortcutRenderer.appendClassicCards(activeItems, STATE.size, container);
+  ShortcutRenderer.appendClassicCards(activeItems, STATE.size, container);
   stabilizeShortcutsHeight(tabs);
   rebuildNavModel();
 }

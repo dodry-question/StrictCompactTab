@@ -1,6 +1,7 @@
 import { TRANSLATIONS } from '../i18n/translations.js';
 import { formatDateLine } from '../src/utils.js';
 import { STATE, store } from '../state/store.js';
+import { ShortcutCategories } from '../services/shortcut-categories.js';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -261,7 +262,7 @@ test('общая область видимости разделённых фай
   assert.equal(probe('typeof mistTabsEl'), 'object');                 // core.js (const mistTabsEl)
   assert.equal(typeof TRANSLATIONS, 'object');                       // i18n/translations.js (import)
   assert.equal(typeof formatDateLine, 'function');                    // src/utils.js (import)
-  assert.equal(probe('typeof ShortcutCategories'), 'object');         // services/shortcut-categories.js
+  assert.equal(typeof ShortcutCategories, 'object');                   // services/shortcut-categories.js (import)
 });
 
 test('обработчики событий навешены и инициализация выполнена', () => {

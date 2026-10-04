@@ -1,3 +1,5 @@
+import { ShortcutCategories } from '../services/shortcut-categories.js';
+
 // --- ГЛОБАЛЬНОЕ ПЕРЕКЛЮЧЕНИЕ КАТЕГОРИЙ КОЛЕСИКОМ МЫШИ ---
 // Работает на ВСЕЙ странице (обработчик на window), а не только над панелью.
 // Прокрутка настроек, модалок и реально скроллируемых областей не перехватывается.
@@ -178,7 +180,7 @@ document.addEventListener('keydown', (e) => {
   const categoryButtons = mistTabsEl && mistTabsEl.style.display !== 'none'
     ? Array.from(/** @type {NodeListOf<HTMLElement>} */ (mistTabsEl.querySelectorAll('.mist-tab')))
     : [];
-  const digitIndex = window.ShortcutCategories.getHotkeyIndex(e.key, categoryButtons.length);
+  const digitIndex = ShortcutCategories.getHotkeyIndex(e.key, categoryButtons.length);
 
   if (digitIndex >= 0 && digitIndex < categoryButtons.length &&
       !isInputActive && !isModalOpen && !weatherDrawerOpen && !schedulePanelOpen &&

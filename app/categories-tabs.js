@@ -1,3 +1,7 @@
+import { ShortcutCategories } from '../services/shortcut-categories.js';
+import { ShortcutLayout } from '../services/shortcut-layout.js';
+import { ShortcutRenderer } from '../services/shortcut-renderer.js';
+
 import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
@@ -5,7 +9,7 @@ import { TRANSLATIONS } from '../i18n/translations.js';
 // ---------- КАТЕГОРИИ (ВКЛАДКИ) ----------
 
 function buildTabs() {
-  const result = window.ShortcutCategories.buildTabs(
+  const result = ShortcutCategories.buildTabs(
     STATE.shortcuts,
     STATE.language,
     TRANSLATIONS,
@@ -16,14 +20,14 @@ function buildTabs() {
 }
 
 function getActiveTab(tabs) {
-  return window.ShortcutCategories.getActiveTab(tabs, activeCategory);
+  return ShortcutCategories.getActiveTab(tabs, activeCategory);
 }
 
 // Метрики классической сетки: жёсткие равные колонки (display: grid),
 // одинаковая ширина плиток и фиксированный отступ gap: 12px.
 // --grid-cols / --cell-size задают CSS: repeat(var(--grid-cols), var(--cell-size))
 function getGridMetrics(count) {
-  return window.ShortcutLayout.getGridMetrics(
+  return ShortcutLayout.getGridMetrics(
     count,
     STATE.size,
     STATE.columns,
@@ -198,7 +202,7 @@ function focusTabByIndex(index) {
 }
 
 function renderCategoryTabs(tabs) {
-  window.ShortcutRenderer.renderCategoryTabs(
+  ShortcutRenderer.renderCategoryTabs(
     mistTabsEl,
     tabs,
     activeCategory,

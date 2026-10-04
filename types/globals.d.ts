@@ -21,10 +21,6 @@ declare global {
     // Сервисы (services/*.js)
     WeatherService: any;
     WeatherDrawer: any;
-    ShortcutRenderer: any;
-    ShortcutIcons: any;
-    ShortcutCategories: any;
-    ShortcutLayout: any;
     // Валидация импортируемого бэкапа (app/backup-validate.js)
     BackupValidate: any;
     // Динамическая тема (app/theme-adaptive.js — модуль с мостом, шаг «в»)

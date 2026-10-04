@@ -1,3 +1,5 @@
+import { ShortcutIcons } from '../services/shortcut-icons.js';
+
 import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
@@ -318,7 +320,7 @@ function renderFolderShortcuts(folderId) {
     img.className = 'shortcut-icon';
     img.alt = '';
 
-    window.ShortcutIcons.attach(img, item, 128);
+    ShortcutIcons.attach(img, item, 128);
     
     const span = document.createElement('span');
     span.className = 'shortcut-label';

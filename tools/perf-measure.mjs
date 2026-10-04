@@ -137,7 +137,6 @@ const PROBE = `(() => {
   const clock = document.getElementById('clock');
   const issues = [];
   if (document.documentElement.classList.contains('state-loading')) issues.push('state-loading НЕ снят');
-  if (!window.ShortcutRenderer) issues.push('ShortcutRenderer отсутствует');
   if (!window.WeatherService) issues.push('WeatherService отсутствует');
   if (!clock || !/^\\d{1,2}:\\d{2}/.test(clock.textContent)) issues.push('часы не отрисованы: ' + (clock ? clock.textContent : 'null'));
   out.issues = issues;
