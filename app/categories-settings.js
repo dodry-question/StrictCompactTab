@@ -1,3 +1,5 @@
+import { draggedId, setJustDroppedId } from './weather.js';
+
 import { addCatCustom, addCatSelectedFor, setAddCatCustom, setAddCatSelectedFor } from './settings-panel.js';
 
 import { saveState, renderShortcuts } from './state-render.js';
@@ -231,7 +233,7 @@ function renderCategoryTabsBar() {
       e.stopPropagation();
       chip.classList.remove('drop-target');
       if (moveItemToCategory(draggedId, tab.id, false)) {
-        justDroppedId = draggedId;
+        setJustDroppedId(draggedId);
         settingsCategoryId = tab.id;
         editingIndex = -1;
         refreshAfterCategoryChange();

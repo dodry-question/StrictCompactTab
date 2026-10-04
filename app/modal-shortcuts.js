@@ -1,3 +1,5 @@
+import { draggedId, justDroppedId, setDraggedId, setJustDroppedId } from './weather.js';
+
 import { saveState, renderShortcuts } from './state-render.js';
 
 import { findShortcutOrFolderById, moveNestedItem, isFolderContainingTarget } from './shortcuts-migration.js';
@@ -30,7 +32,7 @@ function renderModalShortcutsList() {
     emptyDiv.textContent = currentDict.listEmpty;
     modalList.appendChild(emptyDiv);
     populateCategorySelects();
-    justDroppedId = null;
+    setJustDroppedId(null);
     return;
   }
 
@@ -44,7 +46,7 @@ function renderModalShortcutsList() {
 
   modalList.appendChild(fragment);
   populateCategorySelects();
-  justDroppedId = null;
+  setJustDroppedId(null);
 }
 function renderShortcutRow(item, isChild, parentId) {
   const currentDict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
@@ -298,7 +300,7 @@ function getDropAction(e, targetEl, isChild, isDraggedFolder, isTargetFolder) {
 
 function setupDragAndDropListeners(element, item, isChild) {
   element.addEventListener('dragstart', (e) => {
-    draggedId = item.id;
+    setDraggedId(item.id);
     e.dataTransfer.effectAllowed = 'move';
     // Defer class additions to prevent Chrome from aborting drag start due to instant layout reflow
     setTimeout(() => {
@@ -373,7 +375,7 @@ function setupDragAndDropListeners(element, item, isChild) {
     const dropAction = getDropAction(e, element, isChild, isDraggedFolder, item.isFolder);
     
     if (moveNestedItem(draggedId, item.id, dropAction)) {
-      justDroppedId = draggedId;
+      setJustDroppedId(draggedId);
       saveState();
       renderShortcuts();
       renderModalShortcutsList();
@@ -396,7 +398,7 @@ if (settingsModalList) {
       e.preventDefault();
       // Пустое место списка — перенос ярлыка в текущую категорию (в конец)
       if (moveItemToCategory(draggedId, settingsCategoryId, true)) {
-        justDroppedId = draggedId;
+        setJustDroppedId(draggedId);
         refreshAfterCategoryChange();
       } else {
         renderModalShortcutsList();

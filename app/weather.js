@@ -239,18 +239,11 @@ const expandedFolders = new Set();
 let draggedId = null;
 let justDroppedId = null;
 
-// draggedId/justDroppedId переприсваивают modal-shortcuts и categories-settings
-// (draggedId = item.id; justDroppedId = null) — закрыты ACCESSORS, иначе десинк.
-Object.defineProperty(window, 'draggedId', {
-  get: () => draggedId,
-  set: (value) => { draggedId = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'justDroppedId', {
-  get: () => justDroppedId,
-  set: (value) => { justDroppedId = value; },
-  configurable: true
-});
+// Запись снаружи (modal-shortcuts, categories-settings) — только через
+// сеттеры; чтение снаружи — import (live binding). Фаза 3, часть 3.
+function setDraggedId(value) { draggedId = value; }
+function setJustDroppedId(value) { justDroppedId = value; }
+
 // 4 моста сняты — фаза 3 (внешние потребители applyWeatherVisibility/
 // updateStatusText/updateWeatherWidget/handleCityInputChange — state-render и
 // settings-panel через import; остальные имена использовались только внутри
@@ -258,7 +251,7 @@ Object.defineProperty(window, 'justDroppedId', {
 // приходят import'ом (кластер 22). getWeatherDescription остаётся мостом для
 // clock-topbar: обратный импорт clock-topbar→weather замкнул бы цикл, а eval
 // начинается с тега clock-topbar (562) — weather.js оказался бы в TDZ на
-// top-level. Ниже — accessors draggedId/justDroppedId (часть 3).
+// top-level.
 window.getWeatherDescription = getWeatherDescription;
 export {
   handleCityInputChange,
@@ -270,6 +263,8 @@ export {
   getWeatherDescription,
   expandedFolders,
   draggedId,
-  justDroppedId
+  justDroppedId,
+  setDraggedId,
+  setJustDroppedId
 };
 

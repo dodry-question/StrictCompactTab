@@ -47,10 +47,8 @@ var hasDragged: any;
 var mistHeadDrag: any;
 var activeResizeElement: any;
 var resizeStartScale: any;
-// app/weather.js — 4 моста сняты (фаза 3); остался getWeatherDescription + accessors
+// app/weather.js — 4 моста сняты (фаза 3); остался getWeatherDescription (accessors сняты — часть 3)
 var getWeatherDescription: any;
-var draggedId: any;
-var justDroppedId: any;
 // app/categories-settings.js — 9 мостов + accessor settingsCategoryId сняты (часть 3)
 // app/clock-topbar.js — 14 мостов сняты (фаза 3); accessor activeCategory остался
 var activeCategory: any;
