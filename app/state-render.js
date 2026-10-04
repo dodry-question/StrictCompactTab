@@ -1,3 +1,5 @@
+import { sizeSelect, columnsSelect, languageSelect, searchEngineSelect, themeSelect } from './settings-panel.js';
+
 import { syncScheduleEnabled } from './schedule.js';
 
 import { showClockCb, showDateCb, timeFormatCb, showSecondsCb, layoutIosModeCb } from './mist-toggles.js';

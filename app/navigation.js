@@ -1,3 +1,5 @@
+import { searchInput } from './settings-panel.js';
+
 import { ShortcutIcons } from '../services/shortcut-icons.js';
 
 // ---------- НАВИГАЦИЯ ПО СЕТКЕ ЯРЛЫКОВ СТРЕЛКАМИ ----------

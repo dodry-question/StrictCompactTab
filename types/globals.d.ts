@@ -36,18 +36,7 @@ declare global {
 
   // src/utils.js — чистый ESM-модуль (фаза 3): публикаций в globalThis больше
   // нет, потребители берут функции через import.
-// app/settings-panel.js — модуль (шаг «в»): мосты для классических потребителей
-// (голое имя в потребителе + window.X при назначении обеспечиваются одним var).
-var searchInput: any;
-var modal: any;
-var openBtn: any;
-var closeBtn: any;
-var closeSettings: any;
-var sizeSelect: any;
-var columnsSelect: any;
-var languageSelect: any;
-var searchEngineSelect: any;
-var themeSelect: any;
+// app/settings-panel.js — 10 мостов сняты (фаза 3); осталось 2 accessors ниже
 var addCatCustom: any;
 var addCatSelectedFor: any;
 // app/shortcuts-migration.js — модуль (шаг «в»)
