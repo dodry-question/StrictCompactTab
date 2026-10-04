@@ -27,8 +27,6 @@ declare global {
     ShortcutIcons: any;
     ShortcutCategories: any;
     ShortcutLayout: any;
-    ScheduleXlsx: any;
-    ScheduleParser: any;
     // Валидация импортируемого бэкапа (app/backup-validate.js)
     BackupValidate: any;
     // Динамическая тема (app/theme-adaptive.js — модуль с мостом, шаг «в»)

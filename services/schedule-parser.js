@@ -9,7 +9,7 @@
 //   - день и часы объединены вертикально на блок строк (обычно 7 пар),
 //     поэтому значение читается через merge-диапазон.
 // Файл меняется каждую неделю, поэтому строки и колонки ищутся по тексту.
-(function () {
+const ScheduleParser = (function () {
   'use strict';
 
   function norm(value) {
@@ -207,7 +207,7 @@
     return best;
   }
 
-  window.ScheduleParser = {
+  return {
     norm,
     dayKey,
     timeKey,
@@ -306,6 +306,4 @@
   };
 })();
 
-// Экспорт для будущих import (шаг «в»); мост window.ScheduleParser задаётся внутри IIFE.
-const ScheduleParser = window.ScheduleParser;
 export { ScheduleParser };

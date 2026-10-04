@@ -11,6 +11,7 @@ import { setImmediate as nodeSetImmediate } from 'node:timers';
 
 import { STATE } from '../state/store.js';
 import { storage } from '../storage/storage.js';
+import { ScheduleParser } from '../services/schedule-parser.js';
 
 // ---------------------------------------------------------------------------
 // Тест интерфейса плагина «Расписание».
@@ -324,7 +325,7 @@ globalThis.__nextLesson = (partialName) => {
   const data = JSON.parse(store.get('scheduleData'));
   const group = data.groups.find((g) => g.name.includes(partialName));
   if (!group) return null;
-  const next = window.ScheduleParser.nextLesson(group.lessons, new Date());
+  const next = ScheduleParser.nextLesson(group.lessons, new Date());
   return next ? next.day : null;
 };
 
@@ -514,7 +515,7 @@ test('выбор группы показывает расписание по д�
   // неделя по порядку, начиная с понедельника (название дня лежит в span,
   // рядом может стоять значок времени ближайшей пары)
   const dayName = (d) => findByClass(d, 'schedule-day-text').textContent;
-  const weekdays = days.map((d) => app.ScheduleParser.dayKey(dayName(d)).weekday);
+  const weekdays = days.map((d) => ScheduleParser.dayKey(dayName(d)).weekday);
   assert.deepEqual(weekdays, weekdays.slice().sort((a, b) => a - b));
 
   // внутри дня: сетка «время + содержание», пары отсортированы
@@ -526,7 +527,7 @@ test('выбор группы показывает расписание по д�
       const subject = findByClass(row, 'schedule-lesson-subject');
       assert.ok(subject && subject.textContent.length > 0, 'нет дисциплины');
     });
-    const times = rows.map((r) => app.ScheduleParser.timeKey(findByClass(r, 'schedule-lesson-time').textContent));
+    const times = rows.map((r) => ScheduleParser.timeKey(findByClass(r, 'schedule-lesson-time').textContent));
     assert.deepEqual(times, times.slice().sort((a, b) => a - b), 'пары не по порядку');
   });
 

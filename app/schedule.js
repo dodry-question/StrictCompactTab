@@ -1,3 +1,6 @@
+import { ScheduleParser } from '../services/schedule-parser.js';
+import { ScheduleXlsx } from '../services/schedule-xlsx.js';
+
 import { storage } from '../storage/storage.js';
 
 import { STATE } from '../state/store.js';
@@ -220,8 +223,8 @@ async function handleScheduleFile(file) {
 
   try {
     const buffer = await file.arrayBuffer();
-    const sheet = await window.ScheduleXlsx.read(buffer);
-    const parsed = window.ScheduleParser.parse(sheet);
+    const sheet = await ScheduleXlsx.read(buffer);
+    const parsed = ScheduleParser.parse(sheet);
 
     if (!parsed.groups.length) {
       showScheduleError(dict.scheduleUnsupported);
@@ -452,10 +455,10 @@ function renderScheduleGroup() {
   // подсвечивается ничего, чтобы не показывать устаревшую подсказку.
   // В ключ входит и ВРЕМЯ: за день может смениться несколько пар, и значок
   // обязан показывать ближайшую из них, а не первую утреннюю.
-  const next = window.ScheduleParser.nextLesson(lessons, new Date());
+  const next = ScheduleParser.nextLesson(lessons, new Date());
   scheduleNextKey = next ? next.day + '|' + next.time : '';
 
-  window.ScheduleParser.groupByDay(lessons).forEach(section => {
+  ScheduleParser.groupByDay(lessons).forEach(section => {
     const block = document.createElement('section');
     block.className = 'schedule-day';
 
@@ -643,7 +646,7 @@ setInterval(() => {
   const group = ((scheduleData && scheduleData.groups) || [])
     .find(item => item.name === STATE.scheduleGroup);
   if (!group) return;
-  const next = window.ScheduleParser.nextLesson(group.lessons || [], new Date());
+  const next = ScheduleParser.nextLesson(group.lessons || [], new Date());
   if ((next ? next.day + '|' + next.time : '') !== scheduleNextKey) renderScheduleGroup();
 }, 60000);
 

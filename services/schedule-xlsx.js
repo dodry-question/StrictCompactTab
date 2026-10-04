@@ -3,7 +3,7 @@
 //    DecompressionStream('deflate-raw') (Chrome 103+ / Firefox 113+ / Node 18+);
 // 2) XML разбираем регулярками — Excel/Sheets отдают предсказуемую разметку.
 // Результат — плоская карта значений «строка,колонка» + список объединений.
-(function () {
+const ScheduleXlsx = (function () {
   'use strict';
 
   function u16(view, offset) { return view.getUint16(offset, true); }
@@ -125,7 +125,7 @@
     return { values, merges, maxRow, maxCol };
   }
 
-  window.ScheduleXlsx = {
+  return {
     async read(arrayBuffer) {
       const zip = parseZip(arrayBuffer);
       const sharedXml = await readEntry(zip, 'xl/sharedStrings.xml');
@@ -139,6 +139,4 @@
   };
 })();
 
-// Экспорт для будущих import (шаг «в»); мост window.ScheduleXlsx задаётся внутри IIFE.
-const ScheduleXlsx = window.ScheduleXlsx;
 export { ScheduleXlsx };

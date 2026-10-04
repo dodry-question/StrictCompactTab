@@ -140,7 +140,6 @@ const PROBE = `(() => {
   if (!window.ShortcutRenderer) issues.push('ShortcutRenderer отсутствует');
   if (!window.SearchUI) issues.push('SearchUI отсутствует');
   if (!window.WeatherService) issues.push('WeatherService отсутствует');
-  if (!window.ScheduleXlsx) issues.push('ScheduleXlsx отсутствует');
   if (!clock || !/^\\d{1,2}:\\d{2}/.test(clock.textContent)) issues.push('часы не отрисованы: ' + (clock ? clock.textContent : 'null'));
   out.issues = issues;
   return out;
