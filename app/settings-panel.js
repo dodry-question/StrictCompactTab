@@ -1,3 +1,5 @@
+import { renderModalShortcutsList } from './modal-shortcuts.js';
+
 import { AdaptiveThemeManager } from './theme-adaptive.js';
 
 import { WeatherDrawer } from '../services/weather-drawer.js';

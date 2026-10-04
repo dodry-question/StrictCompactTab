@@ -244,11 +244,16 @@ test('все скрипты из index.html загружены', () => {
 // (let/const/function) так же, как браузер между classic-скриптами.
 const probe = (expr) => vm.runInThisContext(expr);
 
+// modal-shortcuts.js уже загружен харнессом выше (тот же инстанс модуля —
+// берём binding из кэша; top-level import в файле невозможен: файл на
+// верхнем уровне читает document)
+const { renderModalShortcutsList } = await import('../app/modal-shortcuts.js');
+
 test('общая область видимости разделённых файлов сохранилась', () => {
   // функции из разных частей бывшего script.js
   assert.equal(probe('typeof loadState'), 'function');                // state-render.js
   assert.equal(probe('typeof renderShortcuts'), 'function');          // state-render.js
-  assert.equal(probe('typeof renderModalShortcutsList'), 'function'); // modal-shortcuts.js
+  assert.equal(typeof renderModalShortcutsList, 'function');            // modal-shortcuts.js (import)
   assert.equal(probe('typeof navHandleKeydown'), 'function');         // navigation.js
   assert.equal(probe('typeof initLayoutDragAndDrop'), 'function');    // layout-dnd.js
   assert.equal(probe('typeof updateClockAndDate'), 'function');       // clock-topbar.js

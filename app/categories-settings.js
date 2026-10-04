@@ -1,3 +1,5 @@
+import { renderModalShortcutsList } from './modal-shortcuts.js';
+
 import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';

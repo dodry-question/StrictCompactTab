@@ -1,3 +1,5 @@
+import { renderModalShortcutsList } from './modal-shortcuts.js';
+
 import { ShortcutRenderer } from '../services/shortcut-renderer.js';
 
 import { SearchUI } from '../services/search-ui.js';

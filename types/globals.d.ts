@@ -63,7 +63,6 @@ var navHandleKeydown: any;
 var createMistPill: any;
 var rebuildNavModel: any;
 // app/modal-shortcuts.js — модуль (шаг «в»)
-var renderModalShortcutsList: any;
 // app/shortcuts-migration.js — модуль (шаг «в»)
 var extractCategoryMeta: any;
 var generateId: any;

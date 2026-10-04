@@ -1,3 +1,5 @@
+import { renderModalShortcutsList } from './modal-shortcuts.js';
+
 import { SearchUI } from '../services/search-ui.js';
 
 import { STATE } from '../state/store.js';
