@@ -45,11 +45,11 @@ const btnExport = document.getElementById('btn-export');
 const btnImport = document.getElementById('btn-import');
 const importFileInput = /** @type {HTMLInputElement} */ (document.getElementById('import-file-input'));
 
-// --- Мосты (шаг «в», фаза 2 завершена: все app/* — модули) -------------------
-// navModel/editingIndex переписывают navigation/modal-shortcuts/settings-panel/
-// categories-settings — ACCESSORS. Остальное — обычные мосты для голых имён.
-// storage/DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS опубликованы своими модулями
-// (window.X) — здесь только export; TRANSLATIONS и store — уже на import.
+// --- navModel/editingIndex — ACCESSORS (шаг «в») -----------------------------
+// Их переписывают navigation/modal-shortcuts/settings-panel/categories-settings —
+// без accessora была бы рассинхронизация. Остальные 9 мостов (MIST_*/NAV_*/btn*)
+// сняты — фаза 3. storage/DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS опубликованы
+// своими модулями (window.X) — здесь только export; TRANSLATIONS — на import.
 Object.defineProperty(window, 'navModel', {
   get: () => navModel,
   set: (value) => { navModel = value; },
@@ -60,15 +60,6 @@ Object.defineProperty(window, 'editingIndex', {
   set: (value) => { editingIndex = value; },
   configurable: true
 });
-window.MIST_CELL_GAP = MIST_CELL_GAP;
-window.MIST_PAD = MIST_PAD;
-window.MIST_MAX_W = MIST_MAX_W;
-window.MIST_CELL_W = MIST_CELL_W;
-window.NAV_KEYS = NAV_KEYS;
-window.NAV_ZONE_ROOTS = NAV_ZONE_ROOTS;
-window.btnExport = btnExport;
-window.btnImport = btnImport;
-window.importFileInput = importFileInput;
 export {
   TRANSLATIONS,
   DEFAULT_SHORTCUTS,

@@ -77,18 +77,9 @@ var weatherWidget: any;
 var weatherIcon: any;
 var renderTopbar: any;
 var updateClockAndDate: any;
-// app/core.js — модуль (шаг «в», фаза 2): глобальный хаб алиасов
+// app/core.js — 9 мостов сняты (фаза 3); accessors navModel/editingIndex + алиасы
 var DEFAULT_SHORTCUTS: any;
 var MIST_WIDGET_KEYS: any;
-var MIST_CELL_GAP: any;
-var MIST_PAD: any;
-var MIST_MAX_W: any;
-var MIST_CELL_W: any;
-var NAV_KEYS: any;
-var NAV_ZONE_ROOTS: any;
-var btnExport: any;
-var btnImport: any;
-var importFileInput: any;
 var navModel: any;
 var editingIndex: any;
 }

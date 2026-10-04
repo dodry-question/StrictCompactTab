@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import vm from 'node:vm';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // ---------------------------------------------------------------------------
@@ -42,14 +41,9 @@ await import(pathToFileURL(path.join(ROOT, 'app/shortcuts-migration.js')).href);
 // app/backup-validate.js — модуль (шаг «в»): грузится через import
 const { BackupValidate } = await import(pathToFileURL(path.join(ROOT, 'app/backup-validate.js')).href);
 
-// app/backup-updates.js на верхнем уровне читает btnExport/btnImport/
-// importFileInput из core.js — здесь заглушаем их null, чтобы блоки
-// обработчиков не навешивались, а функция buildBackupPayload была доступна
-vm.runInThisContext('var btnExport = null; var btnImport = null; var importFileInput = null;', {
-  filename: 'backup-stubs'
-});
-// app/backup-updates.js — модуль (шаг «в»): грузится после заглушек btn*,
-// потому что на верхнем уровне файл их читает
+// app/backup-updates.js — модуль (шаг «в»): btnExport/btnImport/importFileInput
+// приходят import'ом из core.js (тестовая document-заглушка даёт те же значения,
+// что и раньше вешала бы vm-заглушка) — грузится без предварительных стабов
 const { buildBackupPayload } = await import(pathToFileURL(path.join(ROOT, 'app/backup-updates.js')).href);
 
 const sanitize = BackupValidate.sanitize;

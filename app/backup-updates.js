@@ -1,3 +1,5 @@
+import { btnExport, btnImport, importFileInput } from './core.js';
+
 import { migrateToNested, extractCategoryMeta } from './shortcuts-migration.js';
 
 import { storage } from '../storage/storage.js';

@@ -1,3 +1,5 @@
+import { MIST_PAD, MIST_MAX_W, MIST_CELL_GAP, MIST_CELL_W } from './core.js';
+
 import { createMistPill } from './navigation.js';
 
 import { ShortcutCategories } from '../services/shortcut-categories.js';
