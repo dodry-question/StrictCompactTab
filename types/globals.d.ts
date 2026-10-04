@@ -134,6 +134,29 @@ var container: any;
 var initLayoutDragAndDrop: any;
 var onResizeStart: any;
 var removeResizeHandles: any;
+// app/layout-widgets.js — модуль (шаг «в»): 9 accessors (общие let) + мосты
+var tempPositions: any;
+var layoutGridSnap: any;
+var layoutGridSize: any;
+var tempMistWidgets: any;
+var activeDragElement: any;
+var hasDragged: any;
+var mistHeadDrag: any;
+var activeResizeElement: any;
+var resizeStartScale: any;
+var dragOffset: any;
+var resizeStartCoords: any;
+var resizeStartDimensions: any;
+var RESIZE_BASE_SIZE: any;
+var RESIZE_MIN_WIDTH: any;
+var IOS_RESIZE_MIN_CELLS: any;
+var applyLayoutPositions: any;
+var applyMistWidgets: any;
+var isMistHeadWidget: any;
+var getWidgetKey: any;
+var clearCustomLayoutStyles: any;
+var mistWidgetKey: any;
+var applyClockScale: any;
 }
 
 export {};

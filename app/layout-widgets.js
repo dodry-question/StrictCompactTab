@@ -246,3 +246,94 @@ function applyClockScale(widget, scale) {
   }
 }
 
+// --- Мосты для layout-dnd/controls/mist-toggles/state-render/appearance ------
+// Шаг «в», фаза 2; уберём в фазе 3. Переприсваиваемые извне let закрыты
+// ACCESSORS: layout-dnd, controls и mist-toggles пишут в эти переменные
+// напрямую (tempPositions = {}, activeDragElement = widget, ...), и обычный
+// мост по значению дал бы десинк. Объекты с внешними мутациями свойств
+// (dragOffset.x = ... и т.п.) закрыты обычными мостами: объект один и тот же.
+Object.defineProperty(window, 'tempPositions', {
+  get: () => tempPositions,
+  set: (value) => { tempPositions = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'layoutGridSnap', {
+  get: () => layoutGridSnap,
+  set: (value) => { layoutGridSnap = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'layoutGridSize', {
+  get: () => layoutGridSize,
+  set: (value) => { layoutGridSize = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'tempMistWidgets', {
+  get: () => tempMistWidgets,
+  set: (value) => { tempMistWidgets = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'activeDragElement', {
+  get: () => activeDragElement,
+  set: (value) => { activeDragElement = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'hasDragged', {
+  get: () => hasDragged,
+  set: (value) => { hasDragged = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'mistHeadDrag', {
+  get: () => mistHeadDrag,
+  set: (value) => { mistHeadDrag = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'activeResizeElement', {
+  get: () => activeResizeElement,
+  set: (value) => { activeResizeElement = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'resizeStartScale', {
+  get: () => resizeStartScale,
+  set: (value) => { resizeStartScale = value; },
+  configurable: true
+});
+window.dragOffset = dragOffset;
+window.resizeStartCoords = resizeStartCoords;
+window.resizeStartDimensions = resizeStartDimensions;
+window.RESIZE_BASE_SIZE = RESIZE_BASE_SIZE;
+window.RESIZE_MIN_WIDTH = RESIZE_MIN_WIDTH;
+window.IOS_RESIZE_MIN_CELLS = IOS_RESIZE_MIN_CELLS;
+window.applyLayoutPositions = applyLayoutPositions;
+window.applyMistWidgets = applyMistWidgets;
+window.isMistHeadWidget = isMistHeadWidget;
+window.getWidgetKey = getWidgetKey;
+window.clearCustomLayoutStyles = clearCustomLayoutStyles;
+window.mistWidgetKey = mistWidgetKey;
+window.applyClockScale = applyClockScale;
+export {
+  activeDragElement,
+  dragOffset,
+  hasDragged,
+  tempPositions,
+  layoutGridSnap,
+  layoutGridSize,
+  tempMistWidgets,
+  mistHeadDrag,
+  activeResizeElement,
+  resizeStartCoords,
+  resizeStartDimensions,
+  resizeStartScale,
+  RESIZE_BASE_SIZE,
+  RESIZE_MIN_WIDTH,
+  IOS_RESIZE_MIN_CELLS,
+  CUSTOM_POSITION_PROPS,
+  isMistHeadWidget,
+  mistWidgetKey,
+  getWidgetKey,
+  clearCustomLayoutStyles,
+  mistHeadElements,
+  applyMistWidgets,
+  applyLayoutPositions,
+  applyClockScale
+};
+
