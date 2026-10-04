@@ -245,7 +245,7 @@ const { renderModalShortcutsList } = await import('../app/modal-shortcuts.js');
 const { initLayoutDragAndDrop } = await import('../app/layout-dnd.js');
 const { navHandleKeydown } = await import('../app/navigation.js');
 const { initCustomSearchEngines } = await import('../app/controls.js');
-const { applyFavicon } = await import('../app/appearance.js');
+const { applyFavicon, wallpaperTargetSize } = await import('../app/appearance.js');
 const { updateClockAndDate, mistTabsEl, activeCategory } = await import('../app/clock-topbar.js');
 const { loadState, renderShortcuts } = await import('../app/state-render.js');
 
@@ -399,4 +399,36 @@ test('экспорт бэкапа не тащит файл расписания,
   const validateSource = read('app/backup-validate.js');
   assert.match(validateSource, /scheduleEnabled:\s*asBool\(data\.scheduleEnabled, false\)/);
   assert.match(validateSource, /scheduleGroup:\s*sanitizeScheduleGroup\(data\.scheduleGroup\)/);
+});
+
+// --- Целевой размер обоев (адаптивно под экран) -----------------------------
+// Обои занимают ровно область экрана (background-size: cover), поэтому пиксели
+// выше разрешения экрана не видны, но лежат в state/хранилище и съедают ОЗУ
+// (замеры — tools/mem-wallpaper.mjs). Потолок прежний — 2560×1440.
+test('размер обоев: на 1080p@1x картинка легче прежнего потолка', () => {
+  const { maxWidth, maxHeight } = wallpaperTargetSize(1920, 1080, 1);
+  assert.ok(maxWidth <= 2560 && maxHeight <= 1440, 'потолок не должен превышаться');
+  assert.ok(maxWidth < 2560 && maxHeight < 1440, 'на 1080p картинка должна быть меньше 2560×1440');
+  assert.ok(maxWidth >= 1920 && maxHeight >= 1080, 'не меньше самого экрана — иначе потеря детализации');
+});
+
+test('размер обоев: на 4K и Retina потолок остаётся прежним, а не растёт', () => {
+  for (const [w, h, dpr] of [[3840, 2160, 1], [1920, 1080, 2], [2560, 1440, 2]]) {
+    const { maxWidth, maxHeight } = wallpaperTargetSize(w, h, dpr);
+    assert.equal(maxWidth, 2560, `ширина для ${w}x${h}@${dpr}`);
+    assert.equal(maxHeight, 1440, `высота для ${w}x${h}@${dpr}`);
+  }
+});
+
+test('размер обоев: маленький экран не роняет качество ниже разумного', () => {
+  const { maxWidth, maxHeight } = wallpaperTargetSize(1366, 768, 1);
+  assert.ok(maxWidth >= 1280 && maxHeight >= 720, 'нижняя граница 1280×720');
+});
+
+test('размер обоев: битые/недоступные значения экрана → прежний потолок', () => {
+  for (const args of [[undefined, undefined, undefined], [0, 0, 1], [NaN, 1080, 1], [-100, 100, 1]]) {
+    const { maxWidth, maxHeight } = wallpaperTargetSize(...args);
+    assert.equal(maxWidth, 2560, `ширина при аргументах ${JSON.stringify(args)}`);
+    assert.equal(maxHeight, 1440, `высота при аргументах ${JSON.stringify(args)}`);
+  }
 });

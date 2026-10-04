@@ -18,11 +18,51 @@ import { TRANSLATIONS } from '../i18n/translations.js';
 const bgFileInput = /** @type {HTMLInputElement} */ (document.getElementById('bg-file-input'));
 const bgResetBtn = document.getElementById('bg-reset-btn');
 
+// --- ЦЕЛЕВОЙ РАЗМЕР ОБОЕВ (адаптивно под экран) ---
+// Обои кладутся как background-image с `background-size: cover`
+// (css/base/variables-and-reset.css), то есть растягиваются на область экрана.
+// Значит пиксели выше разрешения экрана НЕ видны вообще, а JPEG целиком лежит
+// в state и в хранилище — это самый крупный потребитель ОЗУ страницы.
+// Замер (tools/mem-wallpaper.mjs, §14.10): обои 2560×1440 дают ≈+319 КиБ живого
+// heap (одна копия base64) плюс ≈столько же в native-памяти браузера, и объём
+// растёт линейно от числа пикселей.
+//
+// Раньше ВСЕГДА жало в 2560×1440: на 1080p-экране (самый частый случай) это
+// лишние ~45% ОЗУ за пиксели, которых никто не увидит, а на 4K — наоборот мало.
+// Теперь потолок считается от экрана: ширина/высота экрана × плотность пикселей
+// × запас 1.25 (под масштабирование ОС и обрезку по cover) и не больше
+// прежнего потолка 2560×1440. Смысл правила: на низкой плотности картинка
+// становится легче, а на высокой (Retina/4K) ограничитель остаётся прежним —
+// заметного ухудшения быть не может ни там, ни там.
+const WALLPAPER_MAX_W = 2560;
+const WALLPAPER_MAX_H = 1440;
+const WALLPAPER_SCALE_MARGIN = 1.25;
+
+/**
+ * Потолок размера обоев под текущий экран.
+ * @param {number} screenW ширина экрана в CSS-пикселях
+ * @param {number} screenH высота экрана в CSS-пикселях
+ * @param {number} dpr плотность пикселей (devicePixelRatio)
+ * @returns {{maxWidth: number, maxHeight: number}}
+ */
+function wallpaperTargetSize(screenW, screenH, dpr) {
+  const fallback = { maxWidth: WALLPAPER_MAX_W, maxHeight: WALLPAPER_MAX_H };
+  if (!Number.isFinite(screenW) || !Number.isFinite(screenH) || screenW <= 0 || screenH <= 0) {
+    return fallback;
+  }
+  const scale = Number.isFinite(dpr) && dpr > 0 ? dpr : 1;
+  return {
+    maxWidth: Math.max(1280, Math.min(WALLPAPER_MAX_W, Math.round(screenW * scale * WALLPAPER_SCALE_MARGIN))),
+    maxHeight: Math.max(720, Math.min(WALLPAPER_MAX_H, Math.round(screenH * scale * WALLPAPER_SCALE_MARGIN)))
+  };
+}
+
 if (bgFileInput) {
   bgFileInput.addEventListener('change', (e) => {
     const file = /** @type {HTMLInputElement} */ (e.target).files[0];
     if (file) {
-      compressImage(file, 2560, 1440, 0.8, (result) => {
+      const target = wallpaperTargetSize(window.screen?.width, window.screen?.height, window.devicePixelRatio);
+      compressImage(file, target.maxWidth, target.maxHeight, 0.8, (result) => {
         STATE.customBackground = result;
         if (STATE.theme === 'adaptive') {
           AdaptiveThemeManager.generateThemeFromWallpaper(result)
@@ -385,6 +425,7 @@ function applyLanguage(lang) {
 
 export {
   compressImage,
+  wallpaperTargetSize,
   applyBackground,
   applyTheme,
   applyMistMode,
