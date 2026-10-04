@@ -107,7 +107,7 @@ if (themeSelect) {
   themeSelect.addEventListener('change', (e) => {
     STATE.theme = /** @type {HTMLSelectElement} */ (e.target).value;
     if (STATE.theme === 'adaptive' && STATE.customBackground && !STATE.adaptiveThemeData) {
-      AdaptiveThemeManager.generateThemeFromWallpaper(STATE.customBackground)
+      window.AdaptiveThemeManager.generateThemeFromWallpaper(STATE.customBackground)
         .then(themeData => {
           STATE.adaptiveThemeData = themeData;
           saveState();
@@ -115,7 +115,7 @@ if (themeSelect) {
         })
         .catch(err => {
           console.error("Error generating adaptive theme:", err);
-          STATE.adaptiveThemeData = AdaptiveThemeManager.getFallbackTheme(true);
+          STATE.adaptiveThemeData = window.AdaptiveThemeManager.getFallbackTheme(true);
           saveState();
           applyTheme();
         });

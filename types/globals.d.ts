@@ -38,6 +38,8 @@ declare global {
     ScheduleParser: any;
     // Валидация импортируемого бэкапа (app/backup-validate.js)
     BackupValidate: any;
+    // Динамическая тема (app/theme-adaptive.js — модуль с мостом, шаг «в»)
+    AdaptiveThemeManager: any;
     // Внешняя библиотека (загружается динамически в theme-adaptive.js)
     materialColorUtilities: any;
     // Тест-хук

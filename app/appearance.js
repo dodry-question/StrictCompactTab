@@ -9,7 +9,7 @@ if (bgFileInput) {
       compressImage(file, 2560, 1440, 0.8, (result) => {
         STATE.customBackground = result;
         if (STATE.theme === 'adaptive') {
-          AdaptiveThemeManager.generateThemeFromWallpaper(result)
+          window.AdaptiveThemeManager.generateThemeFromWallpaper(result)
             .then(themeData => {
               STATE.adaptiveThemeData = themeData;
               saveState();
@@ -18,7 +18,7 @@ if (bgFileInput) {
             })
             .catch(err => {
               console.error("Error generating adaptive theme:", err);
-              STATE.adaptiveThemeData = AdaptiveThemeManager.getFallbackTheme(true);
+              STATE.adaptiveThemeData = window.AdaptiveThemeManager.getFallbackTheme(true);
               saveState();
               applyBackground();
               applyTheme();
@@ -118,10 +118,10 @@ function applyTheme() {
   } else if (STATE.theme === 'adaptive') {
     document.body.classList.add('theme-adaptive');
     if (STATE.customBackground && STATE.adaptiveThemeData) {
-      AdaptiveThemeManager.applyThemeToCss(STATE.adaptiveThemeData);
+      window.AdaptiveThemeManager.applyThemeToCss(STATE.adaptiveThemeData);
     } else {
-      const defaultTheme = AdaptiveThemeManager.getFallbackTheme(true);
-      AdaptiveThemeManager.applyThemeToCss(defaultTheme);
+      const defaultTheme = window.AdaptiveThemeManager.getFallbackTheme(true);
+      window.AdaptiveThemeManager.applyThemeToCss(defaultTheme);
     }
   } else {
     document.body.classList.add('theme-dark');
