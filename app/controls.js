@@ -1,6 +1,6 @@
 import { renderTopbar } from './clock-topbar.js';
 
-import { applyMistWidgets, isMistHeadWidget, getWidgetKey, applyLayoutPositions, clearCustomLayoutStyles } from './layout-widgets.js';
+import { applyMistWidgets, isMistHeadWidget, getWidgetKey, applyLayoutPositions, clearCustomLayoutStyles, layoutGridSnap, layoutGridSize, tempPositions, tempMistWidgets, setLayoutGridSnap, setLayoutGridSize, setTempPositions, setTempMistWidgets } from './layout-widgets.js';
 
 import { compressImage } from './appearance.js';
 
@@ -25,8 +25,8 @@ const layoutCancelBtn = document.getElementById('layout-cancel-btn');
 const layoutEditControls = document.getElementById('layout-edit-controls');
 const settingsModal = document.getElementById('settings-modal');
 
-layoutGridSnap = document.getElementById('layout-grid-snap');
-layoutGridSize = document.getElementById('layout-grid-size');
+setLayoutGridSnap(document.getElementById('layout-grid-snap'));
+setLayoutGridSize(document.getElementById('layout-grid-size'));
 
 if (layoutGridSnap) {
   layoutGridSnap.addEventListener('change', () => {
@@ -76,14 +76,14 @@ if (btnEditLayout) {
       document.body.style.removeProperty('--grid-size');
     }
 
-    tempPositions = {};
+    setTempPositions({});
 
     // Mist: редактируются ТОЛЬКО два независимых виджета — «Время» и «Поиск».
     // Каждый остаётся в потоке и сдвигается СВОИМИ CSS-переменными,
     // поэтому абсолютного позиционирования (и измерений) не нужно.
     const mistEditMode = document.body.classList.contains('mode-mist');
     if (mistEditMode) {
-      tempMistWidgets = normalizeMistWidgets(STATE.mistHeadOffset);
+      setTempMistWidgets(normalizeMistWidgets(STATE.mistHeadOffset));
       applyMistWidgets(tempMistWidgets);
     }
 

@@ -1,6 +1,6 @@
 import { renderShortcuts } from './state-render.js';
 
-import { isMistHeadWidget, mistWidgetKey, dragOffset, applyMistWidgets, getWidgetKey, RESIZE_BASE_SIZE, resizeStartCoords, resizeStartDimensions, IOS_RESIZE_MIN_CELLS, RESIZE_MIN_WIDTH, applyClockScale } from './layout-widgets.js';
+import { isMistHeadWidget, mistWidgetKey, dragOffset, applyMistWidgets, getWidgetKey, RESIZE_BASE_SIZE, resizeStartCoords, resizeStartDimensions, IOS_RESIZE_MIN_CELLS, RESIZE_MIN_WIDTH, applyClockScale, activeDragElement, hasDragged, tempPositions, layoutGridSnap, layoutGridSize, tempMistWidgets, mistHeadDrag, activeResizeElement, resizeStartScale, setActiveDragElement, setHasDragged, setMistHeadDrag, setActiveResizeElement, setResizeStartScale } from './layout-widgets.js';
 
 function initLayoutDragAndDrop() {
   // Р”РёРЅР°РјРёС‡РµСЃРєРё СЃРѕР·РґР°РµРј РЅР°РїСЂР°РІР»СЏСЋС‰РёРµ Р»РёРЅРёРё РїСЂРёРјР°РіРЅРёС‡РёРІР°РЅРёСЏ, РµСЃР»Рё РёС… РЅРµС‚ РІ DOM
@@ -70,7 +70,7 @@ function onDragStart(e) {
     const mk = mistWidgetKey(widget) || 'clock';
     const cur = tempMistWidgets[mk] || { x: 0, y: 0, w: 0, h: 0, s: 1 };
 
-    mistHeadDrag = {
+    setMistHeadDrag({
       el: widget,
       key: mk,
       startX: mistClientX,
@@ -78,14 +78,14 @@ function onDragStart(e) {
       baseX: cur.x,
       baseY: cur.y,
       rect: widget.getBoundingClientRect()
-    };
-    activeDragElement = widget;
-    hasDragged = false;
+    });
+    setActiveDragElement(widget);
+    setHasDragged(false);
     return;
   }
 
-  activeDragElement = widget;
-  hasDragged = false;
+  setActiveDragElement(widget);
+  setHasDragged(false);
 
   const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
   const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
@@ -109,7 +109,7 @@ function onDragMove(e) {
   // независимы и никогда не едут вместе
   if (mistHeadDrag) {
     if (e.cancelable) e.preventDefault();
-    hasDragged = true;
+    setHasDragged(true);
 
     const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
     const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
@@ -161,7 +161,7 @@ function onDragMove(e) {
   }
 
   if (!activeDragElement) return;
-  hasDragged = true;
+  setHasDragged(true);
 
   if (e.cancelable) {
     e.preventDefault();
@@ -283,9 +283,9 @@ function onDragEnd() {
   // Mist: сдвиг перетащенного виджета уже записан в tempMistWidgets
   if (mistHeadDrag) {
     const draggedEl = mistHeadDrag.el;
-    mistHeadDrag = null;
-    activeDragElement = null;
-    hasDragged = false;
+    setMistHeadDrag(null);
+    setActiveDragElement(null);
+    setHasDragged(false);
     if (draggedEl) draggedEl.classList.remove('widget-snapped');
     const gX = document.getElementById('guide-line-x');
     const gY = document.getElementById('guide-line-y');
@@ -317,7 +317,7 @@ function onDragEnd() {
   if (guideLineX) guideLineX.classList.remove('active');
   if (guideLineY) guideLineY.classList.remove('active');
   
-  activeDragElement = null;
+  setActiveDragElement(null);
 }
 
 function onResizeStart(e) {
@@ -327,7 +327,7 @@ function onResizeStart(e) {
 
   const handle = e.currentTarget;
   const widget = handle.parentElement;
-  activeResizeElement = widget;
+  setActiveResizeElement(widget);
 
   const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
   const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
@@ -340,7 +340,7 @@ function onResizeStart(e) {
   resizeStartDimensions.w = widget.offsetWidth > 0 ? widget.offsetWidth : base.w;
   resizeStartDimensions.h = widget.offsetHeight > 0 ? widget.offsetHeight : base.h;
   // Масштаб часов на момент старта — новый считается от него
-  resizeStartScale = parseFloat(widget.style.getPropertyValue('--clock-scale')) || 1;
+  setResizeStartScale(parseFloat(widget.style.getPropertyValue('--clock-scale')) || 1);
 }
 
 // Габариты виджета задаём инлайн-стилем с !important: в режиме Mist
@@ -477,7 +477,7 @@ function onResizeMove(e) {
 
 function onResizeEnd() {
   if (!activeResizeElement) return;
-  activeResizeElement = null;
+  setActiveResizeElement(null);
 }
 
 function removeResizeHandles() {

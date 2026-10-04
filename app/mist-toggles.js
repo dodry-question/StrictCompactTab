@@ -2,7 +2,7 @@ import { saveState, renderShortcuts } from './state-render.js';
 
 import { updateClockAndDate, renderTopbar, mistPresetSelect, mistPerRowSelect, mistZenZone, setActiveCategory } from './clock-topbar.js';
 
-import { applyLayoutPositions, clearCustomLayoutStyles } from './layout-widgets.js';
+import { applyLayoutPositions, clearCustomLayoutStyles, setTempMistWidgets } from './layout-widgets.js';
 
 import { applyClockVisibility, syncModeToggles, applyMistMode, applyMistPreset } from './appearance.js';
 
@@ -138,7 +138,7 @@ if (mistPresetSelect) {
     // старые сдвиги, из-за чего на следующей вкладке виджеты возвращались
     // на прежние координаты и сброс пресета не сохранялся
     STATE.mistHeadOffset = normalizeMistWidgets(null);
-    tempMistWidgets = normalizeMistWidgets(null);
+    setTempMistWidgets(normalizeMistWidgets(null));
     applyLayoutPositions();
     renderShortcuts();
     renderTopbar();

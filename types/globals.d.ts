@@ -37,16 +37,7 @@ declare global {
   // src/utils.js — чистый ESM-модуль (фаза 3): публикаций в globalThis больше
   // нет, потребители берут функции через import.
 // app/state-render.js — 5 мостов сняты (фаза 3, хаб: saveState/loadState/…)
-// app/layout-widgets.js — 13 мостов сняты (фаза 3); 9 accessors (общие let) остались
-var tempPositions: any;
-var layoutGridSnap: any;
-var layoutGridSize: any;
-var tempMistWidgets: any;
-var activeDragElement: any;
-var hasDragged: any;
-var mistHeadDrag: any;
-var activeResizeElement: any;
-var resizeStartScale: any;
+// app/layout-widgets.js — 13 мостов + 9 accessors сняты (часть 3)
 // app/weather.js — 4 моста сняты (фаза 3); остался getWeatherDescription (accessors сняты — часть 3)
 var getWeatherDescription: any;
 // app/categories-settings.js — 9 мостов + accessor settingsCategoryId сняты (часть 3)

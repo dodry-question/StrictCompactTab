@@ -250,56 +250,21 @@ function applyClockScale(widget, scale) {
   }
 }
 
-// --- Мосты для layout-dnd/controls/mist-toggles/state-render/appearance ------
-// (13 мостов функций/констант сняты — фаза 3.) Переприсваиваемые извне let
-// закрыты ACCESSORS: layout-dnd, controls и mist-toggles пишут в эти
-// переменные напрямую (tempPositions = {}, activeDragElement = widget, ...),
-// и обычный мост по значению дал бы десинк.
-Object.defineProperty(window, 'tempPositions', {
-  get: () => tempPositions,
-  set: (value) => { tempPositions = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'layoutGridSnap', {
-  get: () => layoutGridSnap,
-  set: (value) => { layoutGridSnap = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'layoutGridSize', {
-  get: () => layoutGridSize,
-  set: (value) => { layoutGridSize = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'tempMistWidgets', {
-  get: () => tempMistWidgets,
-  set: (value) => { tempMistWidgets = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'activeDragElement', {
-  get: () => activeDragElement,
-  set: (value) => { activeDragElement = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'hasDragged', {
-  get: () => hasDragged,
-  set: (value) => { hasDragged = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'mistHeadDrag', {
-  get: () => mistHeadDrag,
-  set: (value) => { mistHeadDrag = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'activeResizeElement', {
-  get: () => activeResizeElement,
-  set: (value) => { activeResizeElement = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'resizeStartScale', {
-  get: () => resizeStartScale,
-  set: (value) => { resizeStartScale = value; },
-  configurable: true
-});
+// --- Мосты функций/констант сняты (13, фаза 3); общие let — часть 3 ---------
+// Переприсваиваемые извне let: чтение снаружи — import (live binding),
+// запись — только через сеттеры владельца (мост по значению разъехался бы при
+// записи извне). Правки свойств (tempPositions[key] = ..., tempMistWidgets[mk]
+// = ...) идут по тому же объекту — сеттер не нужен. layout-dnd, controls и
+// mist-toggles — потребители.
+function setTempPositions(value) { tempPositions = value; }
+function setLayoutGridSnap(value) { layoutGridSnap = value; }
+function setLayoutGridSize(value) { layoutGridSize = value; }
+function setTempMistWidgets(value) { tempMistWidgets = value; }
+function setActiveDragElement(value) { activeDragElement = value; }
+function setHasDragged(value) { hasDragged = value; }
+function setMistHeadDrag(value) { mistHeadDrag = value; }
+function setActiveResizeElement(value) { activeResizeElement = value; }
+function setResizeStartScale(value) { resizeStartScale = value; }
 export {
   activeDragElement,
   dragOffset,
@@ -324,6 +289,15 @@ export {
   mistHeadElements,
   applyMistWidgets,
   applyLayoutPositions,
-  applyClockScale
+  applyClockScale,
+  setTempPositions,
+  setLayoutGridSnap,
+  setLayoutGridSize,
+  setTempMistWidgets,
+  setActiveDragElement,
+  setHasDragged,
+  setMistHeadDrag,
+  setActiveResizeElement,
+  setResizeStartScale
 };
 
