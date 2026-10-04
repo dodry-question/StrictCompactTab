@@ -47,10 +47,23 @@ html, body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #fff;
   user-select: none;
+  /* Более чистое сглаживание текста (на Windows Chrome игнорирует —
+     свойство действует на macOS; безвредно везде) */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Табличные (равноширинные) цифры: часы и температура не «прыгают»
+   при смене значений — глифы меняют ширину только у самого числа */
+.clock, .weather-temp {
+  font-variant-numeric: tabular-nums;
 }
 
 body {
   background-color: #000000;
+  /* Обои: inline-стиль body содержит только короткую ссылку в CSS-переменной
+     (--user-wallpaper: url(blob:...)); сам base64 остаётся в state и в
+     JSON-экспорте, но не раздувает DOM (создаёт appearance.js) */
+  background-image: var(--user-wallpaper, none);
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;

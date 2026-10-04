@@ -22,8 +22,19 @@ body.mode-mist::before {
     radial-gradient(46% 40% at 88% 104%, rgba(150, 110, 190, 0.10), transparent 72%);
 }
 
-/* Если заданы обои пользователя — не перекрываем их подсветкой */
-body.mode-mist.has-wallpaper::before {
+/* Обои пользователя: вместо ПОЛНОГО отключения подсветки — мягкая
+   градиентная вуаль. Два фирменных radial-градиента остаются (едва
+   заметно поверх фото) + тонкая затемняющая скрадка сверху и снизу —
+   белые часы/текст читаются и на светлом фото. Светлая тема оставляет
+   фото чистым: там текст тёмный, ему нужен наоборот светлый фон. */
+body.mode-mist:not(.theme-light).has-wallpaper::before {
+  background:
+    radial-gradient(58% 46% at 50% -6%, rgba(96, 128, 190, 0.10), transparent 72%),
+    radial-gradient(46% 40% at 88% 104%, rgba(150, 110, 190, 0.06), transparent 72%),
+    linear-gradient(180deg, rgba(6, 8, 12, 0.34) 0%, rgba(6, 8, 12, 0.14) 46%, rgba(6, 8, 12, 0.46) 100%);
+}
+
+body.mode-mist.theme-light.has-wallpaper::before {
   display: none;
 }
 
@@ -59,10 +70,13 @@ body.mode-mist .clock-container {
 }
 
 body.mode-mist .clock {
-  font-size: calc(clamp(64px, 10vw, 130px) * var(--clock-scale, 1)) !important;
+  /* Чуть выше и заметно теснее по разрядке: в оригинале Mist цифры
+     выглядят «длиннее» — за счёт пропорции кегль/трекинг, а не ширины.
+     -0.03em перебивает классический letter-spacing: -2px из classic.css */
+  font-size: calc(clamp(64px, 10.5vw, 138px) * var(--clock-scale, 1)) !important;
   font-family: 'Segoe UI Variable Display', 'Aptos Display', 'Segoe UI', sans-serif !important;
   font-weight: 300 !important;
-  letter-spacing: 0 !important;
+  letter-spacing: -0.03em !important;
   line-height: 1.02 !important;
   color: rgba(255, 255, 255, 0.96) !important;
   text-shadow: 0 6px 40px rgba(0, 0, 0, 0.55) !important;
@@ -370,7 +384,8 @@ body.mode-mist .weather-details:not(:empty)::before {
   border-radius: 999px;
   cursor: pointer;
   white-space: nowrap;
-  transition: color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  transition: color 0.25s ease-in-out, background-color 0.25s ease-in-out,
+              transform 0.15s ease-out;
 }
 
 /* Минималистичная нижняя полоска с закруглениями у активной категории */
@@ -393,6 +408,11 @@ body.mode-mist .weather-details:not(:empty)::before {
 .mist-tab:hover {
   color: rgba(255, 255, 255, 0.85);
   background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Отклик при нажатии (мышью/тач): чип слегка «вдавливается» */
+.mist-tab:active {
+  transform: scale(0.96);
 }
 
 .mist-tab.active {
@@ -521,6 +541,11 @@ body:not(.mode-ios):not(.mode-mist) #shortcuts-container .shortcut-card {
   border-color: rgba(255, 255, 255, 0.16);
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+/* Отклик при нажатии: пилюля «садится» обратно и слегка сжимается */
+.mist-pill:active {
+  transform: translateY(0) scale(0.985);
 }
 
 .mist-pill-icon {

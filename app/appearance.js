@@ -115,14 +115,71 @@ function compressImage(file, maxWidth, maxHeight, quality, callback) {
   reader.readAsDataURL(file);
 }
 
-function applyBackground() {
-  if (STATE.customBackground) {
-    document.body.style.backgroundImage = `url(${STATE.customBackground})`;
-  } else {
-    document.body.style.backgroundImage = 'none';
+// --- Жизненный цикл blob-URL обоев (см. applyBackground) -------------------
+// wallpaperSource — какой base64 сейчас отображён; wallpaperBlobUrl —
+// созданный для него объектный URL (отзывается при замене/сбросе).
+let wallpaperSource = '';
+let wallpaperBlobUrl = '';
+
+function releaseWallpaperUrl() {
+  if (wallpaperBlobUrl) {
+    URL.revokeObjectURL(wallpaperBlobUrl);
+    wallpaperBlobUrl = '';
   }
-  // Р¤Р»Р°Рі РЅР°Р»РёС‡РёСЏ РѕР±РѕРµРІ: РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂРµР¶РёРјРµ Mist, С‡С‚РѕР±С‹ РЅРµ РїРµСЂРµРєСЂС‹РІР°С‚СЊ РёС… РїРѕРґСЃРІРµС‚РєРѕР№
-  document.body.classList.toggle('has-wallpaper', !!STATE.customBackground);
+}
+
+// data:image/...;base64,... → Blob вручную через atob. Без fetch(): CSP
+// манифеста (connect-src 'self' + api) не рассчитан на data:-запросы, а
+// синхронное декодирование избавляет и от гонок при быстрой смене фона.
+function dataUrlToBlob(dataUrl) {
+  const comma = dataUrl.indexOf(',');
+  if (comma < 1) return null;
+  const mime = /^data:([^;,]+)/.exec(dataUrl.slice(0, comma));
+  if (!mime) return null;
+  const bin = atob(dataUrl.slice(comma + 1));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mime[1] });
+}
+
+function applyBackground() {
+  // Обои: base64 остаётся в STATE (экспорт/импорт JSON и адаптивная тема
+  // читают его оттуда же), а в DOM уходит ТОЛЬКО короткая blob-ссылка в
+  // CSS-переменной --user-wallpaper — в Elements нет гигантской строки.
+  // blob-URL живёт в рамках вкладки: при смене/сбросе старый отзывается.
+  const source = STATE.customBackground;
+  document.body.classList.toggle('has-wallpaper', !!source);
+
+  if (!source) {
+    wallpaperSource = '';
+    releaseWallpaperUrl();
+    document.body.style.removeProperty('--user-wallpaper');
+    return;
+  }
+  // Тот же base64 уже отображён
+  if (source === wallpaperSource) return;
+  wallpaperSource = source;
+
+  // Короткие http(s)-ссылки кладём как есть; data:-строку превращаем в
+  // blob-URL, а если декодирование не вышло — оставляем сам data-URL.
+  let value = source;
+  if (source.indexOf('data:') === 0) {
+    releaseWallpaperUrl();
+    try {
+      const blob = dataUrlToBlob(source);
+      if (blob) {
+        wallpaperBlobUrl = URL.createObjectURL(blob);
+        value = wallpaperBlobUrl;
+      }
+    } catch {
+      wallpaperBlobUrl = ''; // битый base64 — запасной путь ниже
+    }
+  }
+  // Форма url(...) без кавычек — как и раньше: невалидный токен просто
+  // оставляет фон пустым, объявление через строку не разорвать
+  document.body.style.setProperty('--user-wallpaper', `url(${value})`);
 }
 
 function applyTheme() {

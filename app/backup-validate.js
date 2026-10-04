@@ -199,7 +199,8 @@ const BackupValidate = (() => {
     return 'duckduckgo';
   };
 
-  // Обои кладутся в document.body.style.backgroundImage как url(...):
+  // Обои применяются как url(...) в CSS-переменной --user-wallpaper
+  // (inline-стиль body; сам base64 живёт в state и JSON-экспорте):
   // принимаем data:image/... (сжатый файл) и http(s)-ссылку, остальное —
   // null, чтобы в CSS не попало постороннее значение.
   const sanitizeBackground = (v) => {
