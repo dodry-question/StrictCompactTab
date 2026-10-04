@@ -2,15 +2,16 @@
 //
 // Этап «в» (ESM) убрал публикации модулей в window: app/* и сервисы связаны
 // import-ами (live bindings), запись в общие let — через сеттеры владельцев.
-// Остаток после кластеров 1–29 и фазы 4:
-//   * getWeatherDescription — мост app/weather.js, задокументированное
-//     исключение: clock-topbar читает его в рантайме, weather читает
-//     константы clock-topbar на top-level — обратный импорт замкнул бы
-//     цикл; снимается при следующей пересборке clock-topbar;
+// Остаток:
 //   * window.materialColorUtilities — вендорная min-библиотека
 //     (assets/material-color-utilities.min.js), грузится динамически
 //     в app/theme-adaptive.js;
 //   * Navigator.brave / Navigator.userAgentData — нестандартные API.
+//
+// Публикаций НАШИХ модулей в window больше нет: последний мост
+// (window.getWeatherDescription, TDZ-исключение weather ↔ clock-topbar) снят —
+// clock-topbar теперь берёт описание погоды у WeatherService напрямую, а
+// weather.js импортирует renderTopbar из state-render, а не из clock-topbar.
 //
 // Типы намеренно широкие (any) — уточнение по мере типизации (P2).
 // Профиль данных состояния описан МОДУЛЬНЫМИ типами в types/app-state.d.ts
@@ -32,9 +33,6 @@ declare global {
       getHighEntropyValues(hints: string[]): Promise<{ brands: { brand: string }[] }>;
     };
   }
-
-  // app/weather.js — единственный оставшийся мост (TDZ, см. шапку файла)
-  var getWeatherDescription: any;
 }
 
 export {};

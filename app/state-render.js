@@ -1,6 +1,6 @@
 import { DEFAULT_SHORTCUTS } from '../state/values.js';
 
-import { showWeatherCb, weatherCityInput, mistPresetSelect, mistPerRowSelect, updateClockAndDate } from './clock-topbar.js';
+import { showWeatherCb, weatherCityInput, mistPresetSelect, mistPerRowSelect, updateClockAndDate, renderTopbar } from './clock-topbar.js';
 
 import { clearCustomLayoutStyles, applyLayoutPositions } from './layout-widgets.js';
 
@@ -304,6 +304,11 @@ export {
   moveShortcut,
   handleAutoscroll,
   renderShortcuts,
-  container
+  container,
+  // Реэкспорт: weather.js берёт renderTopbar отсюда, а не из clock-topbar.
+  // Прямой импорт clock-topbar → weather закрыт (clock-topbar читает описание
+  // погоды у WeatherService), но так зависимость остаётся односторонней и
+  // порядок eval не меняется: state-render уже импортирует clock-topbar.
+  renderTopbar
 };
 

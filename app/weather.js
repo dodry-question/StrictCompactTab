@@ -1,6 +1,4 @@
-import { saveState } from './state-render.js';
-
-import { showWeatherCb, weatherCityInput, weatherInputStatus, weatherSubsettings, weatherTemp, weatherDetails, weatherWidget, weatherIcon, renderTopbar } from './clock-topbar.js';
+import { saveState, renderTopbar } from './state-render.js';
 
 import { WeatherService } from '../services/weather.js';
 
@@ -11,6 +9,22 @@ import { STATE } from '../state/store.js';
 import { TRANSLATIONS } from '../i18n/translations.js';
 
 // --- УПРАВЛЕНИЕ ПОГОДОЙ ---
+// renderTopbar приходит из state-render (он общий потребитель обоих файлов и
+// реэкспортирует функцию из clock-topbar) — раньше тянулся import'ом прямо из
+// clock-topbar, из-за чего clock-topbar не мог импортировать
+// getWeatherDescription обратно (цикл + TDZ). Теперь описание погоды
+// clock-topbar берёт у WeatherService напрямую, цикл разорван, и последний
+// мост window.getWeatherDescription снят.
+// Элементы погоды читаем из DOM сами: так файл не зависит от clock-topbar.
+const weatherWidget = document.getElementById('weather-widget');
+const weatherTemp = document.getElementById('weather-temp');
+const weatherIcon = document.getElementById('weather-icon');
+const weatherDetails = document.getElementById('weather-details');
+const showWeatherCb = /** @type {HTMLInputElement} */ (document.getElementById('show-weather-checkbox'));
+const weatherCityInput = /** @type {HTMLInputElement} */ (document.getElementById('weather-city-input'));
+const weatherInputStatus = document.getElementById('weather-input-status');
+const weatherSubsettings = document.getElementById('weather-subsettings');
+
 if (showWeatherCb) {
   showWeatherCb.addEventListener('change', (e) => {
     STATE.showWeather = /** @type {HTMLInputElement} */ (e.target).checked;
@@ -247,12 +261,12 @@ function setJustDroppedId(value) { justDroppedId = value; }
 // 4 моста сняты — фаза 3 (внешние потребители applyWeatherVisibility/
 // updateStatusText/updateWeatherWidget/handleCityInputChange — state-render и
 // settings-panel через import; остальные имена использовались только внутри
-// файла). Константы clock-topbar (showWeatherCb/weatherCityInput/...) тоже
-// приходят import'ом (кластер 22). getWeatherDescription остаётся мостом для
-// clock-topbar: обратный импорт clock-topbar→weather замкнул бы цикл, а eval
-// начинается с тега clock-topbar (562) — weather.js оказался бы в TDZ на
-// top-level.
-window.getWeatherDescription = getWeatherDescription;
+// файла). Константы clock-topbar (showWeatherCb/weatherCityInput/...)
+// импортируются в обратную сторону — clock-topbar читает их у себя, а
+// weather.js больше НЕ зависит от clock-topbar: описание погоды он отдаёт
+// через WeatherService (см. шапку файла), а renderTopbar берёт из state-render.
+// Последний мост window.getWeatherDescription снят — публикаций наших модулей
+// в window не осталось ни одной.
 export {
   handleCityInputChange,
   updateStatusText,

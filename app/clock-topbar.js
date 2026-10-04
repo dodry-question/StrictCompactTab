@@ -2,6 +2,15 @@ import { STATE } from '../state/store.js';
 
 import { formatDateLine, getTopbarCityName } from '../src/utils.js';
 
+// Описание погоды для строки топбара берём у СЕРВИСА напрямую, а не у
+// app/weather.js. Так разорван последний цикл: раньше clock-topbar читал
+// getWeatherDescription из window (мост, заведённый weather.js), потому что
+// weather.js тянул 8 констант clock-topbar на top-level и статический импорт
+// clock-topbar → weather оставлял бы weather.js в TDZ. Сервис — общий
+// поставщик для обоих, у него нет зависимостей от app/*, поэтому цикл исчез,
+// а мост window.getWeatherDescription больше не нужен.
+import { WeatherService } from '../services/weather.js';
+
 // --- ЧАСЫ И ДАТА ---
 const clockElement = document.getElementById('clock');
 const dateElement = document.getElementById('date-display');
@@ -86,7 +95,7 @@ function renderTopbar() {
 
     const descSpan = document.createElement('span');
     descSpan.className = 'topbar-part topbar-desc';
-    const desc = getWeatherDescription(STATE.weatherCache.code, STATE.language);
+    const desc = WeatherService.getWeatherDescription(STATE.weatherCache.code, STATE.language);
     const city = getTopbarCityName(STATE);
     descSpan.textContent = city ? `${desc}, ${city}` : desc;
     frag.appendChild(descSpan);
