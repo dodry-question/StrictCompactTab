@@ -1,3 +1,5 @@
+import { applyLayoutPositions } from './layout-widgets.js';
+
 import { populateCategorySelects } from './categories-settings.js';
 
 import { refreshSchedulePanel } from './schedule.js';

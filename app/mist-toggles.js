@@ -1,3 +1,5 @@
+import { applyLayoutPositions, clearCustomLayoutStyles } from './layout-widgets.js';
+
 import { applyClockVisibility, syncModeToggles, applyMistMode, applyMistPreset } from './appearance.js';
 
 import { checkForUpdates } from './backup-updates.js';

@@ -1,3 +1,5 @@
+import { isMistHeadWidget, mistWidgetKey, dragOffset, applyMistWidgets, getWidgetKey, RESIZE_BASE_SIZE, resizeStartCoords, resizeStartDimensions, IOS_RESIZE_MIN_CELLS, RESIZE_MIN_WIDTH, applyClockScale } from './layout-widgets.js';
+
 function initLayoutDragAndDrop() {
   // Р”РёРЅР°РјРёС‡РµСЃРєРё СЃРѕР·РґР°РµРј РЅР°РїСЂР°РІР»СЏСЋС‰РёРµ Р»РёРЅРёРё РїСЂРёРјР°РіРЅРёС‡РёРІР°РЅРёСЏ, РµСЃР»Рё РёС… РЅРµС‚ РІ DOM
   if (!document.getElementById('guide-line-x')) {

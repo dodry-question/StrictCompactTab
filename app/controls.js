@@ -1,3 +1,5 @@
+import { applyMistWidgets, isMistHeadWidget, getWidgetKey, applyLayoutPositions, clearCustomLayoutStyles } from './layout-widgets.js';
+
 import { compressImage } from './appearance.js';
 
 import { saveState } from './state-render.js';

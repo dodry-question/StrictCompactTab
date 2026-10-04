@@ -251,11 +251,10 @@ function applyClockScale(widget, scale) {
 }
 
 // --- Мосты для layout-dnd/controls/mist-toggles/state-render/appearance ------
-// Шаг «в», фаза 2; уберём в фазе 3. Переприсваиваемые извне let закрыты
-// ACCESSORS: layout-dnd, controls и mist-toggles пишут в эти переменные
-// напрямую (tempPositions = {}, activeDragElement = widget, ...), и обычный
-// мост по значению дал бы десинк. Объекты с внешними мутациями свойств
-// (dragOffset.x = ... и т.п.) закрыты обычными мостами: объект один и тот же.
+// (13 мостов функций/констант сняты — фаза 3.) Переприсваиваемые извне let
+// закрыты ACCESSORS: layout-dnd, controls и mist-toggles пишут в эти
+// переменные напрямую (tempPositions = {}, activeDragElement = widget, ...),
+// и обычный мост по значению дал бы десинк.
 Object.defineProperty(window, 'tempPositions', {
   get: () => tempPositions,
   set: (value) => { tempPositions = value; },
@@ -301,19 +300,6 @@ Object.defineProperty(window, 'resizeStartScale', {
   set: (value) => { resizeStartScale = value; },
   configurable: true
 });
-window.dragOffset = dragOffset;
-window.resizeStartCoords = resizeStartCoords;
-window.resizeStartDimensions = resizeStartDimensions;
-window.RESIZE_BASE_SIZE = RESIZE_BASE_SIZE;
-window.RESIZE_MIN_WIDTH = RESIZE_MIN_WIDTH;
-window.IOS_RESIZE_MIN_CELLS = IOS_RESIZE_MIN_CELLS;
-window.applyLayoutPositions = applyLayoutPositions;
-window.applyMistWidgets = applyMistWidgets;
-window.isMistHeadWidget = isMistHeadWidget;
-window.getWidgetKey = getWidgetKey;
-window.clearCustomLayoutStyles = clearCustomLayoutStyles;
-window.mistWidgetKey = mistWidgetKey;
-window.applyClockScale = applyClockScale;
 export {
   activeDragElement,
   dragOffset,

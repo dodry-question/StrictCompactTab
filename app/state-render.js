@@ -1,3 +1,5 @@
+import { clearCustomLayoutStyles, applyLayoutPositions } from './layout-widgets.js';
+
 import { applyWeatherVisibility, updateWeatherWidget, updateStatusText } from './weather.js';
 
 import { migrateToNested, extractCategoryMeta } from './shortcuts-migration.js';

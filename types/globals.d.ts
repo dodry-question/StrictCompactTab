@@ -45,7 +45,7 @@ var saveState: any;
 var updateSearchEngineUI: any;
 var renderShortcuts: any;
 var container: any;
-// app/layout-widgets.js — модуль (шаг «в»): 9 accessors (общие let) + мосты
+// app/layout-widgets.js — 13 мостов сняты (фаза 3); 9 accessors (общие let) остались
 var tempPositions: any;
 var layoutGridSnap: any;
 var layoutGridSize: any;
@@ -55,19 +55,6 @@ var hasDragged: any;
 var mistHeadDrag: any;
 var activeResizeElement: any;
 var resizeStartScale: any;
-var dragOffset: any;
-var resizeStartCoords: any;
-var resizeStartDimensions: any;
-var RESIZE_BASE_SIZE: any;
-var RESIZE_MIN_WIDTH: any;
-var IOS_RESIZE_MIN_CELLS: any;
-var applyLayoutPositions: any;
-var applyMistWidgets: any;
-var isMistHeadWidget: any;
-var getWidgetKey: any;
-var clearCustomLayoutStyles: any;
-var mistWidgetKey: any;
-var applyClockScale: any;
 // app/weather.js — 4 моста сняты (фаза 3); остался getWeatherDescription + accessors
 var getWeatherDescription: any;
 var draggedId: any;
