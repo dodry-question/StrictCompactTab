@@ -48,16 +48,6 @@ var findShortcutOrFolderById: any;
 var isFolderContainingTarget: any;
 var closeFolder: any;
 var folderModal: any;
-// app/categories-tabs.js — модуль (шаг «в»)
-var buildTabs: any;
-var getActiveTab: any;
-var getGridMetrics: any;
-var stabilizeShortcutsHeight: any;
-var renderMistPills: any;
-var selectCategory: any;
-var renderCategoryTabs: any;
-var tabsPanelAboveGrid: any;
-var syncTabsDomPosition: any;
 // app/state-render.js — модуль (шаг «в»)
 var loadState: any;
 var saveState: any;

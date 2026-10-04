@@ -1,3 +1,5 @@
+import { tabsPanelAboveGrid, selectCategory } from './categories-tabs.js';
+
 import { searchInput } from './settings-panel.js';
 
 import { ShortcutIcons } from '../services/shortcut-icons.js';

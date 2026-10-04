@@ -236,18 +236,6 @@ function syncTabsDomPosition() {
   else wrap.insertBefore(container, mistTabsEl);
 }
 
-// Мосты для потребителей (state-render, input-keys, navigation) —
-// уберём в фазе 3 шага «в». Внутренние let (lastFixedHeight и кэши строк)
-// снаружи не читаются — обычных мостов по значению хватает.
-window.buildTabs = buildTabs;
-window.getActiveTab = getActiveTab;
-window.getGridMetrics = getGridMetrics;
-window.stabilizeShortcutsHeight = stabilizeShortcutsHeight;
-window.renderMistPills = renderMistPills;
-window.selectCategory = selectCategory;
-window.renderCategoryTabs = renderCategoryTabs;
-window.tabsPanelAboveGrid = tabsPanelAboveGrid;
-window.syncTabsDomPosition = syncTabsDomPosition;
 export {
   buildTabs,
   getActiveTab,

@@ -1,3 +1,5 @@
+import { selectCategory } from './categories-tabs.js';
+
 import { modal, closeSettings } from './settings-panel.js';
 
 import { revealMistZenByWheel } from './mist-toggles.js';
