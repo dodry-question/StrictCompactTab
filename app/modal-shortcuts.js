@@ -1,3 +1,5 @@
+import { saveState, renderShortcuts } from './state-render.js';
+
 import { findShortcutOrFolderById, moveNestedItem, isFolderContainingTarget } from './shortcuts-migration.js';
 
 import { refreshAfterCategoryChange, ensureSettingsCategoryId, findCategoryById, moveItemToCategory, populateCategorySelects, renderCategoryTabsBar, renderCategoryHeader, getCategoryItems, buildCategoryOptions } from './categories-settings.js';

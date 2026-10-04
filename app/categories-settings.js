@@ -1,3 +1,5 @@
+import { saveState, renderShortcuts } from './state-render.js';
+
 import { generateId } from './shortcuts-migration.js';
 
 import { renderModalShortcutsList } from './modal-shortcuts.js';

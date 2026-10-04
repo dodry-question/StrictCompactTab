@@ -39,12 +39,7 @@ declare global {
 // app/settings-panel.js — 10 мостов сняты (фаза 3); осталось 2 accessors ниже
 var addCatCustom: any;
 var addCatSelectedFor: any;
-// app/state-render.js — модуль (шаг «в»)
-var loadState: any;
-var saveState: any;
-var updateSearchEngineUI: any;
-var renderShortcuts: any;
-var container: any;
+// app/state-render.js — 5 мостов сняты (фаза 3, хаб: saveState/loadState/…)
 // app/layout-widgets.js — 13 мостов сняты (фаза 3); 9 accessors (общие let) остались
 var tempPositions: any;
 var layoutGridSnap: any;

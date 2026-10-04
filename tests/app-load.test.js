@@ -253,11 +253,12 @@ const { navHandleKeydown } = await import('../app/navigation.js');
 const { initCustomSearchEngines } = await import('../app/controls.js');
 const { applyFavicon } = await import('../app/appearance.js');
 const { updateClockAndDate, mistTabsEl } = await import('../app/clock-topbar.js');
+const { loadState, renderShortcuts } = await import('../app/state-render.js');
 
 test('общая область видимости разделённых файлов сохранилась', () => {
   // функции из разных частей бывшего script.js
-  assert.equal(probe('typeof loadState'), 'function');                // state-render.js
-  assert.equal(probe('typeof renderShortcuts'), 'function');          // state-render.js
+  assert.equal(typeof loadState, 'function');                   // state-render.js
+  assert.equal(typeof renderShortcuts, 'function');             // state-render.js
   assert.equal(typeof renderModalShortcutsList, 'function');            // modal-shortcuts.js (import)
   assert.equal(typeof navHandleKeydown, 'function');         // navigation.js
   assert.equal(typeof initLayoutDragAndDrop, 'function');    // layout-dnd.js

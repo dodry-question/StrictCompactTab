@@ -1,3 +1,5 @@
+import { renderShortcuts } from './state-render.js';
+
 import { isMistHeadWidget, mistWidgetKey, dragOffset, applyMistWidgets, getWidgetKey, RESIZE_BASE_SIZE, resizeStartCoords, resizeStartDimensions, IOS_RESIZE_MIN_CELLS, RESIZE_MIN_WIDTH, applyClockScale } from './layout-widgets.js';
 
 function initLayoutDragAndDrop() {

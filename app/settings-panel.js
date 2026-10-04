@@ -1,3 +1,5 @@
+import { saveState, renderShortcuts, updateSearchEngineUI } from './state-render.js';
+
 import { weatherWidget, updateClockAndDate } from './clock-topbar.js';
 
 import { updateStatusText, updateWeatherWidget, handleCityInputChange } from './weather.js';

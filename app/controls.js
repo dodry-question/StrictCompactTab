@@ -4,7 +4,7 @@ import { applyMistWidgets, isMistHeadWidget, getWidgetKey, applyLayoutPositions,
 
 import { compressImage } from './appearance.js';
 
-import { saveState } from './state-render.js';
+import { saveState, renderShortcuts, updateSearchEngineUI } from './state-render.js';
 import { initLayoutDragAndDrop, onResizeStart, removeResizeHandles } from './layout-dnd.js';
 
 import { renderModalShortcutsList } from './modal-shortcuts.js';

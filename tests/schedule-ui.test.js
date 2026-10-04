@@ -273,6 +273,7 @@ for (const tag of scriptTags) {
 const app = globalThis;
 const { syncScheduleEnabled, handleScheduleFile, isSchedulePanelOpen, closeSchedulePanel } = await import('../app/schedule.js');
 const { applyLanguage } = await import('../app/appearance.js');
+const { saveState } = await import('../app/state-render.js');
 // Пауз нужна для цепочек промисов (открытие панели читает файл из хранилища).
 // Реальный таймер node:timers/promises, а не globalThis.setTimeout — тот в стабе
 // заглушен. Разбор .xlsx — тоже асинхронный, поэтому там ждём по условию.
@@ -611,7 +612,7 @@ test('группа, которой нет в новом файле, сбрасы
   const buffer = await new Blob([fs.readFileSync(FIXTURE)]).arrayBuffer();
   // выдумываем несуществующую группу, как если бы файл сменился
   STATE.scheduleGroup = 'Группа НЕТ-ТАКОЙ-999';
-  app.saveState();
+  saveState();
   await handleScheduleFile({ name: 'test.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
   await settle();
   assert.equal(STATE.scheduleGroup, null);

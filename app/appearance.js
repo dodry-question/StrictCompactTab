@@ -1,3 +1,5 @@
+import { saveState, renderShortcuts } from './state-render.js';
+
 import { renderTopbar } from './clock-topbar.js';
 
 import { applyLayoutPositions } from './layout-widgets.js';
