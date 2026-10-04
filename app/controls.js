@@ -1,3 +1,5 @@
+import { SearchUI } from '../services/search-ui.js';
+
 import { STATE } from '../state/store.js';
 
 import { normalizeMistWidgets } from '../src/utils.js';
@@ -203,11 +205,11 @@ if (btnResetLayout) {
 
 // --- РЈРџР РђР’Р›Р•РќРР• РџРћР›Р¬Р—РћР’РђРўР•Р›Р¬РЎРљРРњР РџРћРРЎРљРћР’РРљРђРњР ---
 function populateSearchEnginesSelect() {
-  window.SearchUI.populateSearchEnginesSelect(STATE, saveState);
+  SearchUI.populateSearchEnginesSelect(STATE, saveState);
 }
 
 function renderCustomSearchEngines() {
-  window.SearchUI.renderCustomSearchEngines(STATE, {
+  SearchUI.renderCustomSearchEngines(STATE, {
     saveState,
     populateSearchEnginesSelect,
     updateSearchEngineUI,
@@ -216,7 +218,7 @@ function renderCustomSearchEngines() {
 }
 
 function initCustomSearchEngines() {
-  window.SearchUI.initCustomSearchEngines(STATE, TRANSLATIONS, {
+  SearchUI.initCustomSearchEngines(STATE, TRANSLATIONS, {
     saveState,
     populateSearchEnginesSelect,
     renderCustomSearchEngines,

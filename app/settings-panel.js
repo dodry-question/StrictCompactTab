@@ -1,3 +1,5 @@
+import { SearchService } from '../services/search.js';
+
 import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
@@ -10,7 +12,7 @@ if (searchForm && searchInput) {
     e.preventDefault();
     const query = searchInput.value.trim();
     if (query) {
-      window.location.href = window.SearchService.buildSearchUrl(
+      window.location.href = SearchService.buildSearchUrl(
         query,
         STATE.searchEngine,
         STATE.customSearchEngines

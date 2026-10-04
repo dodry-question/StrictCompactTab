@@ -239,6 +239,4 @@ const SearchUI = {
   }
 };
 
-// Мост для классических app/* — уберём в фазе 3 шага «в».
-window.SearchUI = SearchUI;
 export { SearchUI };

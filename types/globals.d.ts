@@ -21,8 +21,6 @@ declare global {
     // Сервисы (services/*.js)
     WeatherService: any;
     WeatherDrawer: any;
-    SearchService: any;
-    SearchUI: any;
     ShortcutRenderer: any;
     ShortcutIcons: any;
     ShortcutCategories: any;

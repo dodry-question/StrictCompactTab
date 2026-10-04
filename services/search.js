@@ -29,6 +29,4 @@ const SearchService = {
   }
 };
 
-// Мост для классических app/* — уберём в фазе 3 шага «в».
-window.SearchService = SearchService;
 export { SearchService };

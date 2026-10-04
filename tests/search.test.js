@@ -119,8 +119,8 @@ globalThis.localStorage = {
   removeItem: (k) => { iconStore.delete(k); }
 };
 
-await import('../services/search.js');
-await import('../services/search-ui.js');
+const { SearchService } = await import('../services/search.js');
+const { SearchUI } = await import('../services/search-ui.js');
 await import('../services/weather.js');
 await import('../services/shortcut-icons.js');
 await import('../services/shortcut-renderer.js');

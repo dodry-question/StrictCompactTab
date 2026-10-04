@@ -1,3 +1,5 @@
+import { SearchUI } from '../services/search-ui.js';
+
 import { storage } from '../storage/storage.js';
 
 import { STATE, store } from '../state/store.js';
@@ -187,7 +189,7 @@ function saveState() {
 }
 
 function updateSearchEngineUI() {
-  window.SearchUI.updateSearchEngineUI(STATE);
+  SearchUI.updateSearchEngineUI(STATE);
 }
 
 function moveShortcut(fromAbsoluteIndex, toAbsoluteIndex) {
