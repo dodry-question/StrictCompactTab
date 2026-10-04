@@ -86,6 +86,8 @@ var initCustomSearchEngines: any;
 var navHandleKeydown: any;
 var createMistPill: any;
 var rebuildNavModel: any;
+// app/modal-shortcuts.js — модуль (шаг «в»)
+var renderModalShortcutsList: any;
 }
 
 export {};

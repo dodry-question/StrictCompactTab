@@ -393,3 +393,13 @@ if (settingsModalList) {
   });
 }
 
+// Мост для классических потребителей (categories-settings, controls,
+// settings-panel, state-render + probe в app-load.test) — уберём в фазе 3.
+window.renderModalShortcutsList = renderModalShortcutsList;
+export {
+  renderModalShortcutsList,
+  renderShortcutRow,
+  getDropAction,
+  setupDragAndDropListeners
+};
+
