@@ -21,7 +21,7 @@ import { normalizeMistWidgets } from '../src/utils.js';
 // (normalizeMistWidgets из AppUtils), до app/backup-updates.js.
 // Всё внутри IIFE — в общую область видимости попадает только
 // window.BackupValidate.
-(() => {
+const BackupValidate = (() => {
   // Реальный бэкап — сотни КБ (обои и иконки в base64). Потолок в 20 МБ
   // отсекает файлы-гиганты ДО чтения: JSON.parse на сотнях мегабайтов
   // заморозил бы вкладку на секунды.
@@ -303,9 +303,7 @@ import { normalizeMistWidgets } from '../src/utils.js';
     return { ok: true, value };
   }
 
-  window.BackupValidate = { MAX_FILE_BYTES, sanitize };
+  return { MAX_FILE_BYTES, sanitize };
 })();
 
-// Экспорт для будущих import (шаг «в»); мост window.BackupValidate задаётся внутри IIFE.
-const BackupValidate = window.BackupValidate;
 export { BackupValidate };

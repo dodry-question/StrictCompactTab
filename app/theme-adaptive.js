@@ -215,7 +215,5 @@ const AdaptiveThemeManager = {
   }
 };
 
-// Мост для классических app/* (appearance, settings-panel) — уберём в фазе 3.
-window.AdaptiveThemeManager = AdaptiveThemeManager;
 export { AdaptiveThemeManager };
 

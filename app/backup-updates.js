@@ -1,4 +1,5 @@
 import { storage } from '../storage/storage.js';
+import { BackupValidate } from './backup-validate.js';
 
 import { STATE } from '../state/store.js';
 
@@ -97,7 +98,7 @@ if (btnImport && importFileInput) {
 
     // Файл-гигант отклоняем ДО чтения: JSON.parse на сотнях мегабайтов
     // намертво заморозил бы вкладку
-    if (file.size > window.BackupValidate.MAX_FILE_BYTES) {
+    if (file.size > BackupValidate.MAX_FILE_BYTES) {
       const dictTooLarge = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;
       alert(dictTooLarge.importTooLarge);
       importFileInput.value = '';
@@ -116,7 +117,7 @@ if (btnImport && importFileInput) {
         // приводится к известному типу и диапазону, чужие ключи отбрасываются,
         // небезопасные ссылки (javascript: и т.п.) удаляются вместе с ярлыком.
         // При отказе хранилище НЕ стирается — старые настройки остаются целы.
-        const result = window.BackupValidate.sanitize(data);
+        const result = BackupValidate.sanitize(data);
         if (!result.ok) {
           console.error('Import rejected:', result.reason);
           const dictInvalid = TRANSLATIONS[STATE.language] || TRANSLATIONS.en || TRANSLATIONS.ru;

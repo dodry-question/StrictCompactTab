@@ -1,3 +1,5 @@
+import { AdaptiveThemeManager } from './theme-adaptive.js';
+
 import { WeatherDrawer } from '../services/weather-drawer.js';
 
 import { SearchService } from '../services/search.js';
@@ -115,7 +117,7 @@ if (themeSelect) {
   themeSelect.addEventListener('change', (e) => {
     STATE.theme = /** @type {HTMLSelectElement} */ (e.target).value;
     if (STATE.theme === 'adaptive' && STATE.customBackground && !STATE.adaptiveThemeData) {
-      window.AdaptiveThemeManager.generateThemeFromWallpaper(STATE.customBackground)
+      AdaptiveThemeManager.generateThemeFromWallpaper(STATE.customBackground)
         .then(themeData => {
           STATE.adaptiveThemeData = themeData;
           saveState();
@@ -123,7 +125,7 @@ if (themeSelect) {
         })
         .catch(err => {
           console.error("Error generating adaptive theme:", err);
-          STATE.adaptiveThemeData = window.AdaptiveThemeManager.getFallbackTheme(true);
+          STATE.adaptiveThemeData = AdaptiveThemeManager.getFallbackTheme(true);
           saveState();
           applyTheme();
         });

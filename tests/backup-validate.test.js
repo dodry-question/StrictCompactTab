@@ -40,7 +40,7 @@ globalThis.document = {
 // после document-заглушек (файл на верхнем уровне вешает обработчики)
 await import(pathToFileURL(path.join(ROOT, 'app/shortcuts-migration.js')).href);
 // app/backup-validate.js — модуль (шаг «в»): грузится через import
-await import(pathToFileURL(path.join(ROOT, 'app/backup-validate.js')).href);
+const { BackupValidate } = await import(pathToFileURL(path.join(ROOT, 'app/backup-validate.js')).href);
 
 // app/backup-updates.js на верхнем уровне читает btnExport/btnImport/
 // importFileInput из core.js — здесь заглушаем их null, чтобы блоки
@@ -52,7 +52,7 @@ vm.runInThisContext('var btnExport = null; var btnImport = null; var importFileI
 // потому что на верхнем уровне файл их читает
 await import(pathToFileURL(path.join(ROOT, 'app/backup-updates.js')).href);
 
-const sanitize = window.BackupValidate.sanitize;
+const sanitize = BackupValidate.sanitize;
 const buildBackupPayload = vm.runInThisContext('buildBackupPayload');
 
 test('sanitize отклоняет корень, не похожий на бэкап', () => {
@@ -297,7 +297,7 @@ test('настройки расписания переживают импорт'
 test('потолок размера файла разумен', () => {
   // Реальный бэкап — сотни КБ; слишком низкий потолок заблокировал бы
   // настоящие файлы, слишком высокий — позволил бы заморозить вкладку
-  const max = window.BackupValidate.MAX_FILE_BYTES;
+  const max = BackupValidate.MAX_FILE_BYTES;
   assert.ok(max >= 1024 * 1024, 'потолок не ниже 1 МБ');
   assert.ok(max <= 50 * 1024 * 1024, 'потолок не выше 50 МБ');
 });
