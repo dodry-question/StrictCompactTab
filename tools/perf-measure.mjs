@@ -16,7 +16,7 @@
 //      устройства, где блокирующие скрипты больнее всего.
 //
 // Результат: таблица (медиана/min за прогоны) + путь к JSON.
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import http from 'node:http';
 import os from 'node:os';
 import fs from 'node:fs';
@@ -24,6 +24,55 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// Уборка браузера после прогона.
+//
+// edge.kill() шлёт сигнал ТОЛЬКО головному процессу. Edge — это дерево из
+// десятков процессов, и дочерние (renderer/gpu/utility) при этом нередко
+// переживают родителя: в диспетчере остаются висеть «новые вкладки», которые
+// потом пугают пользователя в Alt+Tab. Поэтому:
+//   1) сначала вежливый SIGTERM родителю и короткое ожидание;
+//   2) если процесс жив — жёсткий `taskkill /T /F` по pid (вместе с деревом);
+//   3) финальная зачистка всех процессов, запущенных с НАШИМ временным
+//      профилем (--user-data-dir=<profile>) — так добиваются сироты, которые
+//      потеряли родителя;
+//   4) ожидание освобождения файлов профиля перед удалением каталога.
+//
+// Ничего вне своего временного профиля уборка не трогает.
+function killBrowserTree(child, profile) {
+  if (child && child.pid) {
+    try { child.kill(); } catch { /* уже мёртв */ }
+    const deadline = Date.now() + 4000;
+    while (Date.now() < deadline) {
+      try {
+        process.kill(child.pid, 0);
+      } catch {
+        return; // процесс завершился сам
+      }
+      spawnSync('cmd', ['/c', 'timeout', '/t', '1', '/nobreak'], { stdio: 'ignore' });
+    }
+    if (process.platform === 'win32') {
+      try { spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' }); } catch { /* пусто */ }
+    } else {
+      try { process.kill(child.pid, 'SIGKILL'); } catch { /* пусто */ }
+    }
+  }
+  // Сироты с нашим профилем: ищем по командной строке через WMIC/PowerShell.
+  if (process.platform === 'win32' && profile) {
+    const marker = `--user-data-dir=${profile}`;
+    const query = `Get-CimInstance Win32_Process -Filter "Name='msedge.exe' or Name='chrome.exe'" | Where-Object { $_.CommandLine -like '*${marker.replace(/'/g, "''")}*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`;
+    try {
+      spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', query], { stdio: 'ignore', timeout: 15000 });
+    } catch { /* нет прав — не критично, профиль временный */ }
+  }
+}
+
+async function removeProfileDir(profile) {
+  for (let i = 0; i < 10; i++) {
+    try { fs.rmSync(profile, { recursive: true, force: true }); return true; } catch { await sleep(300); }
+  }
+  return false;
+}
 
 const EDGE = process.env.BROWSER_BIN || [
   'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
@@ -265,13 +314,12 @@ async function main() {
     fs.writeFileSync(out, JSON.stringify(summary, null, 2));
     console.log('JSON: ' + out);
   } finally {
-    edge.kill();
+    killBrowserTree(edge, profile);
     server.close();
-    // Edge может ещё держать файлы профиля — ждём и глотаем EPERM, каталог
-    // временный и всё равно удалится ОС.
-    for (let i = 0; i < 5; i++) {
-      try { fs.rmSync(profile, { recursive: true, force: true }); break; } catch { await sleep(300); }
-    }
+    // Каталог профиля удаляем ТОЛЬКО после смерти процессов: иначе Edge
+    // держит файлы, rmSync молча падает и в %TEMP% остаётся мусор.
+    const removed = await removeProfileDir(profile);
+    if (!removed) console.warn('Не удалось удалить временный профиль: ' + profile);
   }
 }
 
