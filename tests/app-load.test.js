@@ -7,19 +7,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import vm from 'node:vm';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // ---------------------------------------------------------------------------
 // Smoke-тест загрузки приложения.
 //
-// После разделения бывшего script.js (4573 строки) на app/*.js каждый файл
-// исполняется в браузере как отдельный classic-скрипт: они разделяют одну
-// глобальную область видимости (объект window + глобальная лексическая
-// среда let/const/function), а порядок задаётся порядком тегов <script defer>
-// в index.html. Здесь воспроизводятся именно эти семантика и порядок через
-// vm.runInThisContext, чтобы поймать ошибки разрешения имён (ReferenceError /
-// TDZ), если бы нарезка их сломала.
+// Этап «в» (ESM): каждый app/*.js — модуль, общая видимость — это
+// import-связи (live bindings), порядок исполнения — граф зависимостей,
+// топом служит порядок тегов <script> в index.html. Харнесс выполняет теги
+// по порядку через динамический import(); classic-теги (favicon-loader.js,
+// без import/export) тоже грузятся им — файл исполняется как модуль в
+// строгом режиме, поведение его IIFE не меняется. Исключение каждой
+// загрузки ловится отдельно, кросс-файловые имена — через import-захваты.
+// (До фазы 4 классика выполнялась через vm.runInThisContext + probe()).
 // ---------------------------------------------------------------------------
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -196,9 +196,8 @@ globalThis.devicePixelRatio = 1;
 
 // --- порядок скриптов берём напрямую из index.html -------------------------
 const html = read('index.html');
-const scriptTags = [...html.matchAll(/<script([^>]*)src="([^"]+)"[^>]*>/g)].map((m) => ({
-  attrs: m[1],
-  src: m[2]
+const scriptTags = [...html.matchAll(/<script[^>]*src="([^"]+)"[^>]*>/g)].map((m) => ({
+  src: m[1]
 }));
 const orderedSources = scriptTags.map((t) => t.src);
 
@@ -214,17 +213,13 @@ test('все подключённые скрипты существуют на �
   assert.deepEqual(missing, []);
 });
 
-// --- исполнение в порядке документа (classic — vm, module — import) --------
+// --- исполнение в порядке документа (все теги — через import()) ------------
 const loaded = [];
 const errors = [];
 
 for (const tag of scriptTags) {
   try {
-    if (/\btype="module"/.test(tag.attrs)) {
-      await import(pathToFileURL(path.join(ROOT, tag.src)).href);
-    } else {
-      vm.runInThisContext(read(tag.src), { filename: path.join(ROOT, tag.src) });
-    }
+    await import(pathToFileURL(path.join(ROOT, tag.src)).href);
     loaded.push(tag.src);
   } catch (err) {
     errors.push(`${tag.src}: ${err.name}: ${err.message}`);
@@ -240,13 +235,12 @@ test('все скрипты из index.html загружены', () => {
 });
 
 // --- кросс-файловая проверка разрешения имён -------------------------------
-// vm.runInThisContext видит глобальную лексическую среду отдельных скриптов
-// (let/const/function) так же, как браузер между classic-скриптами.
-const probe = (expr) => vm.runInThisContext(expr);
+// Фаза 4: vm-пробы (probe) убраны — все имена берутся через import (live
+// bindings), прямой typeof вместо eval-проб.
 
 // modal-shortcuts.js уже загружен харнессом выше (тот же инстанс модуля —
-// берём binding из кэша; top-level import в файле невозможен: файл на
-// верхнем уровне читает document)
+// берём binding из кэша; статический import в шапке теста невозможен: app-модули
+// читают document при eval, а DOM-стабы выставляются ниже по тексту)
 const { renderModalShortcutsList } = await import('../app/modal-shortcuts.js');
 const { initLayoutDragAndDrop } = await import('../app/layout-dnd.js');
 const { navHandleKeydown } = await import('../app/navigation.js');
@@ -286,7 +280,7 @@ test('иконка вкладки: по умолчанию компактная,
   // Раньше здесь ставился логотип favicon.png на 78 КБ, потом прозрачная
   // иконка 16px — иконка вкладки переключалась и исчезала на долю секунды.
   // Теперь значение одно и то же в favicon-loader.js и applyFavicon().
-  const href = () => probe("document.querySelector('.page-favicon').getAttribute('href')");
+  const href = () => document.querySelector('.page-favicon').getAttribute('href');
   assert.equal(href(), 'assets/icon-48.png');
 
   STATE.customFavicon = 'data:image/png;base64,myicon';

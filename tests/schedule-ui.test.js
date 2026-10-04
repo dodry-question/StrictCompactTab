@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import vm from 'node:vm';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 // Реальный setImmediate: глобальный setTimeout в стабе ниже заглушён и колбэки
@@ -16,10 +15,10 @@ import { ScheduleParser } from '../services/schedule-parser.js';
 // ---------------------------------------------------------------------------
 // Тест интерфейса плагина «Расписание».
 //
-// app/schedule.js — обычный classic-скрипт, поэтому он проверяется так же,
-// как и загрузка приложения в tests/app-load.test.js: скрипты выполняются
-// в порядке <script> из index.html через vm.runInThisContext (общая глобальная
-// область, как в браузере). Здесь стабы DOM умеют чуть больше — важны
+// Загрузка — как в tests/app-load.test.js (фаза 4): харнесс выполняет теги
+// <script> из index.html по порядку через динамический import() (этап «в»:
+// vm.runInThisContext убран, все файлы модули либо грузятся им как
+// strict-модули). Здесь стабы DOM умеют чуть больше — важны
 // innerHTML (очистка списков), contains (проверки «клик внутри панели»)
 // и цепочка родителей.
 //
@@ -253,18 +252,14 @@ globalThis.devicePixelRatio = 1;
 // --- загрузка приложения в порядке index.html ------------------------------
 
 const html = read('index.html');
-const scriptTags = [...html.matchAll(/<script([^>]*)src="([^"]+)"[^>]*>/g)]
-  .map((m) => ({ attrs: m[1], src: m[2] }));
+const scriptTags = [...html.matchAll(/<script[^>]*src="([^"]+)"[^>]*>/g)]
+  .map((m) => ({ src: m[1] }));
 
 // Плагина «Расписание» до его загрузки в state нет — эмулируем чистое состояние
 const loadErrors = [];
 for (const tag of scriptTags) {
   try {
-    if (/\btype="module"/.test(tag.attrs)) {
-      await import(pathToFileURL(path.join(ROOT, tag.src)).href);
-    } else {
-      vm.runInThisContext(read(tag.src), { filename: path.join(ROOT, tag.src) });
-    }
+    await import(pathToFileURL(path.join(ROOT, tag.src)).href);
   } catch (err) {
     loadErrors.push(`${tag.src}: ${err.name}: ${err.message}`);
   }
