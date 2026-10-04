@@ -221,3 +221,16 @@ function handleUpdateResult(latestVersion) {
   }
 }
 
+// Мосты ТОЛЬКО для того, что читают классические app/* и тесты
+// (mist-toggles, state-render, probe'buildBackupPayload') — уберём в фазе 3
+// шага «в», когда потребители перейдут на import.
+window.buildBackupPayload = buildBackupPayload;
+window.checkForUpdates = checkForUpdates;
+export {
+  buildBackupPayload,
+  isNewerVersion,
+  checkForUpdates,
+  getExtensionVersion,
+  handleUpdateResult
+};
+

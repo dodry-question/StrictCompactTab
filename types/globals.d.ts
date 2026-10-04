@@ -60,6 +60,10 @@ declare global {
   // как window.AppUtils). Объявляем глобальную переменную, чтобы работали обе
   // формы обращения.
   var AppUtils: any;
+// app/backup-updates.js — модуль (шаг «в»): мосты window.* для классических
+// потребителей. Объявление как global var даёт и голое имя, и window.X.
+var buildBackupPayload: any;
+var checkForUpdates: any;
 }
 
 export {};
