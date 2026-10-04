@@ -1,3 +1,5 @@
+import { revealMistZenByWheel } from './mist-toggles.js';
+
 import { navHandleKeydown } from './navigation.js';
 
 import { ShortcutCategories } from '../services/shortcut-categories.js';
