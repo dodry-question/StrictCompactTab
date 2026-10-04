@@ -1,3 +1,4 @@
+import { saveState } from './state-render.js';
 import { initLayoutDragAndDrop, onResizeStart, removeResizeHandles } from './layout-dnd.js';
 
 import { renderModalShortcutsList } from './modal-shortcuts.js';
@@ -244,11 +245,6 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
-// Мосты для классических потребителей (state-render, probe в app-load.test) —
-// уберём в фазе 3 шага «в» при переходе потребителей на import.
-window.layoutEditControls = layoutEditControls;
-window.populateSearchEnginesSelect = populateSearchEnginesSelect;
-window.initCustomSearchEngines = initCustomSearchEngines;
 export {
   layoutEditControls,
   populateSearchEnginesSelect,

@@ -250,6 +250,7 @@ const probe = (expr) => vm.runInThisContext(expr);
 const { renderModalShortcutsList } = await import('../app/modal-shortcuts.js');
 const { initLayoutDragAndDrop } = await import('../app/layout-dnd.js');
 const { navHandleKeydown } = await import('../app/navigation.js');
+const { initCustomSearchEngines } = await import('../app/controls.js');
 
 test('общая область видимости разделённых файлов сохранилась', () => {
   // функции из разных частей бывшего script.js
@@ -259,7 +260,7 @@ test('общая область видимости разделённых фай
   assert.equal(typeof navHandleKeydown, 'function');         // navigation.js
   assert.equal(typeof initLayoutDragAndDrop, 'function');    // layout-dnd.js
   assert.equal(probe('typeof updateClockAndDate'), 'function');       // clock-topbar.js
-  assert.equal(probe('typeof initCustomSearchEngines'), 'function');  // controls.js
+  assert.equal(typeof initCustomSearchEngines, 'function');  // controls.js
   // let/const-состояние, разъехавшееся по файлам (фаза 3: прямые import)
   assert.equal(typeof STATE, 'object');                               // state/store.js (import)
   assert.equal(typeof store.state, 'object');                         // владелец состояния

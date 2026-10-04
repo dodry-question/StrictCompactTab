@@ -50,10 +50,6 @@ var searchEngineSelect: any;
 var themeSelect: any;
 var addCatCustom: any;
 var addCatSelectedFor: any;
-// app/controls.js — модуль (шаг «в»)
-var layoutEditControls: any;
-var populateSearchEnginesSelect: any;
-var initCustomSearchEngines: any;
 // app/shortcuts-migration.js — модуль (шаг «в»)
 var extractCategoryMeta: any;
 var generateId: any;

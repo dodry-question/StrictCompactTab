@@ -1,3 +1,5 @@
+import { layoutEditControls, populateSearchEnginesSelect } from './controls.js';
+
 import { rebuildNavModel } from './navigation.js';
 
 import { removeResizeHandles } from './layout-dnd.js';
