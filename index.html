@@ -6,15 +6,16 @@
   <!-- Подключение фавиконки вкладки -->
   <link class="page-favicon" rel="icon" type="image/png" href="assets/icon16_trans.png">
   <script src="favicon-loader.js"></script>
-  <!-- Всё ниже — defer: браузер не блокирует разбор документа и не откладывает
-       загрузку CSS (link идут ниже), а скрипты исполняются после разбора строго
-       в порядке документа — ровно как раньше, только без ожидания.
+  <!-- Всё ниже — defer или module: браузер не блокирует разбор документа и не
+       откладывает загрузку CSS (link идут ниже), а скрипты исполняются после
+       разбора строго в порядке документа — ровно как раньше, только без
+       ожидания (module без async имеет defer-семантику, порядок сохраняется).
        Относительный порядок сохранён:
        i18n → state → storage → services → src/utils.js (module) → app/*,
        поэтому window.store/storage/AppUtils готовы к моменту чтения в app/*.
        favicon-loader.js намеренно остаётся синхронным: он ставит фавиконку
        прямо в <head> до первой отрисовки, иначе вкладка мигает дефолтной. -->
-  <script defer src="i18n/translations.js"></script>
+  <script type="module" src="i18n/translations.js"></script>
   <script defer src="state/defaults.js"></script>
   <script defer src="state/store.js"></script>
   <script defer src="storage/storage.js"></script>

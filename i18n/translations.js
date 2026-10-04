@@ -1,4 +1,6 @@
-window.TRANSLATIONS = {
+// Словарь локализации. Этап «в» (ESM): файл — модуль, глобал window.TRANSLATIONS
+// остаётся временным «мостом» для классических app/* до их перехода на import.
+const TRANSLATIONS = {
   en: {
     searchPlaceholder: "Search the web...",
     searchBtnTitle: "Search",
@@ -264,3 +266,8 @@ window.TRANSLATIONS = {
     mistPerRowLabel: "Ярлыков в ряду"
   }
 };
+
+// Мост для классических app/* (читают window.TRANSLATIONS) — уберём в фазе 3,
+// когда потребители перейдут на import { TRANSLATIONS }.
+window.TRANSLATIONS = TRANSLATIONS;
+export { TRANSLATIONS };
