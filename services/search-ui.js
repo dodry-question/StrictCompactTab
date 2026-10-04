@@ -1,4 +1,4 @@
-window.SearchUI = {
+const SearchUI = {
   initCustomSearchEngines(state, translations, actions) {
     const toggleBtn = document.getElementById('btn-toggle-custom-engines');
     const panel = document.getElementById('custom-engines-panel');
@@ -238,3 +238,7 @@ window.SearchUI = {
     }
   }
 };
+
+// Мост для классических app/* — уберём в фазе 3 шага «в».
+window.SearchUI = SearchUI;
+export { SearchUI };

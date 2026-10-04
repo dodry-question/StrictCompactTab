@@ -1,4 +1,4 @@
-window.WeatherService = {
+const WeatherService = {
   async fetchForecast(latitude, longitude) {
     const params = new URLSearchParams({
       latitude: String(latitude),
@@ -49,3 +49,7 @@ window.WeatherService = {
     return isRu ? 'Умеренно' : 'Moderate';
   }
 };
+
+// Мост для классических app/* — уберём в фазе 3 шага «в».
+window.WeatherService = WeatherService;
+export { WeatherService };

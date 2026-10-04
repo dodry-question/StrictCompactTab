@@ -1,4 +1,4 @@
-window.ShortcutLayout = {
+const ShortcutLayout = {
   getGridMetrics(count, size, configuredColumns, viewportWidth) {
     let itemWidth = 85;
     if (size === 'medium') itemWidth = 98;
@@ -18,3 +18,7 @@ window.ShortcutLayout = {
     return { itemWidth, gap, padding, columns, maxWidth, perRow };
   }
 };
+
+// Мост для классических app/* — уберём в фазе 3 шага «в».
+window.ShortcutLayout = ShortcutLayout;
+export { ShortcutLayout };

@@ -1,4 +1,4 @@
-window.ShortcutCategories = {
+const ShortcutCategories = {
   getHotkeyIndex(key, categoryCount) {
     const index = key === '0' ? 9 : /^[1-9]$/.test(key) ? Number(key) - 1 : -1;
     return index >= 0 && index < categoryCount ? index : -1;
@@ -43,3 +43,7 @@ window.ShortcutCategories = {
     return tabs.find(tab => tab.id === activeCategory) || tabs[0] || null;
   }
 };
+
+// Мост для классических app/* — уберём в фазе 3 шага «в».
+window.ShortcutCategories = ShortcutCategories;
+export { ShortcutCategories };

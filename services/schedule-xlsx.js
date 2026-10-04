@@ -138,3 +138,7 @@
     }
   };
 })();
+
+// Экспорт для будущих import (шаг «в»); мост window.ScheduleXlsx задаётся внутри IIFE.
+const ScheduleXlsx = window.ScheduleXlsx;
+export { ScheduleXlsx };

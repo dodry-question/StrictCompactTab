@@ -143,3 +143,7 @@
     }
   };
 })();
+
+// Экспорт для будущих import (шаг «в»); мост window.ShortcutIcons задаётся внутри IIFE.
+const ShortcutIcons = window.ShortcutIcons;
+export { ShortcutIcons };

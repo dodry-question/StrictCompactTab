@@ -1,4 +1,4 @@
-window.WeatherDrawer = {
+const WeatherDrawer = {
   init(state, translations) {
     const trigger = document.getElementById('weather-widget');
     const topbar = document.getElementById('mist-topbar');
@@ -221,3 +221,7 @@ window.WeatherDrawer = {
     return { open, close };
   }
 };
+
+// Мост для классических app/* — уберём в фазе 3 шага «в».
+window.WeatherDrawer = WeatherDrawer;
+export { WeatherDrawer };

@@ -305,3 +305,7 @@
     }
   };
 })();
+
+// Экспорт для будущих import (шаг «в»); мост window.ScheduleParser задаётся внутри IIFE.
+const ScheduleParser = window.ScheduleParser;
+export { ScheduleParser };

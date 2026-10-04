@@ -1,4 +1,4 @@
-window.SearchService = {
+const SearchService = {
   getBaseUrl(searchEngine, customSearchEngines) {
     const engines = {
       google: "https://www.google.com/search?q=",
@@ -28,3 +28,7 @@ window.SearchService = {
     return baseUrl + encodeURIComponent(query);
   }
 };
+
+// Мост для классических app/* — уберём в фазе 3 шага «в».
+window.SearchService = SearchService;
+export { SearchService };

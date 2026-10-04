@@ -1,4 +1,4 @@
-window.ShortcutRenderer = {
+const ShortcutRenderer = {
   renderCategoryTabs(element, tabs, activeCategory, onSelect) {
     if (!element) return;
 
@@ -76,3 +76,7 @@ window.ShortcutRenderer = {
     container.appendChild(fragment);
   }
 };
+
+// Мост для классических app/* — уберём в фазе 3 шага «в».
+window.ShortcutRenderer = ShortcutRenderer;
+export { ShortcutRenderer };
