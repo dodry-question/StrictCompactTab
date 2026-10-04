@@ -1,3 +1,5 @@
+import { checkForUpdates } from './backup-updates.js';
+
 import { STATE } from '../state/store.js';
 
 import { normalizeMistWidgets } from '../src/utils.js';

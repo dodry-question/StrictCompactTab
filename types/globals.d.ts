@@ -36,10 +36,6 @@ declare global {
 
   // src/utils.js — чистый ESM-модуль (фаза 3): публикаций в globalThis больше
   // нет, потребители берут функции через import.
-// app/backup-updates.js — модуль (шаг «в»): мосты window.* для классических
-// потребителей. Объявление как global var даёт и голое имя, и window.X.
-var buildBackupPayload: any;
-var checkForUpdates: any;
 // app/settings-panel.js — модуль (шаг «в»): мосты для классических потребителей
 // (голое имя в потребителе + window.X при назначении обеспечиваются одним var).
 var searchInput: any;

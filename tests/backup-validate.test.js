@@ -50,10 +50,9 @@ vm.runInThisContext('var btnExport = null; var btnImport = null; var importFileI
 });
 // app/backup-updates.js — модуль (шаг «в»): грузится после заглушек btn*,
 // потому что на верхнем уровне файл их читает
-await import(pathToFileURL(path.join(ROOT, 'app/backup-updates.js')).href);
+const { buildBackupPayload } = await import(pathToFileURL(path.join(ROOT, 'app/backup-updates.js')).href);
 
 const sanitize = BackupValidate.sanitize;
-const buildBackupPayload = vm.runInThisContext('buildBackupPayload');
 
 test('sanitize отклоняет корень, не похожий на бэкап', () => {
   [null, undefined, 'text', 42, true].forEach((root) => {

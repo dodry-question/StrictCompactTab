@@ -1,3 +1,5 @@
+import { checkForUpdates } from './backup-updates.js';
+
 import { renderModalShortcutsList } from './modal-shortcuts.js';
 
 import { ShortcutRenderer } from '../services/shortcut-renderer.js';

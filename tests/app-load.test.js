@@ -374,15 +374,19 @@ test('loadState снимает флаг state-loading даже при исклю
   assert.match(source, /catch\s*\(error\)/, 'тело колбэка должно быть в try/catch');
 });
 
+// backup-updates.js уже загружен харнессом выше (btn*-мосты core.js навешаны)
+const { buildBackupPayload } = await import('../app/backup-updates.js');
+
 test('экспорт бэкапа не тащит файл расписания, импорт возвращает настройки плагина', () => {
   // Асимметрия была с обеих сторон: scheduleData (сотни КБ разобранного .xlsx)
   // попадал в JSON, а scheduleEnabled/scheduleGroup при импорте терялись,
   // потому что clearAndSet стирает хранилище целиком.
-  const payload = probe('buildBackupPayload({' +
-    ' scheduleData: { groups: [{ name: "G", lessons: [1,2,3] }] },' +
-    ' lastUpdateCheck: 123,' +
-    ' shortcutIconCache: { "128|example.com": "data:image/png;base64,x" },' +
-    ' theme: "dark" })');
+  const payload = buildBackupPayload({
+    scheduleData: { groups: [{ name: 'G', lessons: [1, 2, 3] }] },
+    lastUpdateCheck: 123,
+    shortcutIconCache: { '128|example.com': 'data:image/png;base64,x' },
+    theme: 'dark'
+  });
 
   assert.equal(payload.scheduleData, undefined, 'файл расписания не должен попадать в бэкап');
   assert.equal(payload.lastUpdateCheck, undefined, 'служебные ключи не должны попадать в бэкап');
