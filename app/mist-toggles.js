@@ -204,3 +204,22 @@ if (showSecondsCb) {
   });
 }
 
+// Мосты для потребителей (state-render читает 5 чекбокс-констант,
+// input-keys зовёт revealMistZenByWheel) — уберём в фазе 3 шага «в».
+window.showClockCb = showClockCb;
+window.showDateCb = showDateCb;
+window.timeFormatCb = timeFormatCb;
+window.showSecondsCb = showSecondsCb;
+window.layoutIosModeCb = layoutIosModeCb;
+window.revealMistZenByWheel = revealMistZenByWheel;
+export {
+  showClockCb,
+  showDateCb,
+  timeFormatCb,
+  showSecondsCb,
+  layoutIosModeCb,
+  revealMistZenShortcuts,
+  scheduleHideMistZenShortcuts,
+  revealMistZenByWheel
+};
+

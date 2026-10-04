@@ -117,6 +117,13 @@ var selectCategory: any;
 var renderCategoryTabs: any;
 var tabsPanelAboveGrid: any;
 var syncTabsDomPosition: any;
+// app/mist-toggles.js — модуль (шаг «в»)
+var showClockCb: any;
+var showDateCb: any;
+var timeFormatCb: any;
+var showSecondsCb: any;
+var layoutIosModeCb: any;
+var revealMistZenByWheel: any;
 }
 
 export {};
