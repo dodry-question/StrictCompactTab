@@ -146,14 +146,11 @@ function updateClockAndDate() {
 setInterval(updateClockAndDate, 1000);
 updateClockAndDate();
 
-// activeCategory переприсваивают categories-tabs и mist-toggles — ACCESSOR.
+// activeCategory: запись снаружи (categories-tabs, mist-toggles) — через
+// setActiveCategory, чтение — через import (live binding). Фаза 3, часть 3.
 // Остальные 14 мостов (mistTabsEl/weather-элементы/renderTopbar/
 // updateClockAndDate) сняты — фаза 3, потребители импортируют.
-Object.defineProperty(window, 'activeCategory', {
-  get: () => activeCategory,
-  set: (value) => { activeCategory = value; },
-  configurable: true
-});
+function setActiveCategory(value) { activeCategory = value; }
 export {
   clockElement,
   dateElement,
@@ -171,6 +168,7 @@ export {
   mistZenZone,
   mistTopbarEl,
   activeCategory,
+  setActiveCategory,
   renderTopbar,
   updateClockAndDate
 };

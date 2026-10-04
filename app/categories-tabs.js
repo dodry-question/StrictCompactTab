@@ -1,6 +1,6 @@
 import { renderShortcuts, container } from './state-render.js';
 
-import { mistTabsEl } from './clock-topbar.js';
+import { mistTabsEl, activeCategory, setActiveCategory } from './clock-topbar.js';
 
 import { MIST_PAD, MIST_MAX_W, MIST_CELL_GAP, MIST_CELL_W } from './core.js';
 
@@ -23,7 +23,7 @@ function buildTabs() {
     TRANSLATIONS,
     activeCategory
   );
-  activeCategory = result.activeCategory;
+  setActiveCategory(result.activeCategory);
   return result.tabs;
 }
 
@@ -197,7 +197,7 @@ function selectCategory(tabId, index, focusTab) {
     return;
   }
 
-  activeCategory = tabId;
+  setActiveCategory(tabId);
   renderShortcuts();
 
   if (focusTab) focusTabByIndex(index);

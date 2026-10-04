@@ -252,7 +252,7 @@ const { initLayoutDragAndDrop } = await import('../app/layout-dnd.js');
 const { navHandleKeydown } = await import('../app/navigation.js');
 const { initCustomSearchEngines } = await import('../app/controls.js');
 const { applyFavicon } = await import('../app/appearance.js');
-const { updateClockAndDate, mistTabsEl } = await import('../app/clock-topbar.js');
+const { updateClockAndDate, mistTabsEl, activeCategory } = await import('../app/clock-topbar.js');
 const { loadState, renderShortcuts } = await import('../app/state-render.js');
 
 test('общая область видимости разделённых файлов сохранилась', () => {
@@ -269,7 +269,7 @@ test('общая область видимости разделённых фай
   assert.equal(typeof store.state, 'object');                         // владелец состояния
   assert.equal(STATE === store.state, true);                          // alias указывает на store
   assert.ok(Array.isArray(store.persistKeys), 'нет PERSIST_KEYS');    // единственный список ключей
-  assert.equal(probe('typeof activeCategory'), 'string');             // core.js (let activeCategory)
+  assert.equal(typeof activeCategory, 'string');           // clock-topbar.js (let activeCategory)
   assert.equal(typeof mistTabsEl, 'object');                      // clock-topbar.js (const mistTabsEl)
   assert.equal(typeof TRANSLATIONS, 'object');                       // i18n/translations.js (import)
   assert.equal(typeof formatDateLine, 'function');                    // src/utils.js (import)

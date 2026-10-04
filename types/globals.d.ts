@@ -50,8 +50,7 @@ var resizeStartScale: any;
 // app/weather.js — 4 моста сняты (фаза 3); остался getWeatherDescription (accessors сняты — часть 3)
 var getWeatherDescription: any;
 // app/categories-settings.js — 9 мостов + accessor settingsCategoryId сняты (часть 3)
-// app/clock-topbar.js — 14 мостов сняты (фаза 3); accessor activeCategory остался
-var activeCategory: any;
+// app/clock-topbar.js — 14 мостов + accessor activeCategory сняты (часть 3)
 // app/core.js — 9 мостов + accessors navModel/editingIndex сняты (часть 3); алиасы
 var DEFAULT_SHORTCUTS: any;
 var MIST_WIDGET_KEYS: any;

@@ -1,6 +1,6 @@
 import { saveState, renderShortcuts } from './state-render.js';
 
-import { updateClockAndDate, renderTopbar, mistPresetSelect, mistPerRowSelect, mistZenZone } from './clock-topbar.js';
+import { updateClockAndDate, renderTopbar, mistPresetSelect, mistPerRowSelect, mistZenZone, setActiveCategory } from './clock-topbar.js';
 
 import { applyLayoutPositions, clearCustomLayoutStyles } from './layout-widgets.js';
 
@@ -117,7 +117,7 @@ if (layoutMistModeCb) {
       if (iosCb) iosCb.checked = false;
       if (stealthCb) stealthCb.checked = false;
       document.body.classList.remove('mode-ios', 'stealth-mode');
-      activeCategory = 'main';
+      setActiveCategory('main');
     }
 
     saveState();
