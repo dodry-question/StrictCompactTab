@@ -2,7 +2,7 @@ import { saveState, renderShortcuts } from './state-render.js';
 
 import { findShortcutOrFolderById, moveNestedItem, isFolderContainingTarget } from './shortcuts-migration.js';
 
-import { refreshAfterCategoryChange, ensureSettingsCategoryId, findCategoryById, moveItemToCategory, populateCategorySelects, renderCategoryTabsBar, renderCategoryHeader, getCategoryItems, buildCategoryOptions } from './categories-settings.js';
+import { refreshAfterCategoryChange, ensureSettingsCategoryId, findCategoryById, moveItemToCategory, populateCategorySelects, renderCategoryTabsBar, renderCategoryHeader, getCategoryItems, buildCategoryOptions, settingsCategoryId, setSettingsCategoryId } from './categories-settings.js';
 
 import { compressImage } from './appearance.js';
 
@@ -178,7 +178,7 @@ function renderShortcutRow(item, isChild, parentId) {
         const currentCatId = isChild ? parentId : 'main';
         if (newCatId !== currentCatId) {
           moveItemToCategory(item.id, newCatId, true);
-          settingsCategoryId = newCatId;
+          setSettingsCategoryId(newCatId);
         }
 
         saveState();

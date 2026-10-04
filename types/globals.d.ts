@@ -36,9 +36,6 @@ declare global {
 
   // src/utils.js — чистый ESM-модуль (фаза 3): публикаций в globalThis больше
   // нет, потребители берут функции через import.
-// app/settings-panel.js — 10 мостов сняты (фаза 3); осталось 2 accessors ниже
-var addCatCustom: any;
-var addCatSelectedFor: any;
 // app/state-render.js — 5 мостов сняты (фаза 3, хаб: saveState/loadState/…)
 // app/layout-widgets.js — 13 мостов сняты (фаза 3); 9 accessors (общие let) остались
 var tempPositions: any;
@@ -54,8 +51,7 @@ var resizeStartScale: any;
 var getWeatherDescription: any;
 var draggedId: any;
 var justDroppedId: any;
-// app/categories-settings.js — 9 мостов сняты (фаза 3); accessor settingsCategoryId остался
-var settingsCategoryId: any;
+// app/categories-settings.js — 9 мостов + accessor settingsCategoryId сняты (часть 3)
 // app/clock-topbar.js — 14 мостов сняты (фаза 3); accessor activeCategory остался
 var activeCategory: any;
 // app/core.js — 9 мостов сняты (фаза 3); accessors navModel/editingIndex + алиасы

@@ -4,7 +4,7 @@ import { weatherWidget, updateClockAndDate } from './clock-topbar.js';
 
 import { updateStatusText, updateWeatherWidget, handleCityInputChange } from './weather.js';
 
-import { findCategoryById } from './categories-settings.js';
+import { findCategoryById, settingsCategoryId, setSettingsCategoryId } from './categories-settings.js';
 
 import { applyLanguage, applyTheme, compressImage } from './appearance.js';
 
@@ -54,9 +54,9 @@ if (openBtn && modal) {
     modal.classList.add('active');
     editingIndex = -1;
     // Настройки открываем сразу на категории, которая активна на экране
-    settingsCategoryId = (activeCategory && (activeCategory === 'main' || findCategoryById(activeCategory)))
+    setSettingsCategoryId((activeCategory && (activeCategory === 'main' || findCategoryById(activeCategory)))
       ? activeCategory
-      : 'main';
+      : 'main');
     renderModalShortcutsList();
     if (STATE.showWeather && STATE.weatherCoords && STATE.weatherCoords.resolvedName) {
       updateStatusText("success", STATE.weatherCoords.resolvedName);
@@ -161,6 +161,11 @@ const newCatSelect = /** @type {HTMLSelectElement} */ (document.getElementById('
 let addCatCustom = false;
 let addCatSelectedFor = null;
 
+// Запись снаружи (categories-settings.populateCategorySelects) — только через
+// сеттеры; чтение снаружи — import (live binding). Фаза 3, часть 3.
+function setAddCatCustom(value) { addCatCustom = value; }
+function setAddCatSelectedFor(value) { addCatSelectedFor = value; }
+
 if (newCatSelect) {
   newCatSelect.addEventListener('change', () => { addCatCustom = true; });
 }
@@ -233,23 +238,11 @@ if (newIconInput) {
   });
 }
 
-// addCatCustom/addCatSelectedFor пишет ЕЩЁ categories-settings (классический):
-// мост по значению здесь разошёлся бы (десинк при записи), поэтому запись
-// прокидывается в модуль через accessors.
-Object.defineProperty(window, 'addCatCustom', {
-  get: () => addCatCustom,
-  set: (value) => { addCatCustom = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'addCatSelectedFor', {
-  get: () => addCatSelectedFor,
-  set: (value) => { addCatSelectedFor = value; },
-  configurable: true
-});
-
+// addCatCustom/addCatSelectedFor: запись из categories-settings идёт через
+// setAddCatCustom/setAddCatSelectedFor (часть 3), чтение — через import.
 export {
   searchInput, modal, openBtn, closeBtn, closeSettings,
   sizeSelect, columnsSelect, languageSelect, searchEngineSelect, themeSelect,
-  addCatCustom, addCatSelectedFor
+  addCatCustom, addCatSelectedFor, setAddCatCustom, setAddCatSelectedFor
 };
 

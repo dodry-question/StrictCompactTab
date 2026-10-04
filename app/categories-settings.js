@@ -1,3 +1,5 @@
+import { addCatCustom, addCatSelectedFor, setAddCatCustom, setAddCatSelectedFor } from './settings-panel.js';
+
 import { saveState, renderShortcuts } from './state-render.js';
 
 import { generateId } from './shortcuts-migration.js';
@@ -12,6 +14,9 @@ import { TRANSLATIONS } from '../i18n/translations.js';
 // Категории — это вкладки-разделы: создание, переименование, удаление,
 // порядок и перетаскивание ярлыков между ними.
 let settingsCategoryId = 'main';
+// Запись снаружи (settings-panel/modal-shortcuts) — только через сеттер;
+// чтение снаружи — import (live binding). Фаза 3, часть 3.
+function setSettingsCategoryId(value) { settingsCategoryId = value; }
 
 function getCategoryList() {
   return (STATE.shortcuts || []).filter(s => s && s.isFolder);
@@ -70,8 +75,8 @@ function populateCategorySelects() {
   if (addSelect) {
     // Категория в настройках сменилась — список снова следует за ней
     if (addCatSelectedFor !== settingsCategoryId) {
-      addCatCustom = false;
-      addCatSelectedFor = settingsCategoryId;
+      setAddCatCustom(false);
+      setAddCatSelectedFor(settingsCategoryId);
     }
     const preferred = (addCatCustom && addSelect.value)
       ? addSelect.value
@@ -304,15 +309,11 @@ function renderCategoryHeader() {
   header.appendChild(actions);
 }
 
-// settingsCategoryId переприсваивают settings-panel и modal-shortcuts —
-// ACCESSOR, иначе десинк. (Мосты 9 функций сняты — фаза 3.)
-Object.defineProperty(window, 'settingsCategoryId', {
-  get: () => settingsCategoryId,
-  set: (value) => { settingsCategoryId = value; },
-  configurable: true
-});
+// settingsCategoryId: запись снаружи (settings-panel/modal-shortcuts) —
+// через setSettingsCategoryId, чтение — через import (часть 3, фаза 3).
 export {
   settingsCategoryId,
+  setSettingsCategoryId,
   getCategoryList,
   findCategoryById,
   getCategoryItems,
