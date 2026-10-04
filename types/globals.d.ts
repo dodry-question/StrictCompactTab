@@ -1,25 +1,25 @@
-// Ambient-декларации кастомных глобалов расширения.
+// Ambient-декларации остаточных глобалов расширения (этап «в» закрыт).
 //
-// Приложение собрано из classic-скриптов, которые публикуют свои модули в
-// window / globalThis. Без этого файла `tsc --noEmit` (checkJs) считал бы
-// каждое обращение `window.X` ошибкой «Property 'X' does not exist on Window».
+// Этап «в» (ESM) убрал публикации модулей в window: app/* и сервисы связаны
+// import-ами (live bindings), запись в общие let — через сеттеры владельцев.
+// Остаток после кластеров 1–29 и фазы 4:
+//   * getWeatherDescription — мост app/weather.js, задокументированное
+//     исключение: clock-topbar читает его в рантайме, weather читает
+//     константы clock-topbar на top-level — обратный импорт замкнул бы
+//     цикл; снимается при следующей пересборке clock-topbar;
+//   * window.materialColorUtilities — вендорная min-библиотека
+//     (assets/material-color-utilities.min.js), грузится динамически
+//     в app/theme-adaptive.js;
+//   * Navigator.brave / Navigator.userAgentData — нестандартные API.
 //
-// ВАЖНО: типы здесь намеренно широкие (any) — это стартовая точка этапа P0.
-// Уточнять по мере типизации сервисов (P2) и/или перевода на ESM+импорты (P1),
-// после чего этот файл можно будет удалить. Профиль данных состояния описан
-// JSDoc @typedef'ами в state/defaults.js.
-//
-// ВНИМАНИЕ (обновлено в фазе 3): интерфейс Window и `var` ниже — два разных
-// пространства имён tsc, конфликта нет. `var X` даёт голое имя потребителям
-// (пока они не переведены на import), `Window.X` — присвоения `window.X = ...`.
+// Типы намеренно широкие (any) — уточнение по мере типизации (P2).
+// Профиль данных состояния описан JSDoc @typedef'ами в state/defaults.js
+// (файл остаётся без <script> в index.html — только контейнер глобальных
+// typedef'ов для checkJs; рантайм-значения — в state/values.js).
 declare global {
   interface Window {
-    // Локализация и дефолты (TRANSLATIONS и DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS
-    // переведены на import в фазе 3)
     // Внешняя библиотека (загружается динамически в theme-adaptive.js)
     materialColorUtilities: any;
-    // Тест-хук
-    __nextLesson: any;
   }
 
   // Нестандартные браузерные API, которых нет в стандартной lib.dom:
@@ -32,15 +32,8 @@ declare global {
     };
   }
 
-  // src/utils.js — чистый ESM-модуль (фаза 3): публикаций в globalThis больше
-  // нет, потребители берут функции через import.
-// app/state-render.js — 5 мостов сняты (фаза 3, хаб: saveState/loadState/…)
-// app/layout-widgets.js — 13 мостов + 9 accessors сняты (часть 3)
-// app/weather.js — 4 моста сняты (фаза 3); остался getWeatherDescription (accessors сняты — часть 3)
-var getWeatherDescription: any;
-// app/categories-settings.js — 9 мостов + accessor settingsCategoryId сняты (часть 3)
-// app/clock-topbar.js — 14 мостов + accessor activeCategory сняты (часть 3)
-// app/core.js — 9 мостов + accessors navModel/editingIndex сняты (часть 3)
+  // app/weather.js — единственный оставшийся мост (TDZ, см. шапку файла)
+  var getWeatherDescription: any;
 }
 
 export {};
