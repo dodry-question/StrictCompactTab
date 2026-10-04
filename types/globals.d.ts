@@ -97,6 +97,16 @@ var findShortcutOrFolderById: any;
 var isFolderContainingTarget: any;
 var closeFolder: any;
 var folderModal: any;
+// app/appearance.js — модуль (шаг «в»)
+var compressImage: any;
+var applyBackground: any;
+var applyTheme: any;
+var applyMistMode: any;
+var applyMistPreset: any;
+var syncModeToggles: any;
+var applyClockVisibility: any;
+var applyFavicon: any;
+var applyLanguage: any;
 }
 
 export {};

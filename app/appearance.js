@@ -310,3 +310,28 @@ function applyLanguage(lang) {
   document.title = dict.pageTitle || (lang === 'ru' ? 'Новая вкладка' : 'New Tab');
 }
 
+// Мосты для потребителей (mist-toggles, state-render, controls, schedule-ui/app-load
+// тесты — классика; settings-panel, modal-shortcuts — уже модули) —
+// уберём в фазе 3 шага «в».
+window.compressImage = compressImage;
+window.applyBackground = applyBackground;
+window.applyTheme = applyTheme;
+window.applyMistMode = applyMistMode;
+window.applyMistPreset = applyMistPreset;
+window.syncModeToggles = syncModeToggles;
+window.applyClockVisibility = applyClockVisibility;
+window.applyFavicon = applyFavicon;
+window.applyLanguage = applyLanguage;
+export {
+  compressImage,
+  applyBackground,
+  applyTheme,
+  applyMistMode,
+  applyMistPreset,
+  syncClockDomPosition,
+  syncModeToggles,
+  applyClockVisibility,
+  applyFavicon,
+  applyLanguage
+};
+
