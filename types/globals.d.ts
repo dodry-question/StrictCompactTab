@@ -192,6 +192,12 @@ var weatherWidget: any;
 var weatherIcon: any;
 var renderTopbar: any;
 var updateClockAndDate: any;
+// app/schedule.js — модуль (шаг «в»): 5 мостов, внутренние let не тронуты
+var syncScheduleEnabled: any;
+var refreshSchedulePanel: any;
+var handleScheduleFile: any;
+var isSchedulePanelOpen: any;
+var closeSchedulePanel: any;
 }
 
 export {};

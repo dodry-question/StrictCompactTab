@@ -640,3 +640,23 @@ setInterval(() => {
   const next = window.ScheduleParser.nextLesson(group.lessons || [], new Date());
   if ((next ? next.day + '|' + next.time : '') !== scheduleNextKey) renderScheduleGroup();
 }, 60000);
+
+// Мосты для потребителей и тестов (state-render, appearance — typeof-гард,
+// schedule-ui.test зовёт через globalThis): уберём в фазе 3 шага «в».
+// Внутренние let (scheduleData, scheduleMode, ...) снаружи не трогают —
+// accessors не нужны.
+window.syncScheduleEnabled = syncScheduleEnabled;
+window.refreshSchedulePanel = refreshSchedulePanel;
+window.handleScheduleFile = handleScheduleFile;
+window.isSchedulePanelOpen = isSchedulePanelOpen;
+window.closeSchedulePanel = closeSchedulePanel;
+export {
+  syncScheduleEnabled,
+  openSchedulePanel,
+  closeSchedulePanel,
+  toggleSchedulePanel,
+  isSchedulePanelOpen,
+  refreshSchedulePanel,
+  handleScheduleFile,
+  scheduleData
+};
