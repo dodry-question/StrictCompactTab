@@ -1,3 +1,5 @@
+import { updateStatusText, updateWeatherWidget, handleCityInputChange } from './weather.js';
+
 import { findCategoryById } from './categories-settings.js';
 
 import { applyLanguage, applyTheme, compressImage } from './appearance.js';

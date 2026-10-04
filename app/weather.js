@@ -247,13 +247,14 @@ Object.defineProperty(window, 'justDroppedId', {
   set: (value) => { justDroppedId = value; },
   configurable: true
 });
-// Мосты функций для потребителей (clock-topbar, settings-panel, state-render) —
-// уберём в фазе 3 шага «в».
+// 4 моста сняты — фаза 3 (внешний потребитель applyWeatherVisibility —
+// state-render, теперь через import; updateStatusText/updateWeatherWidget/
+// handleCityInputChange — settings-panel; остальные имени использовались
+// только внутри файла). getWeatherDescription остаётся мостом для
+// clock-topbar: топ-левел weather.js читает showWeatherCb/weatherCityInput
+// из clock-topbar — import-цикл в обе стороны дал бы TDZ, пока clock-topbar
+// сам не переведён. Ниже — accessors draggedId/justDroppedId (часть 3).
 window.getWeatherDescription = getWeatherDescription;
-window.updateStatusText = updateStatusText;
-window.updateWeatherWidget = updateWeatherWidget;
-window.handleCityInputChange = handleCityInputChange;
-window.applyWeatherVisibility = applyWeatherVisibility;
 export {
   handleCityInputChange,
   updateStatusText,

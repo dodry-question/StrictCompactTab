@@ -68,14 +68,10 @@ var getWidgetKey: any;
 var clearCustomLayoutStyles: any;
 var mistWidgetKey: any;
 var applyClockScale: any;
-// app/weather.js — модуль (шаг «в»): 2 accessors + 5 мостов функций
+// app/weather.js — 4 моста сняты (фаза 3); остался getWeatherDescription + accessors
+var getWeatherDescription: any;
 var draggedId: any;
 var justDroppedId: any;
-var getWeatherDescription: any;
-var updateStatusText: any;
-var updateWeatherWidget: any;
-var handleCityInputChange: any;
-var applyWeatherVisibility: any;
 // app/categories-settings.js — 9 мостов сняты (фаза 3); accessor settingsCategoryId остался
 var settingsCategoryId: any;
 // app/clock-topbar.js — модуль (шаг «в»): accessor activeCategory + 12 DOM-мостов

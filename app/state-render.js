@@ -1,3 +1,5 @@
+import { applyWeatherVisibility, updateWeatherWidget, updateStatusText } from './weather.js';
+
 import { migrateToNested, extractCategoryMeta } from './shortcuts-migration.js';
 
 import { buildTabs, getActiveTab, getGridMetrics, stabilizeShortcutsHeight, renderMistPills, renderCategoryTabs, syncTabsDomPosition } from './categories-tabs.js';
