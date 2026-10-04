@@ -165,6 +165,17 @@ var updateStatusText: any;
 var updateWeatherWidget: any;
 var handleCityInputChange: any;
 var applyWeatherVisibility: any;
+// app/categories-settings.js — модуль (шаг «в»): accessor + 9 мостов
+var settingsCategoryId: any;
+var refreshAfterCategoryChange: any;
+var ensureSettingsCategoryId: any;
+var findCategoryById: any;
+var moveItemToCategory: any;
+var populateCategorySelects: any;
+var renderCategoryTabsBar: any;
+var renderCategoryHeader: any;
+var getCategoryItems: any;
+var buildCategoryOptions: any;
 }
 
 export {};

@@ -294,3 +294,40 @@ function renderCategoryHeader() {
   header.appendChild(actions);
 }
 
+// settingsCategoryId переприсваивают settings-panel и modal-shortcuts —
+// ACCESSOR, иначе десинк. Мосты функций — для modal-shortcuts/settings-panel/
+// appearance; уберём в фазе 3 шага «в».
+Object.defineProperty(window, 'settingsCategoryId', {
+  get: () => settingsCategoryId,
+  set: (value) => { settingsCategoryId = value; },
+  configurable: true
+});
+window.refreshAfterCategoryChange = refreshAfterCategoryChange;
+window.ensureSettingsCategoryId = ensureSettingsCategoryId;
+window.findCategoryById = findCategoryById;
+window.moveItemToCategory = moveItemToCategory;
+window.populateCategorySelects = populateCategorySelects;
+window.renderCategoryTabsBar = renderCategoryTabsBar;
+window.renderCategoryHeader = renderCategoryHeader;
+window.getCategoryItems = getCategoryItems;
+window.buildCategoryOptions = buildCategoryOptions;
+export {
+  settingsCategoryId,
+  getCategoryList,
+  findCategoryById,
+  getCategoryItems,
+  getParentCategoryId,
+  ensureSettingsCategoryId,
+  buildCategoryOptions,
+  populateCategorySelects,
+  refreshAfterCategoryChange,
+  createCategory,
+  renameCategory,
+  deleteCategory,
+  moveCategory,
+  removeItemById,
+  moveItemToCategory,
+  renderCategoryTabsBar,
+  renderCategoryHeader
+};
+
