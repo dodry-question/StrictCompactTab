@@ -7,7 +7,7 @@ import { TRANSLATIONS } from '../i18n/translations.js';
 // TRANSLATIONS приходит через import в первой строке файла
 
 // --- Р РђРЎРЁРР Р•РќРќРђРЇ РЎРРЎРўР•РњРђ РҐР РђРќР•РќРРЇ (СЃ РїРѕРґРґРµСЂР¶РєРѕР№ Р±СЌРєР°РїРѕРІ) ---
-const storage = window.storage;
+// storage: потребители импортируют напрямую из storage/storage.js — фаза 3.
 
 // --- Р§РРЎРўР«Р™ РЎРўРђР РўРћР’Р«Р™ РЁРђР±Р›РћРќ ---
 const DEFAULT_SHORTCUTS = window.DEFAULT_SHORTCUTS;
@@ -71,7 +71,6 @@ window.btnImport = btnImport;
 window.importFileInput = importFileInput;
 export {
   TRANSLATIONS,
-  storage,
   DEFAULT_SHORTCUTS,
   MIST_WIDGET_KEYS,
   MIST_CELL_GAP,

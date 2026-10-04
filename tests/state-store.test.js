@@ -17,17 +17,17 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 globalThis.window = globalThis;
 
-// --- заглушка слоя хранения -------------------------------------------------
+// --- заглушка слоя хранения: патчим методы ОБЪЕКТА storage-модуля ----------
+// (store.js импортирует этот же объект — патчи свойств перехватывают вызовы)
 const gets = [];
 const sets = [];
-globalThis.storage = {
-  get(keys, cb) {
-    gets.push(keys);
-    cb({ language: 'ru' });
-  },
-  set(obj) {
-    sets.push(obj);
-  }
+const { storage } = await import(pathToFileURL(path.join(ROOT, 'storage/storage.js')).href);
+storage.get = (keys, cb) => {
+  gets.push(keys);
+  cb({ language: 'ru' });
+};
+storage.set = (obj) => {
+  sets.push(obj);
 };
 
 const { store } = await import(pathToFileURL(path.join(ROOT, 'state/store.js')).href);

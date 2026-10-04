@@ -14,9 +14,6 @@
 // (пока они не переведены на import), `Window.X` — присвоения `window.X = ...`.
 declare global {
   interface Window {
-    // Слой хранения (владелец состояния — state/store.js; фаза 3: store/STATE
-    // потребители берут через import, window.store больше нет)
-    storage: any;
     // Локализация и дефолты (TRANSLATIONS переведён на import в фазе 3)
     DEFAULT_SHORTCUTS: any;
     // Геометрия mist-виджетов
@@ -193,7 +190,6 @@ var handleScheduleFile: any;
 var isSchedulePanelOpen: any;
 var closeSchedulePanel: any;
 // app/core.js — модуль (шаг «в», фаза 2): глобальный хаб алиасов
-var storage: any;
 var DEFAULT_SHORTCUTS: any;
 var MIST_WIDGET_KEYS: any;
 var MIST_CELL_GAP: any;

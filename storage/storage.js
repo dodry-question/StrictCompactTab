@@ -1,6 +1,7 @@
 // Слой доступа к хранилищу: chrome.storage.local, иначе localStorage (тесты).
-// Этап «в» (ESM): модуль с временным мостом window.storage для классических
-// app/* — уберём в фазе 3, когда потребители перейдут на import { storage }.
+// Этап «в» (ESM, фаза 3): чистый модуль — мост window.storage убран, потребители
+// берут объект через import { storage } (объект единственный, патчи методов в
+// тестах действуют на всех импортировавших).
 const storage = {
   get: (keys, callback) => {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
@@ -98,6 +99,4 @@ const storage = {
   }
 };
 
-// Мост для классических app/* (core.js: const storage = window.storage).
-window.storage = storage;
 export { storage };

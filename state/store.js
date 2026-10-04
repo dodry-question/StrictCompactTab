@@ -1,4 +1,6 @@
 // @ts-check
+import { storage } from '../storage/storage.js';
+
 // Единственный владелец состояния приложения — этап «б» (store вместо
 // window.STATE).
 //
@@ -148,7 +150,7 @@ const store = (function () {
      * @param {(result: any) => void} callback
      */
     load(extraKeys, callback) {
-      window.storage.get(PERSIST_KEYS.concat(extraKeys || []), callback);
+      storage.get(PERSIST_KEYS.concat(extraKeys || []), callback);
     },
 
     /**
@@ -161,7 +163,7 @@ const store = (function () {
       const payload = {};
       PERSIST_KEYS.forEach((key) => { payload[key] = bag[key]; });
       if (overrides) Object.assign(payload, overrides);
-      window.storage.set(payload);
+      storage.set(payload);
     }
   };
 })();

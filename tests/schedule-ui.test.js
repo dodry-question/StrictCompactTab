@@ -10,6 +10,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { setImmediate as nodeSetImmediate } from 'node:timers';
 
 import { STATE } from '../state/store.js';
+import { storage } from '../storage/storage.js';
 
 // ---------------------------------------------------------------------------
 // Тест интерфейса плагина «Расписание».
@@ -286,15 +287,15 @@ async function waitFor(predicate, message) {
 // set/get вызывают колбэк НА СЛЕДУЮЩЕМ ТИКЕ. ЛокальныйStorage-фолбэк внутри
 // того же файла синхронный, и из-за этого тесты не воспроизводили гонки —
 // например, «удалить файл» успевало перерисовать панель со старым файлом.
-// Оборачиваем МЕТОДЫ того же объекта (не заменяем сам объект: приложение
-// держит ссылку const storage = window.storage).
+// Оборачиваем МЕТОДЫ того же объекта storage-модуля (не заменяем сам объект:
+// приложение держит import-ссылку на него же — фаза 3).
 const storageQueue = [];
 const flushStorage = () => {
   while (storageQueue.length) storageQueue.shift()();
 };
 ['get', 'set', 'getAll', 'clearAndSet'].forEach((name) => {
-  const original = app.storage[name];
-  app.storage[name] = function (...args) {
+  const original = storage[name];
+  storage[name] = function (...args) {
     const callback = args[args.length - 1];
     if (typeof callback !== 'function') return original.apply(this, args);
     storageQueue.push(() => original.apply(this, args));

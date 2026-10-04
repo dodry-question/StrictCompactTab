@@ -11,7 +11,7 @@
 //      (без puppeteer/зависимостей — только node:http + встроенный WebSocket);
 //   3) для каждой страницы собирает FCP/DCL/load из Performance API, число
 //      ресурсов, heap и проверяет функциональное состояние (state-loading снят,
-//      storage определён, часы отрисованы, 0 JS-ошибок);
+//      сервисы определены, часы отрисованы, 0 JS-ошибок);
 //   4) --throttle N даёт Emulation.setCPUThrottlingRate — имитацию слабого
 //      устройства, где блокирующие скрипты больнее всего.
 //
@@ -137,7 +137,6 @@ const PROBE = `(() => {
   const clock = document.getElementById('clock');
   const issues = [];
   if (document.documentElement.classList.contains('state-loading')) issues.push('state-loading НЕ снят');
-  if (!window.storage || typeof window.storage.get !== 'function') issues.push('storage отсутствует');
   if (!window.ShortcutRenderer) issues.push('ShortcutRenderer отсутствует');
   if (!window.SearchUI) issues.push('SearchUI отсутствует');
   if (!window.WeatherService) issues.push('WeatherService отсутствует');

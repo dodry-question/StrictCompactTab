@@ -1,3 +1,5 @@
+import { storage } from '../storage/storage.js';
+
 import { STATE, store } from '../state/store.js';
 
 import { normalizeMistWidgets } from '../src/utils.js';
