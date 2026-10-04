@@ -128,7 +128,8 @@ if (layoutMistModeCb) {
 // --- РЈРџР РђР’Р›Р•РќРР• РџР Р•РЎР•РўРђРњР РљРћРњРџРћРќРћР’РљР MIST ---
 if (mistPresetSelect) {
   mistPresetSelect.addEventListener('change', (e) => {
-    STATE.mistPreset = /** @type {HTMLSelectElement} */ (e.target).value;
+    // Значения <select> в index.html: center | split | zen (см. AppState.mistPreset)
+    STATE.mistPreset = /** @type {any} */ (/** @type {HTMLSelectElement} */ (e.target).value);
     applyMistPreset();
     // Смена пресета — абсолютные кастомные координаты сбрасываем
     // до значений нового пресета, чтобы элементы не «уезжали»

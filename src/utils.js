@@ -1,13 +1,25 @@
+/**
+ * Нормализует одну пару координат сдвига (или объект-бокс целиком: берутся x/y).
+ * @param {any} raw
+ * @returns {{x: number, y: number}}
+ */
 export function normalizeMistHeadOffset(raw) {
   const x = raw && Number.isFinite(Number(raw.x)) ? Number(raw.x) : 0;
   const y = raw && Number.isFinite(Number(raw.y)) ? Number(raw.y) : 0;
   return { x, y };
 }
 
+/**
+ * Приводит STATE.mistHeadOffset (любой прошлый или чужой формат: легаси-пара
+ * x/y, отсутствующее поле, мусор) к форме { clock: MistWidgetBox, search: ... }.
+ * @param {any} raw
+ * @returns {MistWidgets}
+ */
 export function normalizeMistWidgets(raw) {
   const isLegacy = !!(raw && typeof raw === 'object' && !raw.clock && !raw.search);
   const legacy = isLegacy ? normalizeMistHeadOffset(raw) : { x: 0, y: 0 };
-  const out = {};
+  /** @type {MistWidgets} */
+  const out = /** @type {any} */ ({});
 
   ['clock', 'search'].forEach((key) => {
     const src = raw && raw[key] && typeof raw[key] === 'object' ? raw[key] : null;

@@ -178,7 +178,7 @@ function renderMistPills(items) {
   // Настройка «Ярлыков в ряду» ограничивает ширину центрального блока:
   // виртуальная ячейка × ряд + padding − gap, но не больше MIST_MAX_W.
   // Переменная вешается на body, чтобы её видел и сам модуль (#mist-module)
-  const perRow = Math.max(1, parseInt(STATE.mistPerRow, 10) || 6);
+  const perRow = Math.max(1, Number(STATE.mistPerRow) || 6);
   document.body.style.setProperty(
     '--mist-max-w',
     Math.min(MIST_MAX_W,

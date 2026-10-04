@@ -72,8 +72,11 @@ function loadState() {
     STATE.showDate = result.showDate ?? true;
     STATE.format12h = result.format12h ?? false;
     STATE.showSeconds = result.showSeconds ?? false;
+    // Легаси-тема 'nord' из старых версий → 'dark'. Сравнение идёт по СЫРОМУ
+    // значению из хранилища: в типе AppState 'nord' нет (его мигрирует и
+    // sanitize бэкапа), поэтому проверять STATE.theme уже поздно и бессмысленно.
     STATE.theme = result.theme ?? "dark";
-    if (STATE.theme === 'nord') STATE.theme = 'dark';
+    if (result.theme === 'nord') STATE.theme = 'dark';
     STATE.adaptiveThemeData = result.adaptiveThemeData ?? null;
     STATE.layoutPositions = result.layoutPositions ?? null;
     STATE.layoutGridSnap = result.layoutGridSnap ?? false;
@@ -100,11 +103,11 @@ function loadState() {
       STATE.layoutMistMode = false;
     }
 
-    if (sizeSelect) sizeSelect.value = STATE.size;
-    if (columnsSelect) columnsSelect.value = STATE.columns;
-    if (languageSelect) languageSelect.value = STATE.language;
+    if (sizeSelect) sizeSelect.value = /** @type {any} */ (STATE.size);
+    if (columnsSelect) columnsSelect.value = String(STATE.columns);
+    if (languageSelect) languageSelect.value = /** @type {any} */ (STATE.language);
     if (searchEngineSelect) searchEngineSelect.value = STATE.searchEngine;
-    if (themeSelect) themeSelect.value = STATE.theme;
+    if (themeSelect) themeSelect.value = /** @type {any} */ (STATE.theme);
 
     if (showClockCb) showClockCb.checked = STATE.showClock;
     if (showDateCb) showDateCb.checked = STATE.showDate;
@@ -121,8 +124,8 @@ function loadState() {
     if (layoutZenModeCb) layoutZenModeCb.checked = STATE.layoutZenMode;
     const layoutMistModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-mist-mode'));
     if (layoutMistModeCb) layoutMistModeCb.checked = STATE.layoutMistMode;
-    if (mistPresetSelect) mistPresetSelect.value = STATE.mistPreset;
-    if (mistPerRowSelect) mistPerRowSelect.value = STATE.mistPerRow;
+    if (mistPresetSelect) mistPresetSelect.value = /** @type {any} */ (STATE.mistPreset);
+    if (mistPerRowSelect) mistPerRowSelect.value = String(STATE.mistPerRow);
 
     if (STATE.layoutIosMode) {
       document.body.classList.add('mode-ios');

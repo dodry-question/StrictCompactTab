@@ -22,23 +22,29 @@ let settingsCategoryId = 'main';
 // чтение снаружи — import (live binding). Фаза 3, часть 3.
 function setSettingsCategoryId(value) { settingsCategoryId = value; }
 
+// P2.1: возвращаемые типы фиксируют то, что уже гарантирует фильтр `isFolder`
+// (папка-категория всегда имеет children), — иначе на каждом обращении к
+// .children приходилось бы ставить каст.
+/** @returns {ShortcutFolder[]} */
 function getCategoryList() {
-  return (STATE.shortcuts || []).filter(s => s && s.isFolder);
+  return /** @type {ShortcutFolder[]} */ ((STATE.shortcuts || []).filter(s => s && s.isFolder));
 }
 
+/** @param {string} id @returns {ShortcutFolder|null} */
 function findCategoryById(id) {
   if (!id || id === 'main') return null;
-  return (STATE.shortcuts || []).find(s => s && s.isFolder && s.id === id) || null;
+  return /** @type {ShortcutFolder|null} */ ((STATE.shortcuts || []).find(s => s && s.isFolder && s.id === id) || null);
 }
 
+/** @param {ShortcutFolder|null} category @returns {ShortcutItem[]} */
 function getCategoryItems(category) {
   if (category) return (category.children || []).filter(s => s && !s.isFolder);
   return (STATE.shortcuts || []).filter(s => s && !s.isFolder);
 }
 
 function getParentCategoryId(itemId) {
-  for (const f of (STATE.shortcuts || [])) {
-    if (f && f.isFolder && Array.isArray(f.children) && f.children.some(c => c && c.id === itemId)) {
+  for (const f of getCategoryList()) {
+    if (f.isFolder && Array.isArray(f.children) && f.children.some(c => c && c.id === itemId)) {
       return f.id;
     }
   }
@@ -98,11 +104,13 @@ function refreshAfterCategoryChange() {
   renderModalShortcutsList();
 }
 
+/** @returns {ShortcutFolder|null} */
 function createCategory() {
   const dict = TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
   const name = prompt(dict.addCategoryPrompt, '');
   if (name === null) return null;
   const trimmed = (name || '').trim() || dict.defaultCategoryName || 'Category';
+  /** @type {ShortcutFolder} */
   const category = { id: generateId('f_'), name: trimmed, isFolder: true, children: [] };
   STATE.shortcuts.push(category);
   settingsCategoryId = category.id;
@@ -141,34 +149,40 @@ function deleteCategory(categoryId) {
 }
 
 function moveCategory(categoryId, delta) {
-  const idx = STATE.shortcuts.findIndex(s => s && s.isFolder && s.id === categoryId);
+  const categories = getCategoryList();
+  const idx = categories.findIndex(s => s && s.isFolder && s.id === categoryId);
   if (idx === -1) return;
 
   let swapIdx = -1;
   if (delta < 0) {
     for (let i = idx - 1; i >= 0; i--) {
-      if (STATE.shortcuts[i] && STATE.shortcuts[i].isFolder) { swapIdx = i; break; }
+      if (categories[i]) { swapIdx = i; break; }
     }
   } else {
-    for (let i = idx + 1; i < STATE.shortcuts.length; i++) {
-      if (STATE.shortcuts[i] && STATE.shortcuts[i].isFolder) { swapIdx = i; break; }
+    for (let i = idx + 1; i < categories.length; i++) {
+      if (categories[i]) { swapIdx = i; break; }
     }
   }
   if (swapIdx === -1) return;
 
-  const current = STATE.shortcuts[idx];
-  STATE.shortcuts[idx] = STATE.shortcuts[swapIdx];
-  STATE.shortcuts[swapIdx] = current;
+  // Меняем сами объекты в общем массиве (индекс в categories = индекс в STATE.shortcuts)
+  const current = categories[idx];
+  const rootIdx = STATE.shortcuts.indexOf(current);
+  const swapRootIdx = STATE.shortcuts.indexOf(categories[swapIdx]);
+  if (rootIdx === -1 || swapRootIdx === -1) return;
+  STATE.shortcuts[rootIdx] = categories[swapIdx];
+  STATE.shortcuts[swapRootIdx] = current;
   refreshAfterCategoryChange();
 }
 
 // Достаёт ярлык из любой категории (или с «Главной»)
+/** @param {string} itemId @returns {ShortcutItem|null} */
 function removeItemById(itemId) {
   const rootIdx = STATE.shortcuts.findIndex(s => s && s.id === itemId);
   if (rootIdx !== -1) return STATE.shortcuts.splice(rootIdx, 1)[0];
 
-  for (const f of STATE.shortcuts) {
-    if (f && f.isFolder && Array.isArray(f.children)) {
+  for (const f of getCategoryList()) {
+    if (Array.isArray(f.children)) {
       const childIdx = f.children.findIndex(s => s && s.id === itemId);
       if (childIdx !== -1) return f.children.splice(childIdx, 1)[0];
     }

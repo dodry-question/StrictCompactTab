@@ -13,6 +13,7 @@ import { TRANSLATIONS } from '../i18n/translations.js';
 // extractCategoryMeta собирает описание категорий из ЛЮБОГО из этих форматов,
 // ничего не теряя (включая ссылки и иконки ярлыков).
 function extractCategoryMeta(raw) {
+  /** @type {{id: string, name: string, items: any[]}[]} */
   const meta = [];
   if (!raw || typeof raw !== 'object') return meta;
 
@@ -112,13 +113,17 @@ function migrateToNested(flatShortcuts, categoriesOrFolders) {
   }
 
   // 2) Старый плоский формат: раскладываем ярлыки по категориям.
+  /** @type {ShortcutItem[]} */
   const nested = [];
+  /** @type {Record<string, ShortcutItem>} */
   const folderMap = {};
 
   meta.forEach(f => {
     if (f.id === 'default' || folderMap[f.id]) return;
-    folderMap[f.id] = { id: f.id, name: f.name, isFolder: true, children: [] };
-    nested.push(folderMap[f.id]);
+    /** @type {ShortcutFolder} */
+    const folder = { id: f.id, name: f.name, isFolder: true, children: [] };
+    folderMap[f.id] = folder;
+    nested.push(folder);
   });
 
   // Ярлыки, лежащие прямо внутри категорий (старые groups/folders с вложениями)
@@ -139,6 +144,7 @@ function migrateToNested(flatShortcuts, categoriesOrFolders) {
     if (!s || typeof s !== 'object') return;
     const folderId = s.__category || s.folder || s.category || s.group || 'default';
 
+    /** @type {Record<string, any>} */
     const itemObj = {};
     Object.keys(s).forEach(key => {
       if (key === 'folder' || key === 'category' || key === 'group' || key === '__category') return;
@@ -151,14 +157,16 @@ function migrateToNested(flatShortcuts, categoriesOrFolders) {
 
     if (folderId !== 'default' && !folderMap[folderId]) {
       // Ярлык ссылается на неизвестную категорию — воссоздаём её, ничего не теряем
-      folderMap[folderId] = { id: folderId, name: folderId, isFolder: true, children: [] };
-      nested.push(folderMap[folderId]);
+      /** @type {ShortcutFolder} */
+      const unknownFolder = { id: folderId, name: folderId, isFolder: true, children: [] };
+      folderMap[folderId] = unknownFolder;
+      nested.push(unknownFolder);
     }
 
     if (folderId === 'default') {
-      nested.push(itemObj);
+      nested.push(/** @type {ShortcutItem} */ (itemObj));
     } else {
-      folderMap[folderId].children.push(itemObj);
+      /** @type {ShortcutFolder} */ (folderMap[folderId]).children.push(/** @type {ShortcutItem} */ (itemObj));
     }
   });
 
@@ -177,6 +185,7 @@ function moveNestedItem(draggedId, targetId, action) {
     folderName = name.trim() || "Folder";
   }
 
+  /** @type {ShortcutItem|null} */
   let draggedItem = null;
   
   // Find dragged item and remove it
@@ -184,9 +193,9 @@ function moveNestedItem(draggedId, targetId, action) {
   if (rootIdx !== -1) {
     draggedItem = STATE.shortcuts.splice(rootIdx, 1)[0];
   } else {
-    for (let f of STATE.shortcuts) {
-      if (f.isFolder && f.children) {
-        let childIdx = f.children.findIndex(s => s.id === draggedId);
+    for (const f of getFolderItems()) {
+      if (Array.isArray(f.children)) {
+        const childIdx = f.children.findIndex(s => s.id === draggedId);
         if (childIdx !== -1) {
           draggedItem = f.children.splice(childIdx, 1)[0];
           break;
@@ -206,6 +215,7 @@ function moveNestedItem(draggedId, targetId, action) {
         target.children.push(draggedItem);
       } else {
         // Merge two shortcuts to create a folder using pre-prompted folderName
+        /** @type {ShortcutFolder} */
         const newFolder = {
           id: "f_" + Date.now() + Math.random().toString(36).substr(2, 5),
           name: folderName,
@@ -222,8 +232,8 @@ function moveNestedItem(draggedId, targetId, action) {
       const insertIdx = action === 'before' ? targetIdx : targetIdx + 1;
       STATE.shortcuts.splice(insertIdx, 0, draggedItem);
     } else {
-      for (let f of STATE.shortcuts) {
-        if (f.isFolder && f.children) {
+      for (const f of getFolderItems()) {
+        if (Array.isArray(f.children)) {
           let childIdx = f.children.findIndex(s => s.id === targetId);
           if (childIdx !== -1) {
             const insertIdx = action === 'before' ? childIdx : childIdx + 1;
@@ -237,11 +247,19 @@ function moveNestedItem(draggedId, targetId, action) {
   return true;
 }
 
+// Категории-папки из живого состояния (элементы с isFolder) — локальный
+// помощник вместо кастов: STATE.shortcuts хранит смешанный список.
+/** @returns {ShortcutFolder[]} */
+function getFolderItems() {
+  return /** @type {ShortcutFolder[]} */ ((STATE.shortcuts || []).filter(s => s && s.isFolder));
+}
+
+/** @param {string} id @returns {ShortcutItem|null} */
 function findShortcutOrFolderById(id) {
   let item = STATE.shortcuts.find(s => s.id === id);
   if (item) return item;
-  for (let f of STATE.shortcuts) {
-    if (f.isFolder && f.children) {
+  for (const f of getFolderItems()) {
+    if (Array.isArray(f.children)) {
       let child = f.children.find(s => s.id === id);
       if (child) return child;
     }
@@ -249,13 +267,14 @@ function findShortcutOrFolderById(id) {
   return null;
 }
 
+/** @param {ShortcutFolder} folder @param {string} targetId */
 function isFolderContainingTarget(folder, targetId) {
   if (!folder.children) return false;
   return folder.children.some(child => child.id === targetId);
 }
 
 function openFolder(folderId) {
-  const folder = STATE.shortcuts.find(f => f.isFolder && f.id === folderId);
+  const folder = /** @type {ShortcutFolder|undefined} */ (getFolderItems().find(f => f.id === folderId));
   if (!folder) return;
   
   const folderModal = document.getElementById('folder-modal');
@@ -295,7 +314,7 @@ function renderFolderShortcuts(folderId) {
   if (!folderShortcutsContainer) return;
   folderShortcutsContainer.innerHTML = '';
   
-  const folder = STATE.shortcuts.find(f => f.isFolder && f.id === folderId);
+  const folder = /** @type {ShortcutFolder|undefined} */ (getFolderItems().find(f => f.id === folderId));
   if (!folder || !folder.children) return;
   
   let itemWidth = 85; 

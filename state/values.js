@@ -5,7 +5,7 @@
 // app/core.js (переэкспорт) и app/state-render.js (fallback при loadState).
 // typedef'ы остаются глобальными, пока этап P2 не перенесёт их в .ts.
 
-/** @type {Shortcut[]} */
+/** @type {ShortcutItem[]} */
 export const DEFAULT_SHORTCUTS = [];
 
 /** @type {string[]} */

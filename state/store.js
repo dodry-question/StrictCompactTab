@@ -42,11 +42,14 @@ const store = (function () {
     layoutPositions: null,
     layoutGridSnap: false,
     layoutGridSize: 20,
+    layoutIosMode: false,
+    layoutStealthMode: false,
     showClock: true,
     showWeather: false,
     weatherCity: "",
     weatherCoords: { lat: null, lon: null, resolvedName: "" },
     weatherCache: { temp: "", code: null, desc: "", timestamp: 0 },
+    customSearchEngines: [],
     checkUpdates: false,
     layoutZenMode: false,
     layoutMistMode: false,
@@ -171,8 +174,8 @@ const store = (function () {
 // Фаза 3: мост window.store убран. STATE — та же ссылка, что и раньше:
 // объект state мутируется на месте и никогда не пересоздаётся (см. clone
 // DEFAULT_STATE выше), поэтому алиас не протухает при load/set.
-// any-каст сохраняет прежний тип голого имени (раньше это был `var STATE: any`
-// в globals.d.ts): typedef AppState в state/defaults.js пока неполный —
-// решение по нему отложено, рефакторинг типы не меняет.
-const STATE = /** @type {any} */ (store.state);
+// P2.1: any-каст снят — typedef AppState дополнен до PERSIST_KEYS (были
+// пропущены layoutIosMode/layoutStealthMode/customSearchEngines), поэтому
+// типы снова работают на весь app/*: STATE виден как AppState.
+const STATE = store.state;
 export { store, STATE };

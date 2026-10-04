@@ -88,7 +88,10 @@ const themeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('t
 
 if (sizeSelect) {
   sizeSelect.addEventListener('change', (e) => {
-    STATE.size = /** @type {HTMLSelectElement} */ (e.target).value;
+    // Значения <select> заданы в index.html (small|medium|large) и совпадают
+    // с объединением в AppState — каст только для того, чтобы tsc не требовал
+    // проверки литералов на каждом чтении.
+    STATE.size = /** @type {any} */ (/** @type {HTMLSelectElement} */ (e.target).value);
     saveState();
     renderShortcuts();
   });
@@ -104,7 +107,7 @@ if (columnsSelect) {
 
 if (languageSelect) {
   languageSelect.addEventListener('change', (e) => {
-    STATE.language = /** @type {HTMLSelectElement} */ (e.target).value;
+    STATE.language = /** @type {any} */ (/** @type {HTMLSelectElement} */ (e.target).value);
     saveState();
     applyLanguage(STATE.language);
     updateClockAndDate();
@@ -129,7 +132,7 @@ if (searchEngineSelect) {
 
 if (themeSelect) {
   themeSelect.addEventListener('change', (e) => {
-    STATE.theme = /** @type {HTMLSelectElement} */ (e.target).value;
+    STATE.theme = /** @type {any} */ (/** @type {HTMLSelectElement} */ (e.target).value);
     if (STATE.theme === 'adaptive' && STATE.customBackground && !STATE.adaptiveThemeData) {
       AdaptiveThemeManager.generateThemeFromWallpaper(STATE.customBackground)
         .then(themeData => {
