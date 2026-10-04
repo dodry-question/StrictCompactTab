@@ -124,6 +124,12 @@ var timeFormatCb: any;
 var showSecondsCb: any;
 var layoutIosModeCb: any;
 var revealMistZenByWheel: any;
+// app/state-render.js — модуль (шаг «в»)
+var loadState: any;
+var saveState: any;
+var updateSearchEngineUI: any;
+var renderShortcuts: any;
+var container: any;
 }
 
 export {};

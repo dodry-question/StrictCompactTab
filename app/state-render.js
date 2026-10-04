@@ -251,3 +251,22 @@ function renderShortcuts() {
   rebuildNavModel();
 }
 
+// Мосты для потребителей (saveState зовут ~10 файлов, loadState вызывается
+// на верхнем уровне input-keys, container читает categories-tabs и др.) —
+// уберём в фазе 3 шага «в».
+window.loadState = loadState;
+window.saveState = saveState;
+window.updateSearchEngineUI = updateSearchEngineUI;
+window.renderShortcuts = renderShortcuts;
+window.container = container;
+export {
+  LEGACY_CATEGORY_KEYS,
+  loadState,
+  saveState,
+  updateSearchEngineUI,
+  moveShortcut,
+  handleAutoscroll,
+  renderShortcuts,
+  container
+};
+
