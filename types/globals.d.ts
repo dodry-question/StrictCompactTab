@@ -130,6 +130,10 @@ var saveState: any;
 var updateSearchEngineUI: any;
 var renderShortcuts: any;
 var container: any;
+// app/layout-dnd.js — модуль (шаг «в»)
+var initLayoutDragAndDrop: any;
+var onResizeStart: any;
+var removeResizeHandles: any;
 }
 
 export {};
