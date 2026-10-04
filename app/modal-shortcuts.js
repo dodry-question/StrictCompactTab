@@ -385,7 +385,7 @@ function setupDragAndDropListeners(element, item, isChild) {
   });
 }
 
-// РќР°РІРµС€РёРІР°РµРј СЃР»СѓС€Р°С‚РµР»СЊ РЅР° РїСѓСЃС‚РѕР№ С„РѕРЅ РєРѕРЅС‚РµР№РЅРµСЂР° СЏСЂР»С‹РєРѕРІ РІ РЅР°СЃС‚СЂРѕР№РєР°С…
+// Навешиваем слушатель на пустой фон контейнера ярлыков в настройках
 const settingsModalList = document.getElementById('modal-shortcuts-list');
 if (settingsModalList) {
   settingsModalList.addEventListener('dragover', (e) => {

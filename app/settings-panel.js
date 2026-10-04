@@ -22,7 +22,7 @@ import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
 
-// --- РџРћРРЎРљ РЎ Р”РРќРђРњРР§Р•РЎРљРРњ РџР•Р Р•РќРђРџР РђР’Р›Р•РќРР•Рњ ---
+// --- ПОИСК С ДИНАМИЧЕСКИМ ПЕРЕНАПРАВЛЕНИЕМ ---
 const searchForm = document.getElementById('search-form');
 const searchInput = /** @type {HTMLInputElement} */ (document.getElementById('search-input'));
 if (searchForm && searchInput) {
@@ -42,7 +42,7 @@ if (searchForm && searchInput) {
 // Открытие подробного прогноза во внутренней выдвижной панели.
 if (weatherWidget) WeatherDrawer.init(STATE, TRANSLATIONS);
 
-// --- РЈРџР РђР’Р›Р•РќРР• РРќРўР•Р Р¤Р•Р™РЎРћРњ Р РњРћР”РђР›Р¬РќР«Рњ РћРљРќРћРњ ---
+// --- УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ И МОДАЛЬНЫМ ОКНОМ ---
 const modal = document.getElementById('settings-modal');
 const openBtn = document.getElementById('settings-open-btn');
 const closeBtn = document.getElementById('settings-close-btn');
@@ -79,7 +79,7 @@ if (closeBtn && modal) {
   });
 }
 
-// РќР°СЃС‚СЂРѕР№РєРё СЃРµС‚РєРё РјР°РєРµС‚Р°
+// Настройки сетки макета
 const sizeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('shortcut-size-select'));
 const columnsSelect = /** @type {HTMLSelectElement} */ (document.getElementById('shortcut-columns-select'));
 const languageSelect = /** @type {HTMLSelectElement} */ (document.getElementById('language-select'));
@@ -153,7 +153,7 @@ if (themeSelect) {
   });
 }
 
-// Р¤РѕСЂРјР° СЃРѕР·РґР°РЅРёСЏ РЅРѕРІРѕРіРѕ СЏСЂР»С‹РєР°
+// Форма создания нового ярлыка
 const newIconInput = /** @type {HTMLInputElement} */ (document.getElementById('new-shortcut-icon-file'));
 const addForm = /** @type {HTMLFormElement} */ (document.getElementById('add-shortcut-form'));
 const newNameInput = /** @type {HTMLInputElement} */ (document.getElementById('new-shortcut-name'));

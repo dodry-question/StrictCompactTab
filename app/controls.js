@@ -17,7 +17,7 @@ import { normalizeMistWidgets } from '../src/utils.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
 
-// --- РРќРР¦РРђР›РР—РђР¦РРЇ РљРќРћРџРћРљ Р РђРЎРџРћР›РћР–Р•РќРРЇ ---
+// --- ИНИЦИАЛИЗАЦИЯ КНОПОК РАСПОЛОЖЕНИЯ ---
 const btnEditLayout = document.getElementById('btn-edit-layout');
 const btnResetLayout = document.getElementById('btn-reset-layout');
 const layoutSaveBtn = document.getElementById('layout-save-btn');
@@ -60,7 +60,7 @@ if (btnEditLayout) {
     renderTopbar();
     if (layoutEditControls) layoutEditControls.style.display = 'flex';
     
-    // РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РЅР°СЃС‚СЂРѕР№РєРё СЃРµС‚РєРё РёР· STATE
+// Инициализируем настройки сетки из STATE
     if (layoutGridSnap) {
       layoutGridSnap.checked = STATE.layoutGridSnap;
     }
@@ -89,8 +89,8 @@ if (btnEditLayout) {
 
     const widgets = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.draggable-widget'));
     
-    // РЎРЅР°С‡Р°Р»Р° РёР·РјРµСЂСЏРµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ Р’РЎР•РҐ СЌР»РµРјРµРЅС‚РѕРІ, РїРѕРєР° РѕРЅРё РЅР°С…РѕРґСЏС‚СЃСЏ РІ РµСЃС‚РµСЃС‚РІРµРЅРЅРѕРј РїРѕС‚РѕРєРµ!
-    // Р­С‚Рѕ РїРѕР»РЅРѕСЃС‚СЊСЋ РїСЂРµРґРѕС‚РІСЂР°С‰Р°РµС‚ СЃС…Р»РѕРїС‹РІР°РЅРёРµ РІС‹СЃРѕС‚С‹ СЃС‚СЂР°РЅРёС†С‹ Рё РїСЂРµР¶РґРµРІСЂРµРјРµРЅРЅС‹Р№ СЃРґРІРёРі РїРѕСЃР»РµРґСѓСЋС‰РёС… СЌР»РµРјРµРЅС‚РѕРІ.
+    // Сначала измеряем координаты ВСЕХ элементов, пока они находятся в естественном потоке!
+    // Это полностью предотвращает схлопывание высоты страницы и преждевременный сдвиг последующих элементов.
     const rects = Array.from(widgets).map(w => w.getBoundingClientRect());
     const isIosMode = document.body.classList.contains('mode-ios');
     
@@ -109,7 +109,7 @@ if (btnEditLayout) {
         if (STATE.layoutPositions && STATE.layoutPositions[key]) {
           tempPositions[key] = { ...STATE.layoutPositions[key] };
         } else {
-          // Р•СЃР»Рё СЃРѕС…СЂР°РЅРµРЅРЅРѕРіРѕ РїРѕР»РѕР¶РµРЅРёСЏ РµС‰Рµ РЅРµС‚, РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РµРіРѕ РЅР° РѕСЃРЅРѕРІРµ С‚РµРєСѓС‰РёС… СЌРєСЂР°РЅРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚
+          // Если сохраненного положения еще нет, инициализируем его на основе текущих экранных координат
           tempPositions[key] = {
             left: (rect.left / window.innerWidth) * 100,
             top: (rect.top / window.innerHeight) * 100
@@ -159,7 +159,7 @@ if (layoutSaveBtn) {
       });
     }
     
-    // РЎРѕС…СЂР°РЅСЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ СЃРµС‚РєРё
+    // Сохраняем состояние сетки
     if (layoutGridSnap) {
       STATE.layoutGridSnap = layoutGridSnap.checked;
     }
@@ -214,7 +214,7 @@ if (btnResetLayout) {
   });
 }
 
-// --- РЈРџР РђР’Р›Р•РќРР• РџРћР›Р¬Р—РћР’РђРўР•Р›Р¬РЎРљРРњР РџРћРРЎРљРћР’РРљРђРњР ---
+// --- УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЬСКИМИ ПОИСКОВИКАМИ ---
 function populateSearchEnginesSelect() {
   SearchUI.populateSearchEnginesSelect(STATE, saveState);
 }

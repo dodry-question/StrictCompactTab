@@ -14,7 +14,7 @@ import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
 
-// --- РЈРџР РђР’Р›Р•РќРР• РћР‘РћРЇРњР ---
+// --- УПРАВЛЕНИЕ ОБОЯМИ ---
 const bgFileInput = /** @type {HTMLInputElement} */ (document.getElementById('bg-file-input'));
 const bgResetBtn = document.getElementById('bg-reset-btn');
 
@@ -201,7 +201,7 @@ function applyTheme() {
   }
 }
 
-// --- Р Р•Р–РРњ MIST: РџР РРњР•РќР•РќРР• Р РЎРРќРҐР РћРќРР—РђР¦РРЇ РўРЈРњР‘Р›Р•Р РћР’ ---
+// --- РЕЖИМ MIST: ПРИМЕНЕНИЕ И СИНХРОНИЗАЦИЯ ТУМБЛЕРОВ ---
 function applyMistMode() {
   document.body.classList.toggle('mode-mist', STATE.layoutMistMode);
   applyMistPreset();
@@ -212,7 +212,7 @@ function applyMistMode() {
   renderTopbar();
 }
 
-// РџСЂРёРјРµРЅСЏРµС‚ РІС‹Р±СЂР°РЅРЅС‹Р№ РїСЂРµСЃРµС‚ РєРѕРјРїРѕРЅРѕРІРєРё Mist Рё РїРѕРєР°Р·С‹РІР°РµС‚/СЃРєСЂС‹РІР°РµС‚ РїРѕРґСЂР°Р·РґРµР»С‹ РЅР°СЃС‚СЂРѕРµРє
+// Применяет выбранный пресет компоновки Mist и показывает/скрывает подразделы настроек
 function applyMistPreset() {
   const preset = STATE.mistPreset || 'center';
   document.body.classList.remove('mist-preset-center', 'mist-preset-split', 'mist-preset-zen');
@@ -256,7 +256,7 @@ function syncClockDomPosition() {
   }
 }
 
-// РЎР»РµРґРёС‚ Р·Р° РІР·Р°РёРјРѕРёСЃРєР»СЋС‡РµРЅРёРµРј СЂРµР¶РёРјРѕРІ Рё Р±Р»РѕРєРёСЂСѓРµС‚ РЅРµСЃРѕРІРјРµСЃС‚РёРјС‹Рµ РїРµСЂРµРєР»СЋС‡Р°С‚РµР»Рё
+// Следит за взаимоисключением режимов и блокирует несовместимые переключатели
 function syncModeToggles() {
   const iosCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-ios-mode'));
   const stealthCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-stealth-mode'));
@@ -273,7 +273,7 @@ function syncModeToggles() {
   if (zenCb) zenCb.disabled = mistOn;
   if (mistCb) mistCb.disabled = zenOn;
 
-  // iOS- Рё РЎС‚РµР»СЃ-СЂРµР¶РёРјС‹ РЅРµСЃРѕРІРјРµСЃС‚РёРјС‹ РЅРё СЃ Zen, РЅРё СЃ Mist
+// iOS- и Стелс-режимы несовместимы ни с Zen, ни с Mist
   if (iosCb) iosCb.disabled = zenOn || mistOn;
   if (stealthCb) stealthCb.disabled = zenOn || mistOn;
 
@@ -302,7 +302,7 @@ function applyClockVisibility() {
   renderTopbar();
 }
 
-// --- РЈРџР РђР’Р›Р•РќРР• Р”РРќРђРњРР§Р•РЎРљРћР™ РРљРћРќРљРћР™ Р’РљР›РђР”РљР ---
+// --- УПРАВЛЕНИЕ ДИНАМИЧЕСКОЙ ИКОНКОЙ ВКЛАДКИ ---
 const faviconFileInput = /** @type {HTMLInputElement} */ (document.getElementById('favicon-file-input'));
 const faviconResetBtn = document.getElementById('favicon-reset-btn');
 
@@ -342,7 +342,7 @@ function applyFavicon() {
   }
 }
 
-// --- Р”РРќРђРњРР§Р•РЎРљРђРЇ Р›РћРљРђР›РР—РђР¦РРЇ РРќРўР•Р Р¤Р•Р™РЎРђ ---
+// --- ДИНАМИЧЕСКАЯ ЛОКАЛИЗАЦИЯ ИНТЕРФЕЙСА ---
 function applyLanguage(lang) {
   const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
   

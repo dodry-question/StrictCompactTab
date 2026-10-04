@@ -40,7 +40,7 @@ import { normalizeMistWidgets } from '../src/utils.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
 
-// --- Р¤РЈРќРљР¦РР РћР‘Р РђР‘РћРўРљР Р”РђРќРќР«РҐ Р РћРўР РРЎРћР’РљР ---
+// --- ФУНКЦИИ ОБРАБОТКИ ДАННЫХ И ОТРИСОВКИ ---
 
 // Легаси-ключи от версий до 1.10.5. После успешной миграции их нужно удалить,
 // иначе удалённые пользователем категории воскресают на каждой новой вкладке
@@ -97,8 +97,8 @@ function loadState() {
     STATE.scheduleEnabled = result.scheduleEnabled ?? false;
     STATE.scheduleGroup = result.scheduleGroup ?? null;
 
-    // Р—Р°С‰РёС‚Р° РѕС‚ РєРѕРЅС„Р»РёРєС‚СѓСЋС‰РµРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ РёРјРїРѕСЂС‚РёСЂРѕРІР°РЅРЅРѕР№ СЂРµР·РµСЂРІРЅРѕР№ РєРѕРїРёРё:
-    // Zen вЂ” СЃР°РјС‹Р№ СЃС‚СЂРѕРіРёР№ СЂРµР¶РёРј, РїРѕСЌС‚РѕРјСѓ РѕРЅ РёРјРµРµС‚ РїСЂРёРѕСЂРёС‚РµС‚ РЅР°Рґ Mist
+    // Защита от конфликтующего состояния в импортированной резервной копии:
+// Zen — самый строгий режим, поэтому он имеет приоритет над Mist
     if (STATE.layoutZenMode && STATE.layoutMistMode) {
       STATE.layoutMistMode = false;
     }
@@ -145,7 +145,7 @@ function loadState() {
       document.body.classList.remove('mode-zen');
     }
 
-    // Mist Рё Zen РІР·Р°РёРјРѕРёСЃРєР»СЋС‡Р°СЋС‰РёРµ; iOS- Рё РЎС‚РµР»СЃ-СЂРµР¶РёРјС‹ РѕС‚РєР»СЋС‡Р°СЋС‚СЃСЏ РІ РѕР±РѕРёС…
+// Mist и Zen взаимоисключающие; iOS- и Стелс-режимы отключаются в обоих
     if (STATE.layoutMistMode) {
       document.body.classList.add('mode-mist');
       STATE.layoutIosMode = false;
@@ -194,7 +194,7 @@ function loadState() {
       updateStatusText("success", STATE.weatherCoords.resolvedName);
     }
 
-    // Р—Р°РїСѓСЃРє РїСЂРѕРІРµСЂРєРё РІРµСЂСЃРёР№ (С‚РѕР»СЊРєРѕ РµСЃР»Рё РіР°Р»РѕС‡РєР° Р°РєС‚РёРІРЅР°)
+    // Запуск проверки версий (только если галочка активна)
     if (STATE.checkUpdates) {
       checkForUpdates();
     }

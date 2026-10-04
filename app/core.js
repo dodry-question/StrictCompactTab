@@ -4,13 +4,13 @@ import { TRANSLATIONS } from '../i18n/translations.js';
 // AppUtils (formatDateLine, getTopbarCityName, normalizeMistWidgets) больше не
 // публикуется в window — потребители импортируют функции из src/utils.js напрямую.
 
-// --- РЎР›РћР’РђР Р¬ РџР•Р Р•Р’РћР”РћР’ (Р›РћРљРђР›РР—РђР¦РРЇ) ---
+// --- СЛОВАРЬ ПЕРЕВОДОВ (ЛОКАЛИЗАЦИЯ) ---
 // TRANSLATIONS приходит через import в первой строке файла
 
-// --- Р РђРЎРЁРР Р•РќРќРђРЇ РЎРРЎРўР•РњРђ РҐР РђРќР•РќРРЇ (СЃ РїРѕРґРґРµСЂР¶РєРѕР№ Р±СЌРєР°РїРѕРІ) ---
+// --- РАСШИРЕННАЯ СИСТЕМА ХРАНЕНИЯ (с поддержкой бэкапов) ---
 // storage: потребители импортируют напрямую из storage/storage.js — фаза 3.
 
-// --- Р§РРЎРўР«Р™ РЎРўРђР РўРћР’Р«Р™ РЁРђР±Р›РћРќ ---
+// --- ЧИСТЫЙ СТАРТОВЫЙ ШАБЛОН ---
 // STATE/store (state/store.js) потребители импортируют напрямую — фаза 3.
 
 // Геометрия Flex-потока пилюль — ТОЛЬКО режим Mist (в стандартном режиме
@@ -39,7 +39,7 @@ let navModel = null;
 
 let editingIndex = -1;
 
-// --- РРќРР¦РРђР›РР—РђР¦РРЇ Р­Р›Р•РњР•РќРўРћР’ РРњРџРћР РўРђ / Р­РљРЎРџРћР РўРђ ---
+// --- ИНИЦИАЛИЗАЦИЯ ЭЛЕМЕНТОВ ИМПОРТА / ЭКСПОРТА ---
 const btnExport = document.getElementById('btn-export');
 const btnImport = document.getElementById('btn-import');
 const importFileInput = /** @type {HTMLInputElement} */ (document.getElementById('import-file-input'));

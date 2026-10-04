@@ -2,11 +2,11 @@ import { STATE } from '../state/store.js';
 
 import { formatDateLine, getTopbarCityName } from '../src/utils.js';
 
-// --- Р§РђРЎР« Р Р”РђРўРђ ---
+// --- ЧАСЫ И ДАТА ---
 const clockElement = document.getElementById('clock');
 const dateElement = document.getElementById('date-display');
 
-// --- РџРћР“РћР”Рђ ---
+// --- ПОГОДА ---
 const weatherWidget = document.getElementById('weather-widget');
 const weatherTemp = document.getElementById('weather-temp');
 const weatherIcon = document.getElementById('weather-icon');
@@ -16,7 +16,7 @@ const weatherCityInput = /** @type {HTMLInputElement} */ (document.getElementByI
 const weatherInputStatus = document.getElementById('weather-input-status');
 const weatherSubsettings = document.getElementById('weather-subsettings');
 
-// --- Р Р•Р–РРњ MIST (РЎС‚РµРєР»СЏРЅРЅС‹Р№ РјРёРЅРёРјР°Р»РёР·Рј) ---
+// --- РЕЖИМ MIST (Стеклянный минимализм) ---
 const mistTabsEl = document.getElementById('mist-tabs');
 const mistPresetSelect = /** @type {HTMLSelectElement} */ (document.getElementById('mist-preset-select'));
 const mistPerRowSelect = /** @type {HTMLSelectElement} */ (document.getElementById('mist-per-row-select'));
@@ -120,7 +120,7 @@ function updateClockAndDate() {
 
   if (clockElement) {
     if (ampm) {
-      // РћР±РѕСЂР°С‡РёРІР°РµРј AM/PM РІ span СЃ СѓРјРµРЅСЊС€РµРЅРЅС‹Рј С€СЂРёС„С‚РѕРј РґР»СЏ РєСЂР°СЃРёРІРѕРіРѕ РІРёРґР° Рё РёСЃРєР»СЋС‡РµРЅРёСЏ РЅР°Р»РѕР¶РµРЅРёР№
+      // Оборачиваем AM/PM в span с уменьшенным шрифтом для красивого вида и исключения наложений
       clockElement.textContent = timeString;
       const ampmSpan = document.createElement('span');
       ampmSpan.className = 'clock-ampm';

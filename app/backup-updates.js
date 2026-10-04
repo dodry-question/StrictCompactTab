@@ -9,15 +9,15 @@ import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
 
-// --- Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ РґР»СЏ РїСЂРѕРІРµСЂРєРё Р±СЂР°СѓР·РµСЂР° Brave ---
+// --- Вспомогательная функция для проверки браузера Brave ---
 async function isBraveBrowser() {
-  // РџРµСЂРІРёС‡РЅР°СЏ РїСЂРѕРІРµСЂРєР° С‡РµСЂРµР· API Brave
+  // Первичная проверка через API Brave
   if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
     try {
       return await navigator.brave.isBrave();
     } catch (e) {}
   }
-  // Р—Р°РїР°СЃРЅР°СЏ РїСЂРѕРІРµСЂРєР° С‡РµСЂРµР· Client Hints (navigator.userAgentData)
+  // Запасная проверка через Client Hints (navigator.userAgentData)
   if (navigator.userAgentData && typeof navigator.userAgentData.getHighEntropyValues === 'function') {
     try {
       const hints = await navigator.userAgentData.getHighEntropyValues(['brands']);
@@ -27,7 +27,7 @@ async function isBraveBrowser() {
   return false;
 }
 
-// --- Р­РљРЎРџРћР Рў Р РРњРџРћР Рў РќРђРЎРўР РћР•Рљ (JSON-Р‘Р­РљРђРџ) ---
+// --- ЭКСПОРТ И ИМПОРТ НАСТРОЕК (JSON-БЭКАП) ---
 // Структурированная экспортная форма: категории со своими ярлыками
 // + вложенный список shortcuts (обратно совместим со старыми версиями,
 //   которым нужны ключи shortcuts и folders).
@@ -76,7 +76,7 @@ if (btnExport) {
       const dataStr = JSON.stringify(buildBackupPayload(allData), null, 2);
       const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
       
-      // РћР¶РёРґР°РµРј СЂРµР·СѓР»СЊС‚Р°С‚ РїСЂРѕРІРµСЂРєРё РЅР° Brave
+      // Ожидаем результат проверки на Brave
       const isBrave = await isBraveBrowser();
       const exportFileName = isBrave ? 'brave_new_tab_backup.json' : 'strict_compact_tab_backup.json';
       
@@ -175,7 +175,7 @@ function checkForUpdates() {
   const lastCheck = Number(localStorage.getItem('lastUpdateCheck')) || 0;
   const cachedVersion = localStorage.getItem('cachedLatestVersion');
   
-  // РљСЌС€ РЅР° 1 С‡Р°СЃ РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ Р»РёРјРёС‚РѕРІ Р·Р°РїСЂРѕСЃРѕРІ GitHub API
+  // Кэш на 1 час для предотвращения лимитов запросов GitHub API
   if (now - lastCheck < 3600000 && cachedVersion) {
     handleUpdateResult(cachedVersion);
     return;

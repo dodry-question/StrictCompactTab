@@ -10,7 +10,7 @@ import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
 
-// --- РЈРџР РђР’Р›Р•РќРР• РџРћР“РћР”РћР™ ---
+// --- УПРАВЛЕНИЕ ПОГОДОЙ ---
 if (showWeatherCb) {
   showWeatherCb.addEventListener('change', (e) => {
     STATE.showWeather = /** @type {HTMLInputElement} */ (e.target).checked;
@@ -234,7 +234,7 @@ function getWeatherDescription(code, lang) {
   return WeatherService.getWeatherDescription(code, lang);
 }
 
-// --- РЈРџР РђР’Р›Р•РќРР• РџРђРџРљРђРњР (Р”Р Р•Р’РћР’РР”РќРђРЇ РР•Р РђР РҐРРЇ) ---
+// --- УПРАВЛЕНИЕ ПАПКАМИ (ДРЕВОВИДНАЯ ИЕРАРХИЯ) ---
 const expandedFolders = new Set();
 let draggedId = null;
 let justDroppedId = null;

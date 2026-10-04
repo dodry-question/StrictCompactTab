@@ -12,7 +12,7 @@ import { STATE } from '../state/store.js';
 
 import { normalizeMistWidgets } from '../src/utils.js';
 
-// --- РЈРџР РђР’Р›Р•РќРР• РўРЈРњР‘Р›Р•Р РђРњР Р§РђРЎРћР’ Р Р”РђРўР« ---
+// --- УПРАВЛЕНИЕ ТУМБЛЕРАМИ ЧАСОВ И ДАТЫ ---
 const showClockCb = /** @type {HTMLInputElement} */ (document.getElementById('show-clock-checkbox'));
 const showDateCb = /** @type {HTMLInputElement} */ (document.getElementById('show-date-checkbox'));
 const timeFormatCb = /** @type {HTMLInputElement} */ (document.getElementById('time-format-checkbox'));
@@ -102,14 +102,14 @@ if (layoutZenModeCb) {
   });
 }
 
-// --- РџР•Р Р•РљР›Р®Р§РђРўР•Р›Р¬ Р Р•Р–РРњРђ MIST ---
+// --- ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМА MIST ---
 const layoutMistModeCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-mist-mode'));
 if (layoutMistModeCb) {
   layoutMistModeCb.addEventListener('change', (e) => {
     STATE.layoutMistMode = /** @type {HTMLInputElement} */ (e.target).checked;
 
     if (STATE.layoutMistMode) {
-      // Mist РЅРµСЃРѕРІРјРµСЃС‚РёРј СЃРѕ РЎС‚РµР»СЃ- Рё iOS-СЂРµР¶РёРјР°РјРё (Сѓ РЅРёС… РєРѕРЅС„Р»РёРєС‚СѓСЋС‰РёРµ СЃС‚РёР»Рё)
+// Mist несовместим со Стелс- и iOS-режимами (у них конфликтующие стили)
       STATE.layoutIosMode = false;
       STATE.layoutStealthMode = false;
       const iosCb = /** @type {HTMLInputElement} */ (document.getElementById('layout-ios-mode'));
@@ -125,7 +125,7 @@ if (layoutMistModeCb) {
   });
 }
 
-// --- РЈРџР РђР’Р›Р•РќРР• РџР Р•РЎР•РўРђРњР РљРћРњРџРћРќРћР’РљР MIST ---
+// --- УПРАВЛЕНИЕ ПРЕСЕТАМИ КОМПОНОВКИ MIST ---
 if (mistPresetSelect) {
   mistPresetSelect.addEventListener('change', (e) => {
     // Значения <select> в index.html: center | split | zen (см. AppState.mistPreset)

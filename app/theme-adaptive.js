@@ -1,4 +1,4 @@
-// --- РђР”РђРџРўРР’РќР«Р™ РњР•РќР•Р”Р–Р•Р  РўР•Рњ ---
+// --- АДАПТИВНЫЙ МЕНЕДЖЕР ТЕМ ---
 // Библиотека Material You весит 47 КБ и нужна ТОЛЬКО адаптивной теме с
 // собственными обоями. Раньше она была обычным <script> в index.html, то есть
 // загружалась и разбиралась при КАЖДОЙ новой вкладке, хотя по умолчанию тема
@@ -66,7 +66,7 @@ const AdaptiveThemeManager = {
               b += pb;
               count++;
 
-              // РЎРѕР·РґР°РµРј ARGB РёР· РїРёРєСЃРµР»СЏ РґР»СЏ РєРІР°РЅС‚РёР·Р°С‚РѕСЂР° (Celebrity Quantizer)
+              // Создаем ARGB из пикселя для квантизатора (Celebrity Quantizer)
               if (alpha >= 255) {
                 const argb = ((255 << 24) | (pr << 16) | (pg << 8) | pb) >>> 0;
                 pixels.push(argb);
@@ -85,7 +85,7 @@ const AdaptiveThemeManager = {
           let sourceColorArgb;
 
           if (lib && lib.QuantizerCelebi && lib.Score) {
-            // РљРІР°РЅС‚РёР·РёСЂСѓРµРј РїРёРєСЃРµР»Рё Рё РІС‹Р±РёСЂР°РµРј Р»СѓС‡С€РёР№ С†РІРµС‚
+            // Квантизируем пиксели и выбираем лучший цвет
             const quantized = lib.QuantizerCelebi.quantize(pixels, 128);
             const scored = lib.Score.score(quantized);
             if (scored && scored.length > 0) {

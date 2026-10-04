@@ -2,7 +2,7 @@ import { STATE } from '../state/store.js';
 
 import { normalizeMistWidgets } from '../src/utils.js';
 
-// --- Р РђРЎРџРћР›РћР–Р•РќРР• Р­Р›Р•РњР•РќРўРћР’ (LAYOUT DRAG & DROP) ---
+// --- РАСПОЛОЖЕНИЕ ЭЛЕМЕНТОВ (LAYOUT DRAG & DROP) ---
 let activeDragElement = null;
 let dragOffset = { x: 0, y: 0 };
 let hasDragged = false;

@@ -3,7 +3,7 @@ import { renderShortcuts } from './state-render.js';
 import { isMistHeadWidget, mistWidgetKey, dragOffset, applyMistWidgets, getWidgetKey, RESIZE_BASE_SIZE, resizeStartCoords, resizeStartDimensions, IOS_RESIZE_MIN_CELLS, RESIZE_MIN_WIDTH, applyClockScale, activeDragElement, hasDragged, tempPositions, layoutGridSnap, layoutGridSize, tempMistWidgets, mistHeadDrag, activeResizeElement, resizeStartScale, setActiveDragElement, setHasDragged, setMistHeadDrag, setActiveResizeElement, setResizeStartScale } from './layout-widgets.js';
 
 function initLayoutDragAndDrop() {
-  // Р”РёРЅР°РјРёС‡РµСЃРєРё СЃРѕР·РґР°РµРј РЅР°РїСЂР°РІР»СЏСЋС‰РёРµ Р»РёРЅРёРё РїСЂРёРјР°РіРЅРёС‡РёРІР°РЅРёСЏ, РµСЃР»Рё РёС… РЅРµС‚ РІ DOM
+  // Динамически создаем направляющие линии примагничивания, если их нет в DOM
   if (!document.getElementById('guide-line-x')) {
     const guideX = document.createElement('div');
     guideX.id = 'guide-line-x';
@@ -173,20 +173,20 @@ function onDragMove(e) {
   let newLeft = clientX - dragOffset.x;
   let newTop = clientY - dragOffset.y;
   
-  // РЎРЅР°С‡Р°Р»Р° РѕР±С‹С‡РЅР°СЏ СЃРµС‚РєР° РїСЂРёРІСЏР·РєРё (РµСЃР»Рё Р°РєС‚РёРІРЅР°)
+  // Сначала обычная сетка привязки (если активна)
   if (layoutGridSnap && layoutGridSnap.checked) {
     const gridSize = parseInt(layoutGridSize.value) || 20;
     newLeft = Math.round(newLeft / gridSize) * gridSize;
     newTop = Math.round(newTop / gridSize) * gridSize;
   }
   
-  // РџРѕР»СѓС‡Р°РµРј РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ С„РёР·РёС‡РµСЃРєРёРµ СЂР°Р·РјРµСЂС‹ СЌР»РµРјРµРЅС‚Р° Р±РµР· СѓС‡РµС‚Р° CSS-РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёСЏ (scale)
+  // Получаем оригинальные физические размеры элемента без учета CSS-масштабирования (scale)
   const widgetWidth = activeDragElement.offsetWidth;
   const widgetHeight = activeDragElement.offsetHeight;
   const key = getWidgetKey(activeDragElement);
   
-  // Р•СЃР»Рё РїРµСЂРµС‚Р°СЃРєРёРІР°РµС‚СЃСЏ Р±Р»РѕРє СЏСЂР»С‹РєРѕРІ РІ РєР»Р°СЃСЃРёС‡РµСЃРєРѕРј СЂРµР¶РёРјРµ, С„РёРєСЃРёСЂСѓРµРј РµРіРѕ РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅРѕРµ РїРѕР»РѕР¶РµРЅРёРµ СЃС‚СЂРѕРіРѕ РїРѕ С†РµРЅС‚СЂСѓ.
-  // Р’ СЂРµР¶РёРјРµ iOS СЂР°Р·СЂРµС€Р°РµРј СЃРІРѕР±РѕРґРЅРѕРµ РїРµСЂРµРјРµС‰РµРЅРёРµ РїРѕ РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё.
+  // Если перетаскивается блок ярлыков в классическом режиме, фиксируем его горизонтальное положение строго по центру.
+  // В режиме iOS разрешаем свободное перемещение по горизонтали.
   if (key === 'shortcuts' && !document.body.classList.contains('mode-ios')) {
     newLeft = (window.innerWidth - widgetWidth) / 2;
   }
@@ -194,12 +194,12 @@ function onDragMove(e) {
   const viewportCenterX = window.innerWidth / 2;
   const viewportCenterY = window.innerHeight / 2;
   
-  const snapThreshold = 15; // Р Р°СЃСЃС‚РѕСЏРЅРёРµ РїСЂРёС‚СЏР¶РµРЅРёСЏ РІ РїРёРєСЃРµР»СЏС… (РєР°Рє РІ PowerPoint/Figma)
+const snapThreshold = 15; // Расстояние притяжения в пикселях (как в PowerPoint/Figma)
   let snappedX = false;
   let snappedY = false;
   
-  // 1. РџСЂРёС‚СЏРіРёРІР°РЅРёРµ Рє РІРµСЂС‚РёРєР°Р»СЊРЅРѕР№ РѕСЃРё С†РµРЅС‚СЂР° СЌРєСЂР°РЅР° (РґР»СЏ РІСЃРµС… РІРёРґР¶РµС‚РѕРІ, РєСЂРѕРјРµ СЏСЂР»С‹РєРѕРІ РІ РєР»Р°СЃСЃРёС‡РµСЃРєРѕРј СЂРµР¶РёРјРµ)
-  // РњР°РіРЅРёС‚РёС‚СЃСЏ РїРѕ 3 С‚РѕС‡РєР°Рј: Р»РµРІС‹Р№ РєСЂР°Р№, С†РµРЅС‚СЂ, РїСЂР°РІС‹Р№ РєСЂР°Р№ Рє С†РµРЅС‚СЂР°Р»СЊРЅРѕР№ РІРµСЂС‚РёРєР°Р»Рё
+  // 1. Притягивание к вертикальной оси центра экрана (для всех виджетов, кроме ярлыков в классическом режиме)
+  // Магнитится по 3 точкам: левый край, центр, правый край к центральной вертикали
   if (key !== 'shortcuts' || document.body.classList.contains('mode-ios')) {
     const distCenterX = Math.abs((newLeft + widgetWidth / 2) - viewportCenterX);
     const distLeftX = Math.abs(newLeft - viewportCenterX);
@@ -209,18 +209,18 @@ function onDragMove(e) {
     
     if (minDistX < snapThreshold) {
       if (minDistX === distCenterX) {
-        newLeft = viewportCenterX - widgetWidth / 2; // РџСЂРёРјР°РіРЅРёС‚РёС‚СЊ РїРѕ С†РµРЅС‚СЂСѓ
+newLeft = viewportCenterX - widgetWidth / 2; // Примагнитить по центру
       } else if (minDistX === distLeftX) {
-        newLeft = viewportCenterX; // Р Р°Р·РјРµСЃС‚РёС‚СЊ СЃРїСЂР°РІР° РѕС‚ РѕСЃРё (Р»РµРІС‹Р№ РєСЂР°Р№ РЅР° РѕСЃРё)
+newLeft = viewportCenterX; // Разместить справа от оси (левый край на оси)
       } else {
-        newLeft = viewportCenterX - widgetWidth; // Р Р°Р·РјРµСЃС‚РёС‚СЊ СЃР»РµРІР° РѕС‚ РѕСЃРё (РїСЂР°РІС‹Р№ РєСЂР°Р№ РЅР° РѕСЃРё)
+newLeft = viewportCenterX - widgetWidth; // Разместить слева от оси (правый край на оси)
       }
       snappedX = true;
     }
   }
   
-  // 2. РџСЂРёС‚СЏРіРёРІР°РЅРёРµ Рє РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅРѕР№ РѕСЃРё С†РµРЅС‚СЂР° СЌРєСЂР°РЅР° (РґР»СЏ РІСЃРµС… РІРёРґР¶РµС‚РѕРІ, РІРєР»СЋС‡Р°СЏ СЏСЂР»С‹РєРё)
-  // РњР°РіРЅРёС‚РёС‚СЃСЏ РїРѕ 3 С‚РѕС‡РєР°Рј: РІРµСЂС…РЅРёР№ РєСЂР°Р№, С†РµРЅС‚СЂ, РЅРёР¶РЅРёР№ РєСЂР°Р№ Рє С†РµРЅС‚СЂР°Р»СЊРЅРѕР№ РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё
+  // 2. Притягивание к горизонтальной оси центра экрана (для всех виджетов, включая ярлыки)
+  // Магнитится по 3 точкам: верхний край, центр, нижний край к центральной горизонтали
   const distCenterY = Math.abs((newTop + widgetHeight / 2) - viewportCenterY);
   const distTopY = Math.abs(newTop - viewportCenterY);
   const distBottomY = Math.abs((newTop + widgetHeight) - viewportCenterY);
@@ -229,16 +229,16 @@ function onDragMove(e) {
   
   if (minDistY < snapThreshold) {
     if (minDistY === distCenterY) {
-      newTop = viewportCenterY - widgetHeight / 2; // РџСЂРёРјР°РіРЅРёС‚РёС‚СЊ РїРѕ С†РµРЅС‚СЂСѓ
+newTop = viewportCenterY - widgetHeight / 2; // Примагнитить по центру
     } else if (minDistY === distTopY) {
-      newTop = viewportCenterY; // Р Р°Р·РјРµСЃС‚РёС‚СЊ РїРѕРґ РѕСЃСЊСЋ (РІРµСЂС…РЅРёР№ РєСЂР°Р№ РЅР° РѕСЃРё)
+newTop = viewportCenterY; // Разместить под осью (верхний край на оси)
     } else {
-      newTop = viewportCenterY - widgetHeight; // Р Р°Р·РјРµСЃС‚РёС‚СЊ РЅР°Рґ РѕСЃСЊСЋ (РЅРёР¶РЅРёР№ РєСЂР°Р№ РЅР° РѕСЃРё)
+newTop = viewportCenterY - widgetHeight; // Разместить над осью (нижний край на оси)
     }
     snappedY = true;
   }
   
-  // РЈРїСЂР°РІР»РµРЅРёРµ РїРѕРґСЃРІРµС‚РєРѕР№ РѕСЃРµР№
+  // Управление подсветкой осей
   const guideLineX = document.getElementById('guide-line-x');
   const guideLineY = document.getElementById('guide-line-y');
   
@@ -258,7 +258,7 @@ function onDragMove(e) {
     }
   }
   
-  // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Р№ РІРёР·СѓР°Р»СЊРЅС‹Р№ СЌС„С„РµРєС‚ РЅР° СЃР°РјРѕРј СЌР»РµРјРµРЅС‚Рµ РїСЂРё РјР°РіРЅРёС‚РЅРѕР№ СЃС‚С‹РєРѕРІРєРµ
+  // Дополнительный визуальный эффект на самом элементе при магнитной стыковке
   if (snappedX || snappedY) {
     activeDragElement.classList.add('widget-snapped');
   } else {
@@ -298,8 +298,8 @@ function onDragEnd() {
   
   const key = getWidgetKey(activeDragElement);
   if (key && hasDragged) {
-    // РСЃРїРѕР»СЊР·СѓРµРј offsetLeft Рё offsetTop РІРјРµСЃС‚Рѕ getBoundingClientRect()
-    // Р­С‚Рѕ РїРѕР»РЅРѕСЃС‚СЊСЋ РёСЃРєР»СЋС‡Р°РµС‚ СЃРјРµС‰РµРЅРёСЏ, РІС‹Р·РІР°РЅРЅС‹Рµ CSS-СЌС„С„РµРєС‚РѕРј transform: scale(1.02)
+// Используем offsetLeft и offsetTop вместо getBoundingClientRect()
+    // Это полностью исключает смещения, вызванные CSS-эффектом transform: scale(1.02)
     const layoutLeft = activeDragElement.offsetLeft;
     const layoutTop = activeDragElement.offsetTop;
     
@@ -310,7 +310,7 @@ function onDragEnd() {
     tempPositions[key].top = (layoutTop / window.innerHeight) * 100;
   }
   
-  // РЎР±СЂР°СЃС‹РІР°РµРј СЌС„С„РµРєС‚С‹ Рё СЃРєСЂС‹РІР°РµРј Р»РёРЅРёРё
+  // Сбрасываем эффекты и скрываем линии
   activeDragElement.classList.remove('widget-snapped');
   const guideLineX = document.getElementById('guide-line-x');
   const guideLineY = document.getElementById('guide-line-y');
@@ -429,7 +429,7 @@ function onResizeMove(e) {
   const wCells = round2(newWidth / gridSize);
   const hCells = round2(newHeight / gridSize);
 
-  // Р”РѕР±Р°РІР»СЏРµРј РєР»Р°СЃСЃ С€РёСЂРѕРєРѕРіРѕ РІРёРґР¶РµС‚Р° РґР»СЏ РїРµСЂРµСЃС‚СЂРѕРµРЅРёСЏ РєРѕРЅС‚РµРЅС‚Р°
+  // Добавляем класс широкого виджета для перестроения контента
   if (wCells >= hCells * 1.4) {
     activeResizeElement.classList.add('widget-wide');
   } else {
@@ -456,7 +456,7 @@ function onResizeMove(e) {
 
   if (key) {
     if (!tempPositions[key]) {
-      // Р•СЃР»Рё РІСЂРµРјРµРЅРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚ РµС‰Рµ РЅРµС‚, РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј
+      // Если временных координат еще нет, инициализируем
       const leftPct = (activeResizeElement.offsetLeft / window.innerWidth) * 100;
       const topPct = (activeResizeElement.offsetTop / window.innerHeight) * 100;
       tempPositions[key] = { left: leftPct, top: topPct };
@@ -468,7 +468,7 @@ function onResizeMove(e) {
     tempPositions[key].heightPx = Math.round(newHeight);
     tempPositions[key].scale = key === 'clock' ? widgetScale : 1;
 
-    // РћРїС‚РёРјРёР·Р°С†РёСЏ: РїРµСЂРµСЂРёСЃРѕРІС‹РІР°РµРј СЏСЂР»С‹РєРё С‚РѕР»СЊРєРѕ РµСЃР»Рё С‡РёСЃР»Рѕ РєРѕР»РѕРЅРѕРє РІ СЃРµС‚РєРµ РёР·РјРµРЅРёР»РѕСЃСЊ
+    // Оптимизация: перерисовываем ярлыки только если число колонок в сетке изменилось
     if (key === 'shortcuts' && prevW !== wCells) {
       renderShortcuts();
     }

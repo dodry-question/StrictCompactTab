@@ -74,7 +74,7 @@ window.addEventListener('wheel', (e) => {
 
 loadState();
 
-// --- РЈРџР РђР’Р›Р•РќРР• Р¤РћРљРЈРЎРћРњ Р Р”РћРЎРўРЈРџРќРћРЎРўР¬Р® (TAB / ESCAPE) ---
+// --- УПРАВЛЕНИЕ ФОКУСОМ И ДОСТУПНОСТЬЮ (TAB / ESCAPE) ---
 function getKeyboardFocusableElements(container) {
   return Array.from(container.querySelectorAll(
     'a[href], area[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]'
@@ -87,7 +87,7 @@ function getKeyboardFocusableElements(container) {
 // Единственный слушатель клавиатуры на document: локальные keydown-обработчики
 // (панель категорий, сетка ярлыков) убраны — одно событие = одно решение.
 document.addEventListener('keydown', (e) => {
-  // 1. Р›РѕРіРёРєР° РґР»СЏ Р°РєС‚РёРІРЅРѕРіРѕ РјРѕРґР°Р»СЊРЅРѕРіРѕ РѕРєРЅР° РїР°РїРєРё
+  // 1. Логика для активного модального окна папки
   if (folderModal && folderModal.classList.contains('active')) {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -126,7 +126,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // 2. Р›РѕРіРёРєР° РґР»СЏ Р°РєС‚РёРІРЅРѕРіРѕ РјРѕРґР°Р»СЊРЅРѕРіРѕ РѕРєРЅР° РЅР°СЃС‚СЂРѕРµРє
+  // 2. Логика для активного модального окна настроек
   if (modal && modal.classList.contains('active')) {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -162,7 +162,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // 3. Р’С‹С…РѕРґ РёР· СЂРµР¶РёРјР° РІРІРѕРґР° (blur input/textarea) РїСЂРё РЅР°Р¶Р°С‚РёРё Escape
+  // 3. Выход из режима ввода (blur input/textarea) при нажатии Escape
   if (e.key === 'Escape') {
     const activeEl = /** @type {HTMLElement} */ (document.activeElement);
     if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.hasAttribute('contenteditable'))) {
@@ -208,7 +208,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // 4. Р“Р»РѕР±Р°Р»СЊРЅС‹Рµ С…РѕС‚РєРµРё СЂРµР¶РёРјР° Mist (Р±С‹СЃС‚СЂРѕРµ РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РєР°С‚РµРіРѕСЂРёР№/РїР°РїРѕРє)
+  // 4. Глобальные хоткеи режима Mist (быстрое переключение категорий/папок)
   if (!document.body.classList.contains('mode-ios') && !document.body.classList.contains('mode-zen')) {
     // activeEl, isInputActive и isModalOpen уже объявлены выше по обработчику
     // Фокус на панели категорий или на ярлыке — навигацию берут их обработчики
@@ -220,7 +220,7 @@ document.addEventListener('keydown', (e) => {
       if (buttons.length >= 2) {
         const currentIndex = buttons.findIndex(b => b.classList.contains('active'));
 
-        // РЎС‚СЂРµР»РєРё Left / Right РїРµСЂРµРєР»СЋС‡Р°СЋС‚ Р°РєС‚РёРІРЅСѓСЋ РєР°С‚РµРіРѕСЂРёСЋ
+        // Стрелки Left / Right переключают активную категорию
         if (e.key === 'ArrowLeft') {
           e.preventDefault();
           const prev = (currentIndex - 1 + buttons.length) % buttons.length;
