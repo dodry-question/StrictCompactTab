@@ -9,15 +9,16 @@
 // после чего этот файл можно будет удалить. Профиль данных состояния описан
 // JSDoc @typedef'ами в state/defaults.js.
 //
-// ВНИМАНИЕ: `STATE`, `storage`, `TRANSLATIONS`, `DEFAULT_SHORTCUTS` и
+// ВНИМАНИЕ: `store`, `storage`, `TRANSLATIONS`, `DEFAULT_SHORTCUTS` и
 // `MIST_WIDGET_KEYS` объявлены ТОЛЬКО через интерфейс Window (а не как `var`),
 // потому что те же имена уже объявлены как top-level `const` в app/core.js
-// (`const STATE = window.STATE;` и т.п.) — иначе tsc ругался бы на
+// (`const STATE = window.store.state;` и т.п.) — иначе tsc ругался бы на
 // «Cannot redeclare block-scoped variable».
 declare global {
   interface Window {
-    // Состояние и слой хранения
-    STATE: any;
+    // Состояние (владелец — state/store.js, этап «б»: store вместо window.STATE)
+    // и слой хранения
+    store: any;
     storage: any;
     // Локализация и дефолты
     TRANSLATIONS: any;

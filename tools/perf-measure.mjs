@@ -137,7 +137,7 @@ const PROBE = `(() => {
   const clock = document.getElementById('clock');
   const issues = [];
   if (document.documentElement.classList.contains('state-loading')) issues.push('state-loading НЕ снят');
-  if (typeof window.STATE !== 'object') issues.push('STATE не определён');
+  if (!window.store || typeof window.store.state !== 'object') issues.push('store не определён');
   if (!window.AppUtils || typeof window.AppUtils.formatDateLine !== 'function') issues.push('AppUtils отсутствует');
   if (!window.storage || typeof window.storage.get !== 'function') issues.push('storage отсутствует');
   if (!window.ShortcutRenderer) issues.push('ShortcutRenderer отсутствует');

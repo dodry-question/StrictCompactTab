@@ -252,7 +252,7 @@ const html = read('index.html');
 const scriptTags = [...html.matchAll(/<script([^>]*)src="([^"]+)"[^>]*>/g)]
   .map((m) => ({ attrs: m[1], src: m[2] }));
 
-// Плагина «Расписание» до его загрузки в STATE нет — эмулируем чистое состояние
+// Плагина «Расписание» до его загрузки в state нет — эмулируем чистое состояние
 const loadErrors = [];
 for (const tag of scriptTags) {
   try {
@@ -342,8 +342,8 @@ test('модуль плагина загрузился и подключён Д�
 });
 
 test('галка выключена по умолчанию: кнопки нет, панель закрыта', () => {
-  assert.equal(app.STATE.scheduleEnabled, false);
-  assert.equal(app.STATE.scheduleGroup, null);
+  assert.equal(app.store.state.scheduleEnabled, false);
+  assert.equal(app.store.state.scheduleGroup, null);
   assert.equal(app.document.body.classList.contains('schedule-on'), false);
   assert.equal(byId('schedule-enabled').checked, false);
 });
@@ -385,7 +385,7 @@ test('включение галки показывает кнопку и сох�
   const checkbox = byId('schedule-enabled');
   checkbox.checked = true;
   checkbox.dispatch('change');
-  assert.equal(app.STATE.scheduleEnabled, true);
+  assert.equal(app.store.state.scheduleEnabled, true);
   assert.equal(app.document.body.classList.contains('schedule-on'), true);
   assert.equal(JSON.parse(store.get('scheduleEnabled')), true);
 });
@@ -500,9 +500,9 @@ test('выбор группы показывает расписание по д�
   assert.equal(groupsView.hidden, true);
   assert.equal(view.hidden, false);
   assert.equal(byId('schedule-change-group').hidden, false, 'кнопка «сменить группу» нужна');
-  assert.equal(app.STATE.scheduleGroup.includes('ИСПк-302'), true);
+  assert.equal(app.store.state.scheduleGroup.includes('ИСПк-302'), true);
   // группа хранится по НАЗВАНИЮ: id после каждого разбора генерируются заново
-  assert.equal(store.get('scheduleGroup'), app.STATE.scheduleGroup);
+  assert.equal(store.get('scheduleGroup'), app.store.state.scheduleGroup);
 
   const days = findAllByClass(view, 'schedule-day');
   assert.ok(days.length >= 3, `дней в расписании: ${days.length}`);
@@ -579,13 +579,13 @@ test('«сменить группу» возвращает к списку и п
   const other = findAllByClass(groupsView, 'schedule-group-btn')[0];
   const otherName = findByClass(other, 'schedule-group-name').textContent;
   other.dispatch('click');
-  assert.equal(app.STATE.scheduleGroup, otherName);
+  assert.equal(app.store.state.scheduleGroup, otherName);
   assert.equal(view.hidden, false);
   assert.match(byId('schedule-subtitle').textContent, new RegExp(otherName.slice(0, 8)));
 });
 
 test('группа переживает замену файла — не приходится искать заново', async () => {
-  const before = app.STATE.scheduleGroup;
+  const before = app.store.state.scheduleGroup;
   const bytes = fs.readFileSync(FIXTURE);
   const buffer = await new Blob([bytes]).arrayBuffer();
 
@@ -593,7 +593,7 @@ test('группа переживает замену файла — не при�
   await app.handleScheduleFile({ name: '12_05-10_10.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
   await settle();
 
-  assert.equal(app.STATE.scheduleGroup, before, 'группа сбросилась после замены файла');
+  assert.equal(app.store.state.scheduleGroup, before, 'группа сбросилась после замены файла');
   assert.equal(view.hidden, false, 'должно сразу открыться расписание');
   assert.ok(findAllByClass(view, 'schedule-day').length > 0);
   // подзаголовок показывает выбранную группу, а не имя файла
@@ -604,11 +604,11 @@ test('группа переживает замену файла — не при�
 test('группа, которой нет в новом файле, сбрасывается на список', async () => {
   const buffer = await new Blob([fs.readFileSync(FIXTURE)]).arrayBuffer();
   // выдумываем несуществующую группу, как если бы файл сменился
-  app.STATE.scheduleGroup = 'Группа НЕТ-ТАКОЙ-999';
+  app.store.state.scheduleGroup = 'Группа НЕТ-ТАКОЙ-999';
   app.saveState();
   await app.handleScheduleFile({ name: 'test.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
   await settle();
-  assert.equal(app.STATE.scheduleGroup, null);
+  assert.equal(app.store.state.scheduleGroup, null);
   assert.equal(groupsView.hidden, false, 'должен показаться список групп');
 });
 
@@ -627,7 +627,7 @@ test('удаление файла возвращает окно переноса
   await settle();
 
   assert.equal(store.has('scheduleData'), false, 'файл не удалён из хранилища');
-  assert.equal(app.STATE.scheduleGroup, null);
+  assert.equal(app.store.state.scheduleGroup, null);
   assert.equal(drop.hidden, false, 'должно вернуться окно переноса файла');
   assert.equal(groupsView.hidden, true);
   assert.equal(byId('schedule-delete').hidden, true);
@@ -662,20 +662,20 @@ test('смена языка перерисовывает содержимое о
   // дни приходят из файла по-русски и не зависят от языка интерфейса
   const dayTitle = findByClass(view, 'schedule-day-text').textContent;
 
-  app.STATE.language = 'en';
+  app.store.state.language = 'en';
   app.applyLanguage('en');
   assert.equal(app.isSchedulePanelOpen(), true, 'панель не должна закрываться при смене языка');
   assert.equal(findByClass(view, 'schedule-day-text').textContent, dayTitle);
 
   // в списке групп placeholder рисуется кодом — он должен обновиться
   byId('schedule-change-group').dispatch('click');
-  app.STATE.language = 'ru';
+  app.store.state.language = 'ru';
   app.applyLanguage('ru');
   assert.equal(search.placeholder, 'Название или номер группы');
 
   // вернуть группу и английский, чтобы следующие тесты шли в известном состоянии
   findAllByClass(groupsView, 'schedule-group-btn')[0].dispatch('click');
-  app.STATE.language = 'en';
+  app.store.state.language = 'en';
   app.applyLanguage('en');
   assert.equal(view.hidden, false);
 });
@@ -720,7 +720,7 @@ test('выключение галки прячет кнопку и закрыв�
   checkbox.checked = false;
   checkbox.dispatch('change');
 
-  assert.equal(app.STATE.scheduleEnabled, false);
+  assert.equal(app.store.state.scheduleEnabled, false);
   assert.equal(app.document.body.classList.contains('schedule-on'), false);
   assert.equal(panel.classList.contains('is-open'), false, 'панель должна закрыться');
   assert.equal(JSON.parse(store.get('scheduleEnabled')), false);

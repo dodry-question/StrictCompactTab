@@ -249,7 +249,11 @@ test('общая область видимости разделённых фай
   assert.equal(probe('typeof updateClockAndDate'), 'function');       // clock-topbar.js
   assert.equal(probe('typeof initCustomSearchEngines'), 'function');  // controls.js
   // let/const-состояние, разъехавшееся по файлам
-  assert.equal(probe('typeof STATE'), 'object');                      // core.js (const STATE)
+  assert.equal(probe('typeof STATE'), 'object');                      // core.js (const STATE = store.state)
+  assert.equal(probe('typeof window.store'), 'object');               // state/store.js
+  assert.equal(probe('typeof window.store.state'), 'object');         // владелец состояния (этап «б»)
+  assert.equal(probe('STATE === window.store.state'), true);          // alias указывает на store
+  assert.equal(probe('Array.isArray(window.store.persistKeys)'), true); // единственный список ключей
   assert.equal(probe('typeof activeCategory'), 'string');             // core.js (let activeCategory)
   assert.equal(probe('typeof mistTabsEl'), 'object');                 // core.js (const mistTabsEl)
   assert.equal(probe('typeof TRANSLATIONS'), 'object');               // core.js

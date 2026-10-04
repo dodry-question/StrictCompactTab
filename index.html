@@ -11,11 +11,12 @@
        в порядке документа — ровно как раньше, только без ожидания.
        Относительный порядок сохранён:
        i18n → state → storage → services → src/utils.js (module) → app/*,
-       поэтому window.STATE/storage/AppUtils готовы к моменту чтения в app/*.
+       поэтому window.store/storage/AppUtils готовы к моменту чтения в app/*.
        favicon-loader.js намеренно остаётся синхронным: он ставит фавиконку
        прямо в <head> до первой отрисовки, иначе вкладка мигает дефолтной. -->
   <script defer src="i18n/translations.js"></script>
   <script defer src="state/defaults.js"></script>
+  <script defer src="state/store.js"></script>
   <script defer src="storage/storage.js"></script>
   <script defer src="services/search.js"></script>
   <script defer src="services/search-ui.js"></script>

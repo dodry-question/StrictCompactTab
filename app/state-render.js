@@ -7,7 +7,9 @@
 const LEGACY_CATEGORY_KEYS = ['folders', 'categories', 'groups'];
 
 function loadState() {
-  storage.get(['shortcuts', 'categories', 'folders', 'groups', 'columns', 'size', 'customBackground', 'customFavicon', 'language', 'searchEngine', 'showDate', 'format12h', 'showSeconds', 'theme', 'adaptiveThemeData', 'layoutPositions', 'layoutGridSnap', 'layoutGridSize', 'layoutIosMode', 'layoutStealthMode', 'showClock', 'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache', 'customSearchEngines', 'checkUpdates', 'layoutZenMode', 'layoutMistMode', 'mistPreset', 'mistPerRow', 'mistHeadOffset', 'scheduleEnabled', 'scheduleGroup'], (result) => {
+  // Ключи чтения задаёт store (persistKeys + легаси-ключи миграций) —
+  // раньше список был продублирован здесь и в saveState
+  store.load(LEGACY_CATEGORY_KEYS, (result) => {
   try {
     STATE.shortcuts = migrateToNested(result.shortcuts ?? DEFAULT_SHORTCUTS, extractCategoryMeta(result));
     STATE.customSearchEngines = result.customSearchEngines ?? [];
@@ -170,39 +172,10 @@ function loadState() {
 }
 
 function saveState() {
-  storage.set({
-    shortcuts: STATE.shortcuts,
-    columns: STATE.columns,
-    size: STATE.size,
-    customBackground: STATE.customBackground,
-    customFavicon: STATE.customFavicon,
-    language: STATE.language,
-    searchEngine: STATE.searchEngine,
-    showDate: STATE.showDate,
-    format12h: STATE.format12h,
-    showSeconds: STATE.showSeconds,
-    theme: STATE.theme,
-    adaptiveThemeData: STATE.adaptiveThemeData,
-    layoutPositions: STATE.layoutPositions,
-    layoutGridSnap: STATE.layoutGridSnap,
-    layoutGridSize: STATE.layoutGridSize,
-    layoutIosMode: STATE.layoutIosMode,
-    layoutStealthMode: STATE.layoutStealthMode,
-    showClock: STATE.showClock,
-    showWeather: STATE.showWeather,
-    weatherCity: STATE.weatherCity,
-    weatherCoords: STATE.weatherCoords,
-    weatherCache: STATE.weatherCache,
-    customSearchEngines: STATE.customSearchEngines,
-    checkUpdates: STATE.checkUpdates,
-    layoutZenMode: STATE.layoutZenMode,
-    layoutMistMode: STATE.layoutMistMode,
-    mistPreset: STATE.mistPreset,
-    mistPerRow: STATE.mistPerRow,
-    scheduleEnabled: STATE.scheduleEnabled,
-    scheduleGroup: STATE.scheduleGroup,
-    mistHeadOffset: normalizeMistWidgets(STATE.mistHeadOffset)
-  });
+  // Ключи сохранения задаёт store (PERSIST_KEYS — тот же список, что при
+  // чтении). Нормализация mistHeadOffset осталась здесь: в хранилище
+  // уходит безопасная геометрия, состояние при этом не трогаем
+  store.save({ mistHeadOffset: normalizeMistWidgets(STATE.mistHeadOffset) });
 }
 
 function updateSearchEngineUI() {

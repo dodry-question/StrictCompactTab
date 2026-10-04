@@ -8,7 +8,10 @@ const storage = window.storage;
 
 // --- Р§РРЎРўР«Р™ РЎРўРђР РўРћР’Р«Р™ РЁРђР±Р›РћРќ ---
 const DEFAULT_SHORTCUTS = window.DEFAULT_SHORTCUTS;
-const STATE = window.STATE;
+// Состояние принадлежит store (state/store.js): здесь берём только ссылку
+// на живой объект — прямые записи STATE.x работают как раньше
+const store = window.store;
+const STATE = window.store.state;
 const MIST_WIDGET_KEYS = window.MIST_WIDGET_KEYS;
 
 // Геометрия Flex-потока пилюль — ТОЛЬКО режим Mist (в стандартном режиме
