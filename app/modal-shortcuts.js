@@ -1,3 +1,5 @@
+import { refreshAfterCategoryChange, ensureSettingsCategoryId, findCategoryById, moveItemToCategory, populateCategorySelects, renderCategoryTabsBar, renderCategoryHeader, getCategoryItems, buildCategoryOptions } from './categories-settings.js';
+
 import { compressImage } from './appearance.js';
 
 import { STATE } from '../state/store.js';

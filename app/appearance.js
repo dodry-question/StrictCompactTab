@@ -1,3 +1,5 @@
+import { populateCategorySelects } from './categories-settings.js';
+
 import { refreshSchedulePanel } from './schedule.js';
 
 import { AdaptiveThemeManager } from './theme-adaptive.js';

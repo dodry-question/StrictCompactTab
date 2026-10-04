@@ -1,3 +1,5 @@
+import { findCategoryById } from './categories-settings.js';
+
 import { applyLanguage, applyTheme, compressImage } from './appearance.js';
 
 import { renderModalShortcutsList } from './modal-shortcuts.js';

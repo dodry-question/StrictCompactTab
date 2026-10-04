@@ -301,22 +301,12 @@ function renderCategoryHeader() {
 }
 
 // settingsCategoryId переприсваивают settings-panel и modal-shortcuts —
-// ACCESSOR, иначе десинк. Мосты функций — для modal-shortcuts/settings-panel/
-// appearance; уберём в фазе 3 шага «в».
+// ACCESSOR, иначе десинк. (Мосты 9 функций сняты — фаза 3.)
 Object.defineProperty(window, 'settingsCategoryId', {
   get: () => settingsCategoryId,
   set: (value) => { settingsCategoryId = value; },
   configurable: true
 });
-window.refreshAfterCategoryChange = refreshAfterCategoryChange;
-window.ensureSettingsCategoryId = ensureSettingsCategoryId;
-window.findCategoryById = findCategoryById;
-window.moveItemToCategory = moveItemToCategory;
-window.populateCategorySelects = populateCategorySelects;
-window.renderCategoryTabsBar = renderCategoryTabsBar;
-window.renderCategoryHeader = renderCategoryHeader;
-window.getCategoryItems = getCategoryItems;
-window.buildCategoryOptions = buildCategoryOptions;
 export {
   settingsCategoryId,
   getCategoryList,
