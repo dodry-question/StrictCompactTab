@@ -1,3 +1,5 @@
+import { WeatherService } from '../services/weather.js';
+
 import { storage } from '../storage/storage.js';
 
 import { STATE } from '../state/store.js';
@@ -221,11 +223,11 @@ function renderWeatherFromCache() {
 }
 
 function getWeatherEmoji(code) {
-  return window.WeatherService.getWeatherEmoji(code);
+  return WeatherService.getWeatherEmoji(code);
 }
 
 function getWeatherDescription(code, lang) {
-  return window.WeatherService.getWeatherDescription(code, lang);
+  return WeatherService.getWeatherDescription(code, lang);
 }
 
 // --- РЈРџР РђР’Р›Р•РќРР• РџРђРџРљРђРњР (Р”Р Р•Р’РћР’РР”РќРђРЇ РР•Р РђР РҐРРЇ) ---

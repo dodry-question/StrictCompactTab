@@ -121,7 +121,7 @@ globalThis.localStorage = {
 
 const { SearchService } = await import('../services/search.js');
 const { SearchUI } = await import('../services/search-ui.js');
-await import('../services/weather.js');
+const { WeatherService } = await import('../services/weather.js');
 const { ShortcutIcons } = await import('../services/shortcut-icons.js');
 const { ShortcutRenderer } = await import('../services/shortcut-renderer.js');
 const { ShortcutCategories } = await import('../services/shortcut-categories.js');

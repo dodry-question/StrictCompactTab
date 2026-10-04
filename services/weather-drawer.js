@@ -1,3 +1,5 @@
+import { WeatherService } from './weather.js';
+
 const WeatherDrawer = {
   init(state, translations) {
     const trigger = document.getElementById('weather-widget');
@@ -56,11 +58,11 @@ const WeatherDrawer = {
 
         const hero = document.createElement('div');
         hero.className = 'weather-current-hero';
-        appendText(hero, 'span', 'weather-current-icon', window.WeatherService.getWeatherEmoji(current.weather_code));
+        appendText(hero, 'span', 'weather-current-icon', WeatherService.getWeatherEmoji(current.weather_code));
         const summary = document.createElement('div');
         summary.className = 'weather-current-summary';
         appendText(summary, 'strong', 'weather-current-temperature', `${Math.round(current.temperature_2m)}°`);
-        appendText(summary, 'span', 'weather-current-description', window.WeatherService.getWeatherDescription(current.weather_code, state.language));
+        appendText(summary, 'span', 'weather-current-description', WeatherService.getWeatherDescription(current.weather_code, state.language));
         hero.appendChild(summary);
         currentSection.appendChild(hero);
 
@@ -97,7 +99,7 @@ const WeatherDrawer = {
           const item = document.createElement('div');
           item.className = 'weather-hourly-item';
           appendText(item, 'span', 'weather-hourly-time', formatHour(time));
-          appendText(item, 'span', 'weather-hourly-icon', window.WeatherService.getWeatherEmoji(hourly.weather_code[index]));
+          appendText(item, 'span', 'weather-hourly-icon', WeatherService.getWeatherEmoji(hourly.weather_code[index]));
           appendText(item, 'strong', 'weather-hourly-temperature', `${Math.round(hourly.temperature_2m[index])}°`);
           appendText(item, 'span', 'weather-hourly-precipitation', `${hourly.precipitation_probability[index] ?? 0}%`);
           list.appendChild(item);
@@ -116,7 +118,7 @@ const WeatherDrawer = {
           const item = document.createElement('div');
           item.className = 'weather-daily-item';
           appendText(item, 'span', 'weather-daily-date', formatDay(day, index, dict));
-          appendText(item, 'span', 'weather-daily-icon', window.WeatherService.getWeatherEmoji(daily.weather_code[index]));
+          appendText(item, 'span', 'weather-daily-icon', WeatherService.getWeatherEmoji(daily.weather_code[index]));
           appendText(item, 'span', 'weather-daily-temperatures', `${Math.round(daily.temperature_2m_min[index])}° / ${Math.round(daily.temperature_2m_max[index])}°`);
           appendText(item, 'span', 'weather-daily-precipitation', `${daily.precipitation_probability_max[index] ?? 0}%`);
           list.appendChild(item);
@@ -159,7 +161,7 @@ const WeatherDrawer = {
 
       showMessage(getDictionary().weatherForecastLoading, 'loading');
       try {
-        const data = await window.WeatherService.fetchForecast(latitude, longitude);
+        const data = await WeatherService.fetchForecast(latitude, longitude);
         cachedForecast = { key, timestamp: Date.now(), data };
         renderForecast(data);
       } catch (error) {
@@ -222,6 +224,4 @@ const WeatherDrawer = {
   }
 };
 
-// Мост для классических app/* — уберём в фазе 3 шага «в».
-window.WeatherDrawer = WeatherDrawer;
 export { WeatherDrawer };

@@ -18,9 +18,7 @@ declare global {
     DEFAULT_SHORTCUTS: any;
     // Геометрия mist-виджетов
     MIST_WIDGET_KEYS: any;
-    // Сервисы (services/*.js)
-    WeatherService: any;
-    WeatherDrawer: any;
+    // Сервисы (services/*.js) — фаза 3: все на import, window.X убраны
     // Валидация импортируемого бэкапа (app/backup-validate.js)
     BackupValidate: any;
     // Динамическая тема (app/theme-adaptive.js — модуль с мостом, шаг «в»)

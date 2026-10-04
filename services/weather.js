@@ -50,6 +50,4 @@ const WeatherService = {
   }
 };
 
-// Мост для классических app/* — уберём в фазе 3 шага «в».
-window.WeatherService = WeatherService;
 export { WeatherService };
