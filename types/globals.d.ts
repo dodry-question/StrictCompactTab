@@ -82,6 +82,10 @@ var addCatSelectedFor: any;
 var layoutEditControls: any;
 var populateSearchEnginesSelect: any;
 var initCustomSearchEngines: any;
+// app/navigation.js — модуль (шаг «в»)
+var navHandleKeydown: any;
+var createMistPill: any;
+var rebuildNavModel: any;
 }
 
 export {};

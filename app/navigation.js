@@ -311,6 +311,28 @@ function createMistPill(item) {
   return pill;
 }
 
+// Мосты для классических потребителей (input-keys, categories-tabs,
+// state-render + probe в app-load.test) — уберём в фазе 3 шага «в».
+window.navHandleKeydown = navHandleKeydown;
+window.createMistPill = createMistPill;
+window.rebuildNavModel = rebuildNavModel;
+export {
+  gridShortcutItems,
+  gridItemsPerRow,
+  navVisible,
+  navFocusables,
+  navZoneRoots,
+  navZoneOrder,
+  navZoneItems,
+  rebuildNavModel,
+  navFocus,
+  navActiveTabElement,
+  navZoneEntry,
+  navJumpZone,
+  navHandleKeydown,
+  createMistPill
+};
+
 
 
 
