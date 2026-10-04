@@ -1,4 +1,5 @@
 // @ts-check
+/** @import { AppState } from '../types/app-state.d.ts' */
 import { storage } from '../storage/storage.js';
 
 // Единственный владелец состояния приложения — этап «б» (store вместо

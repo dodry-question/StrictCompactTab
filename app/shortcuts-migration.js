@@ -4,6 +4,8 @@ import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
 
+/** @import { ShortcutItem, ShortcutFolder } from '../types/app-state.d.ts' */
+
 // --- МИГРАЦИЯ СТРУКТУРЫ ЯРЛЫКОВ (ОБРАТНАЯ СОВМЕСТИМОСТЬ) ---
 // Старые версии хранили данные по-разному:
 //   • плоский список ярлыков с полями folder / category / group;

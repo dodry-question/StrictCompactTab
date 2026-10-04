@@ -14,6 +14,8 @@ import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
 
+/** @import { ShortcutItem, ShortcutFolder } from '../types/app-state.d.ts' */
+
 // ---------- УПРАВЛЕНИЕ КАТЕГОРИЯМИ (раздел настроек «Категории») ----------
 // Категории — это вкладки-разделы: создание, переименование, удаление,
 // порядок и перетаскивание ярлыков между ними.

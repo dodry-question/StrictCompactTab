@@ -1,3 +1,6 @@
+// @ts-check
+/** @import { MistWidgets } from '../types/app-state.d.ts' */
+
 /**
  * Нормализует одну пару координат сдвига (или объект-бокс целиком: берутся x/y).
  * @param {any} raw

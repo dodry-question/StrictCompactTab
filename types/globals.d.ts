@@ -13,9 +13,10 @@
 //   * Navigator.brave / Navigator.userAgentData — нестандартные API.
 //
 // Типы намеренно широкие (any) — уточнение по мере типизации (P2).
-// Профиль данных состояния описан JSDoc @typedef'ами в state/defaults.js
-// (файл остаётся без <script> в index.html — только контейнер глобальных
-// typedef'ов для checkJs; рантайм-значения — в state/values.js).
+// Профиль данных состояния описан МОДУЛЬНЫМИ типами в types/app-state.d.ts
+// (P2.2: раньше это были глобальные JSDoc-typedef'ы в state/defaults.js —
+// файл удалён, глобальных typedef'ов больше нет, потребители импортируют
+// типы через JSDoc `@import`).
 declare global {
   interface Window {
     // Внешняя библиотека (загружается динамически в theme-adaptive.js)
