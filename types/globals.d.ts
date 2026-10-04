@@ -198,6 +198,27 @@ var refreshSchedulePanel: any;
 var handleScheduleFile: any;
 var isSchedulePanelOpen: any;
 var closeSchedulePanel: any;
+// app/core.js — модуль (шаг «в», фаза 2): глобальный хаб алиасов
+var STATE: any;
+var TRANSLATIONS: any;
+var storage: any;
+var DEFAULT_SHORTCUTS: any;
+var store: any;
+var MIST_WIDGET_KEYS: any;
+var formatDateLine: any;
+var getTopbarCityName: any;
+var normalizeMistWidgets: any;
+var MIST_CELL_GAP: any;
+var MIST_PAD: any;
+var MIST_MAX_W: any;
+var MIST_CELL_W: any;
+var NAV_KEYS: any;
+var NAV_ZONE_ROOTS: any;
+var btnExport: any;
+var btnImport: any;
+var importFileInput: any;
+var navModel: any;
+var editingIndex: any;
 }
 
 export {};

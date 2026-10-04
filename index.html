@@ -557,7 +557,7 @@
   <!-- Скрипты приложения: порядок подключения = порядок выполнения (бывший script.js).
        defer — выполнение после разбора документа строго в порядке документа,
        поэтому module src/utils.js отрабатывает первым и window.AppUtils уже готов. -->
-  <script defer src="app/core.js"></script>
+  <script type="module" src="app/core.js"></script>
   <script type="module" src="app/clock-topbar.js"></script>
   <script type="module" src="app/settings-panel.js"></script>
   <script type="module" src="app/appearance.js"></script>
