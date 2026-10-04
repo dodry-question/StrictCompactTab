@@ -1,3 +1,5 @@
+import { removeResizeHandles } from './layout-dnd.js';
+
 import { checkForUpdates } from './backup-updates.js';
 
 import { renderModalShortcutsList } from './modal-shortcuts.js';

@@ -1,3 +1,5 @@
+import { initLayoutDragAndDrop, onResizeStart, removeResizeHandles } from './layout-dnd.js';
+
 import { renderModalShortcutsList } from './modal-shortcuts.js';
 
 import { SearchUI } from '../services/search-ui.js';

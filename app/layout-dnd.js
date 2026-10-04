@@ -481,13 +481,6 @@ function removeResizeHandles() {
   handles.forEach(h => h.remove());
 }
 
-// Мосты для потребителей (controls: top-level initLayoutDragAndDrop(),
-// наResizeStart в листенерах; state-render: removeResizeHandles) —
-// уберём в фазе 3 шага «в». Записи в tempPositions/layoutGrid* идут в
-// глобальные let layout-widgets (ещё классика) — работают как есть.
-window.initLayoutDragAndDrop = initLayoutDragAndDrop;
-window.onResizeStart = onResizeStart;
-window.removeResizeHandles = removeResizeHandles;
 export {
   initLayoutDragAndDrop,
   onDragStart,

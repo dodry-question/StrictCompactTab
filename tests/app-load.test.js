@@ -248,6 +248,7 @@ const probe = (expr) => vm.runInThisContext(expr);
 // берём binding из кэша; top-level import в файле невозможен: файл на
 // верхнем уровне читает document)
 const { renderModalShortcutsList } = await import('../app/modal-shortcuts.js');
+const { initLayoutDragAndDrop } = await import('../app/layout-dnd.js');
 
 test('общая область видимости разделённых файлов сохранилась', () => {
   // функции из разных частей бывшего script.js
@@ -255,7 +256,7 @@ test('общая область видимости разделённых фай
   assert.equal(probe('typeof renderShortcuts'), 'function');          // state-render.js
   assert.equal(typeof renderModalShortcutsList, 'function');            // modal-shortcuts.js (import)
   assert.equal(probe('typeof navHandleKeydown'), 'function');         // navigation.js
-  assert.equal(probe('typeof initLayoutDragAndDrop'), 'function');    // layout-dnd.js
+  assert.equal(typeof initLayoutDragAndDrop, 'function');    // layout-dnd.js
   assert.equal(probe('typeof updateClockAndDate'), 'function');       // clock-topbar.js
   assert.equal(probe('typeof initCustomSearchEngines'), 'function');  // controls.js
   // let/const-состояние, разъехавшееся по файлам (фаза 3: прямые import)
