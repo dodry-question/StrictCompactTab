@@ -45,21 +45,14 @@ const btnExport = document.getElementById('btn-export');
 const btnImport = document.getElementById('btn-import');
 const importFileInput = /** @type {HTMLInputElement} */ (document.getElementById('import-file-input'));
 
-// --- navModel/editingIndex — ACCESSORS (шаг «в») -----------------------------
-// Их переписывают navigation/modal-shortcuts/settings-panel/categories-settings —
-// без accessora была бы рассинхронизация. Остальные 9 мостов (MIST_*/NAV_*/btn*)
-// сняты — фаза 3. storage/DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS опубликованы
-// своими модулями (window.X) — здесь только export; TRANSLATIONS — на import.
-Object.defineProperty(window, 'navModel', {
-  get: () => navModel,
-  set: (value) => { navModel = value; },
-  configurable: true
-});
-Object.defineProperty(window, 'editingIndex', {
-  get: () => editingIndex,
-  set: (value) => { editingIndex = value; },
-  configurable: true
-});
+// --- navModel/editingIndex: запись снаружи через сеттеры (часть 3) ----------
+// navModel пишет navigation (rebuildNavModel), editingIndex — modal-shortcuts,
+// settings-panel, categories-settings; чтение снаружи — import (live binding).
+// Остальные 9 мостов (MIST_*/NAV_*/btn*) сняты — фаза 3. storage/
+// DEFAULT_SHORTCUTS/MIST_WIDGET_KEYS опубликованы своими модулями (window.X) —
+// здесь только export; TRANSLATIONS — на import.
+function setNavModel(value) { navModel = value; }
+function setEditingIndex(value) { editingIndex = value; }
 export {
   TRANSLATIONS,
   DEFAULT_SHORTCUTS,
@@ -73,6 +66,8 @@ export {
   NAV_ZONE_ROOTS,
   navModel,
   editingIndex,
+  setNavModel,
+  setEditingIndex,
   btnExport,
   btnImport,
   importFileInput

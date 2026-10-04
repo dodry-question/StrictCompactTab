@@ -52,11 +52,9 @@ var getWeatherDescription: any;
 // app/categories-settings.js — 9 мостов + accessor settingsCategoryId сняты (часть 3)
 // app/clock-topbar.js — 14 мостов сняты (фаза 3); accessor activeCategory остался
 var activeCategory: any;
-// app/core.js — 9 мостов сняты (фаза 3); accessors navModel/editingIndex + алиасы
+// app/core.js — 9 мостов + accessors navModel/editingIndex сняты (часть 3); алиасы
 var DEFAULT_SHORTCUTS: any;
 var MIST_WIDGET_KEYS: any;
-var navModel: any;
-var editingIndex: any;
 }
 
 export {};

@@ -1,3 +1,5 @@
+import { setEditingIndex } from './core.js';
+
 import { draggedId, setJustDroppedId } from './weather.js';
 
 import { addCatCustom, addCatSelectedFor, setAddCatCustom, setAddCatSelectedFor } from './settings-panel.js';
@@ -213,7 +215,7 @@ function renderCategoryTabsBar() {
 
     chip.addEventListener('click', () => {
       settingsCategoryId = tab.id;
-      editingIndex = -1;
+      setEditingIndex(-1);
       renderModalShortcutsList();
     });
 
@@ -235,7 +237,7 @@ function renderCategoryTabsBar() {
       if (moveItemToCategory(draggedId, tab.id, false)) {
         setJustDroppedId(draggedId);
         settingsCategoryId = tab.id;
-        editingIndex = -1;
+        setEditingIndex(-1);
         refreshAfterCategoryChange();
       }
     });

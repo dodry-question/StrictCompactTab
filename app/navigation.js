@@ -2,7 +2,7 @@ import { container } from './state-render.js';
 
 import { mistTabsEl } from './clock-topbar.js';
 
-import { NAV_ZONE_ROOTS, NAV_KEYS } from './core.js';
+import { NAV_ZONE_ROOTS, NAV_KEYS, navModel, setNavModel } from './core.js';
 
 import { tabsPanelAboveGrid, selectCategory } from './categories-tabs.js';
 
@@ -114,11 +114,11 @@ function rebuildNavModel() {
   });
   const gridZone = zones.find((z) => z.key === 'grid');
   const gridItems = gridZone ? gridZone.items : [];
-  navModel = {
+  setNavModel({
     zones,
     gridItems,
     gridPerRow: gridItems.length ? gridItemsPerRow(gridItems) : 1
-  };
+  });
   return navModel;
 }
 

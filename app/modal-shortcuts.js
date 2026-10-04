@@ -1,3 +1,5 @@
+import { editingIndex, setEditingIndex } from './core.js';
+
 import { draggedId, justDroppedId, setDraggedId, setJustDroppedId } from './weather.js';
 
 import { saveState, renderShortcuts } from './state-render.js';
@@ -108,7 +110,7 @@ function renderShortcutRow(item, isChild, parentId) {
     cancelBtn.className = 'btn btn-inline-cancel';
     cancelBtn.textContent = currentDict.btnCancel;
     cancelBtn.addEventListener('click', () => {
-      editingIndex = -1;
+      setEditingIndex(-1);
       renderModalShortcutsList();
     });
 
@@ -184,7 +186,7 @@ function renderShortcutRow(item, isChild, parentId) {
         }
 
         saveState();
-        editingIndex = -1;
+        setEditingIndex(-1);
         renderShortcuts();
         renderModalShortcutsList();
       }
@@ -223,7 +225,7 @@ function renderShortcutRow(item, isChild, parentId) {
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
     </svg>`;
     editBtn.addEventListener('click', () => {
-      editingIndex = item.id;
+      setEditingIndex(item.id);
       renderModalShortcutsList();
     });
 

@@ -4,6 +4,8 @@ import { weatherWidget, updateClockAndDate } from './clock-topbar.js';
 
 import { updateStatusText, updateWeatherWidget, handleCityInputChange } from './weather.js';
 
+import { setEditingIndex } from './core.js';
+
 import { findCategoryById, settingsCategoryId, setSettingsCategoryId } from './categories-settings.js';
 
 import { applyLanguage, applyTheme, compressImage } from './appearance.js';
@@ -52,7 +54,7 @@ function closeSettings() {
 if (openBtn && modal) {
   openBtn.addEventListener('click', () => {
     modal.classList.add('active');
-    editingIndex = -1;
+    setEditingIndex(-1);
     // Настройки открываем сразу на категории, которая активна на экране
     setSettingsCategoryId((activeCategory && (activeCategory === 'main' || findCategoryById(activeCategory)))
       ? activeCategory
