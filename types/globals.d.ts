@@ -64,6 +64,20 @@ declare global {
 // потребителей. Объявление как global var даёт и голое имя, и window.X.
 var buildBackupPayload: any;
 var checkForUpdates: any;
+// app/settings-panel.js — модуль (шаг «в»): мосты для классических потребителей
+// (голое имя в потребителе + window.X при назначении обеспечиваются одним var).
+var searchInput: any;
+var modal: any;
+var openBtn: any;
+var closeBtn: any;
+var closeSettings: any;
+var sizeSelect: any;
+var columnsSelect: any;
+var languageSelect: any;
+var searchEngineSelect: any;
+var themeSelect: any;
+var addCatCustom: any;
+var addCatSelectedFor: any;
 }
 
 export {};

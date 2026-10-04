@@ -211,3 +211,35 @@ if (newIconInput) {
   });
 }
 
+// --- Мосты для классических app/* (шаг «в», фаза 2), уберём в фазе 3 ---------
+window.searchInput = searchInput;
+window.modal = modal;
+window.openBtn = openBtn;
+window.closeBtn = closeBtn;
+window.closeSettings = closeSettings;
+window.sizeSelect = sizeSelect;
+window.columnsSelect = columnsSelect;
+window.languageSelect = languageSelect;
+window.searchEngineSelect = searchEngineSelect;
+window.themeSelect = themeSelect;
+
+// addCatCustom/addCatSelectedFor пишет ЕЩЁ categories-settings (классический):
+// мост по значению здесь разошёлся бы (десинк при записи), поэтому запись
+// прокидывается в модуль через accessors.
+Object.defineProperty(window, 'addCatCustom', {
+  get: () => addCatCustom,
+  set: (value) => { addCatCustom = value; },
+  configurable: true
+});
+Object.defineProperty(window, 'addCatSelectedFor', {
+  get: () => addCatSelectedFor,
+  set: (value) => { addCatSelectedFor = value; },
+  configurable: true
+});
+
+export {
+  searchInput, modal, openBtn, closeBtn, closeSettings,
+  sizeSelect, columnsSelect, languageSelect, searchEngineSelect, themeSelect,
+  addCatCustom, addCatSelectedFor
+};
+
