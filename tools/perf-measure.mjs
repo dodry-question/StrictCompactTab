@@ -74,6 +74,29 @@ async function removeProfileDir(profile) {
   return false;
 }
 
+// Страховка на старте: если предыдущий прогон не дожил до уборки (Ctrl+C,
+// падение, убийство процесса), в %TEMP% остаются каталоги вида perf-profile-*.
+// Старше часа они точно никому не нужны — удаляем, чтобы мусор не копился.
+function sweepOldProfiles() {
+  const tmp = os.tmpdir();
+  let removed = 0;
+  try {
+    for (const entry of fs.readdirSync(tmp, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      if (!/^(perf|mem|ui-smoke)-profile-/.test(entry.name)) continue;
+      const full = path.join(tmp, entry.name);
+      try {
+        const ageMs = Date.now() - fs.statSync(full).mtimeMs;
+        if (ageMs > 60 * 60 * 1000) {
+          fs.rmSync(full, { recursive: true, force: true });
+          removed += 1;
+        }
+      } catch { /* занят другим процессом — пропускаем */ }
+    }
+  } catch { /* нет доступа к %TEMP% — не критично */ }
+  return removed;
+}
+
 const EDGE = process.env.BROWSER_BIN || [
   'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
   'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
@@ -291,6 +314,8 @@ function report(label, runs) {
 
 async function main() {
   if (!EDGE) { console.error('Не найден Edge/Chrome. Задай BROWSER_BIN.'); process.exit(1); }
+  const swept = sweepOldProfiles();
+  if (swept) console.log(`убрано старых временных профилей: ${swept}`);
   const { server, port } = await startServer();
   const dbgPort = 9400 + Math.floor(Math.random() * 400);
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'perf-profile-'));

@@ -360,7 +360,7 @@ async function findExtensionUrl(s) {
   return null;
 }
 
-async function runScenario(dbgPort, url, scenario, extensionId) {
+async function runScenario(dbgPort, url, scenario) {
   const created = await fetch(`http://127.0.0.1:${dbgPort}/json/new?${encodeURIComponent('about:blank')}`, { method: 'PUT' });
   if (!created.ok) throw new Error('json/new: HTTP ' + created.status);
   const target = await created.json();
@@ -449,8 +449,32 @@ async function runScenario(dbgPort, url, scenario, extensionId) {
   }
 }
 
+// Страховка на старте: каталоги perf/mem/ui-smoke-profile-* старше часа —
+// мусор от прогонов, которые не дожили до уборки. См. perf-measure.mjs.
+function sweepOldProfiles() {
+  const tmp = os.tmpdir();
+  let removed = 0;
+  try {
+    for (const entry of fs.readdirSync(tmp, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      if (!/^(perf|mem|ui-smoke)-profile-/.test(entry.name)) continue;
+      const full = path.join(tmp, entry.name);
+      try {
+        const ageMs = Date.now() - fs.statSync(full).mtimeMs;
+        if (ageMs > 60 * 60 * 1000) {
+          fs.rmSync(full, { recursive: true, force: true });
+          removed += 1;
+        }
+      } catch { /* занят другим процессом — пропускаем */ }
+    }
+  } catch { /* нет доступа к %TEMP% — не критично */ }
+  return removed;
+}
+
 async function main() {
   if (!EDGE) { console.error('Не найден Edge/Chrome. Задай BROWSER_BIN.'); process.exit(1); }
+  const swept = sweepOldProfiles();
+  if (swept) console.log(`убрано старых временных профилей: ${swept}`);
   const { server, port } = await startServer();
   const dbgPort = 9500 + Math.floor(Math.random() * 300);
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'ui-smoke-profile-'));

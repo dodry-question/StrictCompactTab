@@ -87,6 +87,28 @@ async function removeProfileDir(profile) {
   return false;
 }
 
+// Страховка на старте: каталоги perf/mem/ui-smoke-profile-* старше часа —
+// мусор от прогонов, которые не дожили до уборки. См. perf-measure.mjs.
+function sweepOldProfiles() {
+  const tmp = os.tmpdir();
+  let removed = 0;
+  try {
+    for (const entry of fs.readdirSync(tmp, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      if (!/^(perf|mem|ui-smoke)-profile-/.test(entry.name)) continue;
+      const full = path.join(tmp, entry.name);
+      try {
+        const ageMs = Date.now() - fs.statSync(full).mtimeMs;
+        if (ageMs > 60 * 60 * 1000) {
+          fs.rmSync(full, { recursive: true, force: true });
+          removed += 1;
+        }
+      } catch { /* занят другим процессом — пропускаем */ }
+    }
+  } catch { /* нет доступа к %TEMP% — не критично */ }
+  return removed;
+}
+
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -291,6 +313,8 @@ async function heapComposition(s) {
 
 async function main() {
   if (!EDGE) { console.error('Не найден Edge/Chrome. Задай BROWSER_BIN.'); process.exit(1); }
+  const swept = sweepOldProfiles();
+  if (swept) console.log(`убрано старых временных профилей: ${swept}`);
   const { server, port } = await startServer();
   const dbgPort = 9800 + Math.floor(Math.random() * 150);
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'mem-profile-'));
