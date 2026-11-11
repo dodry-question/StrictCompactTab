@@ -178,6 +178,23 @@ body.theme-adaptive .settings-input:focus {
   box-shadow: 0 0 0 3px rgba(var(--adapt-primary-rgb), 0.2);
 }
 
+body.theme-adaptive .settings-hint {
+  color: rgba(var(--adapt-on-surface-rgb), 0.6);
+}
+
+body.theme-adaptive .settings-hint.is-error {
+  color: #f08a8a;
+}
+
+body.theme-adaptive .settings-hint.is-success {
+  color: #7fd6a0;
+}
+
+body.theme-adaptive .settings-input.is-invalid {
+  border-color: #e05a5a;
+  box-shadow: 0 0 0 3px rgba(224, 90, 90, 0.15);
+}
+
 body.theme-adaptive .add-shortcut-form {
   background: rgba(var(--adapt-on-surface-rgb), 0.03);
   border-color: rgba(var(--adapt-outline-rgb), 0.2);

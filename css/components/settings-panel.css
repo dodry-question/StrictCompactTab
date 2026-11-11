@@ -378,6 +378,51 @@
   box-shadow: 0 0 0 3px rgba(var(--adaptive-color-rgb), 0.15);
 }
 
+/* Невалидный адрес Worker: поле остаётся редактируемым, просто подсвечено */
+.settings-input.is-invalid {
+  border-color: #e05a5a;
+  box-shadow: 0 0 0 3px rgba(224, 90, 90, 0.15);
+}
+
+/* Мелкая подпись под полем: подсказки и статусы облачной синхронизации */
+.settings-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.settings-hint.is-error {
+  color: #f08a8a;
+}
+
+.settings-hint.is-success {
+  color: #7fd6a0;
+}
+
+.settings-hint.is-busy {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Код — 28 символов, в одну строку с кнопками он не влезает: поле идёт
+   во всю ширину, кнопки — отдельной строкой под ним */
+#cloud-sync-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.5px;
+}
+
+#cloud-sync-section .settings-cloud-code-actions {
+  gap: 8px;
+}
+
+#cloud-sync-section .settings-cloud-code-actions .btn {
+  white-space: nowrap;
+}
+
+#cloud-sync-section .settings-field + .settings-field {
+  margin-top: 10px;
+}
+
 /* Обособленная, компактная форма добавления ярлыка */
 .add-shortcut-form {
   background: rgba(255, 255, 255, 0.02);

@@ -131,6 +131,13 @@ const SCENARIOS = [
     what: 'режим Zen (без виджетов и ярлыков)',
     state: { layoutMistMode: false, layoutZenMode: true },
     shortcuts: []
+  },
+  {
+    name: 'settings-worker',
+    what: 'настройки открыты: рубильник Worker видим и внутри окна',
+    state: { layoutMistMode: false, layoutZenMode: false },
+    openSettings: true,
+    shortcuts: Array.from({ length: 4 }, (_, i) => SHORTCUT(`sc_${i}`, `Site ${i + 1}`, `https://example${i}.com`))
   }
 ];
 
@@ -211,6 +218,26 @@ const CHECKS = `(() => {
   const schedulePanel = document.getElementById('schedule-panel');
   if (schedulePanel && visible(schedulePanel)) {
     checkInside('панель расписания', [schedulePanel.getBoundingClientRect()]);
+  }
+
+  // 5. Настройки: рубильник Worker — единственная новая строка, она не
+  // должна ни пропасть, ни уехать за край прокручиваемой колонки.
+  const settingsModal = document.getElementById('settings-modal');
+  if (settingsModal && visible(settingsModal)) {
+    const workerToggle = document.getElementById('worker-enabled');
+    const row = workerToggle && workerToggle.closest('.settings-field');
+    if (!row || !visible(row)) problems.push('рубильник Worker не виден в настройках');
+    else checkInside('рубильник Worker', [row.getBoundingClientRect()]);
+
+    // Подпись версии в шапке настроек обязана совпадать с манифестом:
+    // вписанный руками номер однажды уже расходился с реальным.
+    const label = document.querySelector('.settings-version');
+    const manifest = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest)
+      ? chrome.runtime.getManifest() : null;
+    const expected = manifest && (manifest.version_name || manifest.version);
+    if (label && expected && (label.textContent || '').trim() !== 'v' + expected) {
+      problems.push('версия в настройках «' + (label.textContent || '').trim() + '», в манифесте «' + expected + '»');
+    }
   }
 
   return {
@@ -432,6 +459,20 @@ async function runScenario(dbgPort, url, scenario) {
       await sleep(100);
     }
     await sleep(250);
+
+    if (scenario.openSettings) {
+      await s.send('Runtime.evaluate', {
+        expression: `(() => {
+          const btn = document.getElementById('settings-open-btn');
+          if (btn) btn.click();
+          const toggle = document.getElementById('worker-enabled');
+          if (toggle) toggle.scrollIntoView({ block: 'center' });
+          return Boolean(btn && toggle);
+        })()`,
+        returnByValue: true
+      });
+      await sleep(350);
+    }
 
     const ev = await s.send('Runtime.evaluate', { expression: CHECKS, returnByValue: true });
     const result = ev.result?.value || { problems: ['проверка не вернула результат'], info: {} };

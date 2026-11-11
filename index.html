@@ -109,6 +109,8 @@
         <p id="schedule-subtitle" class="schedule-subtitle"></p>
       </div>
       <div class="schedule-actions">
+        <button id="schedule-check" class="schedule-action" type="button"
+                data-i18n="scheduleCheck">Проверить обновление</button>
         <button id="schedule-change-group" class="schedule-action" type="button" hidden
                 data-i18n="scheduleChangeGroup">Сменить группу</button>
         <button id="schedule-delete" class="schedule-action" type="button" hidden
@@ -196,7 +198,7 @@
       <div class="modal-header">
         <div style="display: flex; align-items: baseline; gap: 8px;">
           <h2 data-i18n="settingsTitle" style="margin: 0;">Screen Settings</h2>
-          <span class="settings-version" style="font-size: 0.75rem; opacity: 0.5; font-weight: normal; font-family: monospace;">v1.11.1</span>
+          <span class="settings-version" style="font-size: 0.75rem; opacity: 0.5; font-weight: normal; font-family: monospace;">v1.11.3b</span>
         </div>
         <button id="settings-close-btn" class="modal-close-icon">&times;</button>
       </div>
@@ -322,6 +324,34 @@
               <label class="toggle-label">
                 <input type="checkbox" id="schedule-enabled">
                 <span data-i18n="scheduleEnabledLabel">Расписание занятий (файл расписания из ВК)</span>
+              </label>
+            </div>
+
+            <!-- Подразделы расписания: уведомление о новой версии файла и адрес
+                 Worker (общий с облачной синхронизацией). -->
+            <div id="schedule-subsettings" class="settings-toggle-group settings-subsettings" style="display: none;">
+              <div class="settings-field">
+                <label class="toggle-label">
+                  <input type="checkbox" id="schedule-auto-check">
+                  <span data-i18n="scheduleAutoCheckLabel">Уведомлять о новом расписании</span>
+                </label>
+                <p class="settings-hint" data-i18n="scheduleAutoCheckHint">Проверка раз в 6 часов при открытии новой вкладки.</p>
+              </div>
+              <div class="settings-field">
+                <label for="schedule-worker-url" data-i18n="scheduleWorkerLabel">Адрес Worker</label>
+                <input type="url" id="schedule-worker-url" class="settings-input"
+                       autocomplete="off" spellcheck="false" placeholder="https://....workers.dev">
+                <p class="settings-hint" data-i18n="scheduleWorkerHint">Тот же адрес, что в облачной синхронизации: расписание скачивает Worker, браузер с ВК не общается.</p>
+              </div>
+            </div>
+
+            <!-- Рубильник сервера. Выключен по умолчанию: пока он не включён,
+                 к Worker не уходит ни одного запроса — ни за облаком, ни за
+                 расписанием, ни за погодой. -->
+            <div class="settings-field worker-switch-field">
+              <label class="toggle-label">
+                <input type="checkbox" id="worker-enabled">
+                <span data-i18n="workerEnabledLabel">Сервер расширения (Worker)</span>
               </label>
             </div>
 
@@ -486,6 +516,39 @@
             </div>
           </div>
 
+          <!-- 10. Облачная синхронизация -->
+          <div class="settings-section" id="cloud-sync-section">
+            <h3 data-i18n="cloudTitle">Cloud sync</h3>
+            <p class="settings-hint" data-i18n="cloudHint">Settings and shortcuts only. Wallpaper stays on this device. The server stores an encrypted blob and cannot read it.</p>
+            <div class="settings-field">
+              <label for="cloud-worker-url" data-i18n="cloudWorkerLabel">Worker address</label>
+              <input type="url" id="cloud-worker-url" class="settings-input"
+                     autocomplete="off" spellcheck="false" placeholder="https://....workers.dev">
+            </div>
+            <div class="settings-field">
+              <label for="cloud-sync-code" data-i18n="cloudCodeLabel">Sync code</label>
+              <input type="text" id="cloud-sync-code" class="settings-input" autocomplete="off"
+                     spellcheck="false" placeholder="SCT1-XXXXX-XXXXX-XXXXX-XXXXX">
+              <div class="settings-row settings-cloud-code-actions">
+                <button id="cloud-new-code" class="btn btn-secondary" type="button" data-i18n="cloudNewCode">New code</button>
+                <button id="cloud-copy-code" class="btn btn-secondary" type="button" data-i18n="cloudCopy">Copy</button>
+              </div>
+            </div>
+            <div class="settings-field">
+              <label class="toggle-label">
+                <input type="checkbox" id="cloud-master">
+                <span data-i18n="cloudMaster">This is the main device (defines settings)</span>
+              </label>
+              <p id="cloud-role-hint" class="settings-hint"></p>
+            </div>
+            <div class="settings-row">
+              <button id="cloud-save" class="btn btn-secondary" type="button" data-i18n="cloudSave">Upload to cloud</button>
+              <button id="cloud-load" class="btn btn-secondary" type="button" data-i18n="cloudLoad">Download from cloud</button>
+              <button id="cloud-forget" class="btn btn-danger-action" type="button" data-i18n="cloudForget">Forget code</button>
+            </div>
+            <p id="cloud-status" class="settings-hint" role="status"></p>
+          </div>
+
         </div>
 
         <!-- ПРАВАЯ КОЛОНКА: управление категориями и ярлыками -->
@@ -534,8 +597,20 @@
 
   <!-- Уведомление о новой версии расширения -->
   <div id="update-notification" class="update-notification" style="display: none;">
-    <span id="update-text">New version available: 1.11.1</span>
+    <span id="update-text">New version available: 1.11.3b</span>
     <a id="update-link" href="https://github.com/dodry-question/StrictCompactTab/releases" target="_blank" data-i18n="updateDownload">Download</a>
+  </div>
+
+  <!-- Уведомление о новом файле расписания. Тот же угол, что у уведомления
+       об обновлении расширения, но выше: они не должны накладываться. -->
+  <div id="schedule-toast" class="schedule-toast" style="display: none;" role="status">
+    <span id="schedule-toast-text" class="schedule-toast-text"></span>
+    <div class="schedule-toast-actions">
+      <button id="schedule-toast-action" class="schedule-toast-action" type="button"
+              data-i18n="scheduleToastAction">Обновить</button>
+      <button id="schedule-toast-close" class="schedule-toast-close" type="button"
+              data-i18n-title="scheduleToastClose" title="Скрыть" aria-label="Скрыть">&times;</button>
+    </div>
   </div>
 
   <!-- Модальное окно открытой папки -->
@@ -557,6 +632,9 @@
   <!-- Скрипты приложения: порядок подключения = порядок выполнения (бывший script.js).
        defer — выполнение после разбора документа строго в порядке документа,
        поэтому module src/utils.js отрабатывает первым и window.AppUtils уже готов. -->
+  <!-- Адрес и рубильник Worker: до остальных app/* — погода, облако,
+       расписание и кеш иконок читают адрес уже настроенным. -->
+  <script type="module" src="app/worker-url.js"></script>
   <script type="module" src="app/core.js"></script>
   <script type="module" src="app/clock-topbar.js"></script>
   <script type="module" src="app/settings-panel.js"></script>
@@ -568,6 +646,7 @@
   <script type="module" src="app/categories-settings.js"></script>
   <script type="module" src="app/modal-shortcuts.js"></script>
   <script type="module" src="app/backup-updates.js"></script>
+  <script type="module" src="app/cloud-sync.js"></script>
   <script type="module" src="app/layout-widgets.js"></script>
   <script type="module" src="app/state-render.js"></script>
   <script type="module" src="app/categories-tabs.js"></script>

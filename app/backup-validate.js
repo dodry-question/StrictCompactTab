@@ -296,7 +296,8 @@ const BackupValidate = (() => {
       // они принадлежат бэкапу. Сам файл расписания (scheduleData) — нет:
       // его заново загружают перетаскиванием .xlsx.
       scheduleEnabled: asBool(data.scheduleEnabled, false),
-      scheduleGroup: sanitizeScheduleGroup(data.scheduleGroup)
+      scheduleGroup: sanitizeScheduleGroup(data.scheduleGroup),
+      scheduleAutoCheck: asBool(data.scheduleAutoCheck, false)
     };
 
     // Zen и Mist взаимоисключающи: иначе комбинация из чужого бэкапа

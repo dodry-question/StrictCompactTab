@@ -2,6 +2,8 @@ import { saveState, renderTopbar } from './state-render.js';
 
 import { WeatherService } from '../services/weather.js';
 
+import { getWorkerUrl, workerUrlReady } from './worker-url.js';
+
 import { storage } from '../storage/storage.js';
 
 import { STATE } from '../state/store.js';
@@ -74,13 +76,9 @@ function handleCityInputChange() {
   geocodeTimeout = setTimeout(() => {
     // Полный снимок — один раз, уже после паузы ввода, перед геокодированием
     saveState();
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=${STATE.language === 'ru' ? 'ru' : 'en'}`;
 
-    fetch(url)
-      .then(response => {
-        if (!response.ok) throw new Error('Geocoding API error');
-        return response.json();
-      })
+    workerUrlReady
+      .then((base) => WeatherService.fetchGeocode(cityName, STATE.language, getWorkerUrl() || base))
       .then(data => {
         if (!STATE.showWeather) return;
         
@@ -189,13 +187,8 @@ function updateWeatherWidget() {
     weatherDetails.textContent = dict.weatherLoading || 'Loading...';
   }
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${STATE.weatherCoords.lat}&longitude=${STATE.weatherCoords.lon}&current_weather=true&timezone=auto`;
-
-  fetch(url)
-    .then(response => {
-      if (!response.ok) throw new Error('Weather API error');
-      return response.json();
-    })
+  workerUrlReady
+    .then((base) => WeatherService.fetchCurrent(STATE.weatherCoords.lat, STATE.weatherCoords.lon, getWorkerUrl() || base))
     .then(data => {
       if (!STATE.showWeather) return;
       const current = data.current_weather;

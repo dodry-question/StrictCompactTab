@@ -4,5 +4,8 @@ node_modules/
 # Кэш инкрементальной сборки TypeScript (на будущее)
 *.tsbuildinfo
 
+# Локальное состояние wrangler dev (сборка Worker, локальная KV)
+.wrangler/
+
 # рабочая сводка-план (не для git и не для релиза)
 СВОДКА.md

@@ -1,4 +1,4 @@
-// Иконки ярлыков: мгновенная отрисовка + локальный кэш.
+// Иконки ярлыков: мгновенная отрисовка + кэш на устройстве.
 //
 // Проблема, которую это решает. Раньше в трёх местах (services/shortcut-renderer.js,
 // app/navigation.js, app/shortcuts-migration.js) было написано одно и то же:
@@ -11,18 +11,26 @@
 // подставлялась запасная заглушка. Плюс каждое открытие вкладки отправляло
 // Google список всех твоих доменов.
 //
-// Те��ь:
+// Теперь:
 //   1) на элемент мгновенно ставится ЛОКАЛЬНАЯ заглушка — пустых окон не бывает;
-//   2) иконка кэшируется в localStorage как data:URL, поэтому со второго раза
-//      она рисуется сразу и без сети (localStorage синхронный — первый кадр
-//      не ждёт promises);
-//   3) реальная иконка дорисовывается мягким проявлением, без «щелчка»;
-//   4) кэш ограничен по размеру, при переполнении молча отключается.
+//   2) иконка лежит в localStorage, поэтому со второго раза рисуется сразу и
+//      без сети (localStorage синхронный — первый кадр не ждёт promises);
+//   3) обновляется не чаще раза в сутки и только в фоне: даже устаревшая
+//      иконка показывается сразу, а свежая дорисовывается, когда придёт;
+//   4) один запрос на домен, сколько бы плиток его ни показывали;
+//   5) кэш ограничен по числу записей и по весу, при переполнении отключается.
+//
+// Байты иконки можно прочитать только через Worker (см. cloudflare/src/favicons.js):
+// Google не отдаёт CORS-заголовки, а без них fetch из страницы расширения
+// режется браузером. Пока рубильник Worker выключен, работает прежний путь
+// через <img> — картинка показывается, но хранит её браузерный HTTP-кэш.
 const ShortcutIcons = (function () {
   'use strict';
 
   const CACHE_KEY = 'shortcutIconCache';
   const CACHE_LIMIT = 200;
+  const CACHE_CHARS = 1200000;   // ~1.2 МБ символов: localStorage не бездонный
+  const REFRESH_MS = 24 * 60 * 60 * 1000;
 
   // Нейтральный глиф-заглушка: рисуется мгновенно, не требует сети.
   // Светлый круг с точкой — читается как «иконка ещё подгружается».
@@ -42,6 +50,10 @@ const ShortcutIcons = (function () {
 
   let cache = null;
   let cacheBroken = false;   // localStorage переполнен — больше не пробуем писать
+  let proxyBase = () => '';
+
+  // Ключ → плитки, которые ждут эту иконку. Один запрос на домен.
+  const pending = new Map();
 
   function readCache() {
     if (cache) return cache;
@@ -51,7 +63,17 @@ const ShortcutIcons = (function () {
       const raw = localStorage.getItem(CACHE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') cache = parsed;
+        if (parsed && typeof parsed === 'object') {
+          for (const key of Object.keys(parsed)) {
+            const value = parsed[key];
+            // Записи прошлых версий — просто строка с адресом иконки, без
+            // времени. Показываем её сразу и обновляем в фоне.
+            if (typeof value === 'string') cache[key] = { src: value, ts: 0 };
+            else if (value && typeof value.src === 'string') {
+              cache[key] = { src: value.src, ts: Number(value.ts) || 0 };
+            }
+          }
+        }
       }
     } catch (e) {
       cacheBroken = true;
@@ -59,15 +81,27 @@ const ShortcutIcons = (function () {
     return cache;
   }
 
+  function prune() {
+    const keys = Object.keys(cache);
+    let chars = 0;
+    for (const key of keys) chars += cache[key].src.length;
+    if (keys.length <= CACHE_LIMIT && chars <= CACHE_CHARS) return;
+
+    // Вытесняем самые давно обновлённые: их всё равно пора перечитать.
+    const oldest = keys.sort((a, b) => cache[a].ts - cache[b].ts);
+    let count = keys.length;
+    for (const key of oldest) {
+      if (count <= CACHE_LIMIT && chars <= CACHE_CHARS) break;
+      chars -= cache[key].src.length;
+      count -= 1;
+      delete cache[key];
+    }
+  }
+
   function writeCache() {
     if (cacheBroken) return;
     try {
-      // Ограничение не только по числу записей, но и по весу: при переполнении
-      // localStorage лучше сбросить кэш целиком, чем ломать запись вкладки.
-      const keys = Object.keys(cache);
-      if (keys.length > CACHE_LIMIT) {
-        for (const key of keys.slice(0, keys.length - CACHE_LIMIT)) delete cache[key];
-      }
+      prune();
       localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
     } catch (e) {
       cacheBroken = true;
@@ -75,21 +109,99 @@ const ShortcutIcons = (function () {
     }
   }
 
+  function hostname(item) {
+    try { return new URL(item.url).hostname; } catch (e) { return String(item.url || ''); }
+  }
+
   function cacheKey(item, size) {
-    let hostname;
-    try { hostname = new URL(item.url).hostname; } catch (e) { hostname = String(item.url || ''); }
-    return size + '|' + hostname;
+    return size + '|' + hostname(item);
   }
 
   function remoteUrl(item, size) {
-    let hostname;
-    try { hostname = new URL(item.url).hostname; } catch (e) { hostname = String(item.url || ''); }
-    return 'https://www.google.com/s2/favicons?sz=' + size + '&domain=' + encodeURIComponent(hostname);
+    return 'https://www.google.com/s2/favicons?sz=' + size + '&domain=' + encodeURIComponent(hostname(item));
+  }
+
+  function apply(img, key, source) {
+    // Пока иконка ехала, плитку могли перерисовать под другой ярлык.
+    if (!img || img.dataset.iconKey !== key) return;
+    img.src = source;
+    img.classList.remove('icon-pending');
+    img.classList.add('is-loaded');
+  }
+
+  function finish(key, source) {
+    const targets = pending.get(key);
+    pending.delete(key);
+    if (!cacheBroken) {
+      readCache()[key] = { src: source, ts: Date.now() };
+      writeCache();
+    }
+    if (targets) targets.forEach((img) => apply(img, key, source));
+  }
+
+  // Путь без Worker: картинку показывает браузер, прочитать её байты нельзя.
+  function probeDirect(key, item, size) {
+    const probe = new Image();
+    probe.referrerPolicy = 'no-referrer';
+    probe.onload = () => finish(key, probe.src);
+    // Недоступный сайт тоже запоминаем: иначе мёртвый домен дёргался бы при
+    // каждом открытии вкладки.
+    probe.onerror = () => finish(key, FALLBACK);
+    probe.src = remoteUrl(item, size);
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error || new Error('icon_read_failed'));
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // Путь через Worker: байты приходят с CORS и ложатся на устройство.
+  async function loadViaProxy(key, item, size, base) {
+    try {
+      const response = await fetch(
+        base + '/favicon?size=' + size + '&domain=' + encodeURIComponent(hostname(item)),
+        { cache: 'no-store' }
+      );
+      if (!response.ok) throw new Error('icon_http_' + response.status);
+
+      const blob = await response.blob();
+      if (!blob || !blob.size || blob.size > 128 * 1024) throw new Error('icon_bad_body');
+      if (!/^image\//i.test(blob.type || '')) throw new Error('icon_not_image');
+
+      finish(key, await blobToDataUrl(blob));
+    } catch (error) {
+      // Сервер недоступен — иконка всё равно нужна, берём напрямую.
+      probeDirect(key, item, size);
+    }
+  }
+
+  function startLoad(key, item, size, img) {
+    const waiting = pending.get(key);
+    if (waiting) {
+      waiting.add(img);
+      return;
+    }
+    pending.set(key, new Set([img]));
+
+    const base = proxyBase();
+    if (base && typeof FileReader === 'function') loadViaProxy(key, item, size, base);
+    else probeDirect(key, item, size);
   }
 
   return {
     PLACEHOLDER,
     FALLBACK,
+    REFRESH_MS,
+
+    // Адрес Worker приходит из app/worker-url.js: сервис не знает ни про
+    // настройки, ни про рубильник — выключенный сервер для него пустая строка.
+    setProxyBase(resolver) {
+      proxyBase = typeof resolver === 'function' ? resolver : () => '';
+    },
 
     // size: 128 для плиток сетки, 64 для пилюль Mist
     attach(img, item, size) {
@@ -103,42 +215,30 @@ const ShortcutIcons = (function () {
       }
 
       const key = cacheKey(item, size);
-      const cached = readCache()[key];
+      img.dataset.iconKey = key;
+      const entry = readCache()[key];
 
-      // Из кэша — мгновенно, без сети и без мигания
-      if (cached) {
-        img.src = cached;
+      // Из кэша — мгновенно, даже если запись пора обновить: открытие новой
+      // вкладки не должно ждать сеть.
+      if (entry) {
+        img.src = entry.src;
         img.classList.add('is-loaded');
+        if (Date.now() - entry.ts >= REFRESH_MS) startLoad(key, item, size, img);
         return img;
       }
 
       // Первый раз по этому домену: заглушка сейчас, иконка — через мгновение
       img.src = PLACEHOLDER;
       img.classList.add('icon-pending');
-
-      const probe = new Image();
-      probe.referrerPolicy = 'no-referrer';
-      const ready = (source) => {
-        img.src = source;
-        img.classList.remove('icon-pending');
-        img.classList.add('is-loaded');
-      };
-      probe.onload = () => {
-        ready(probe.src);
-        if (!cacheBroken) {
-          readCache()[key] = probe.src;
-          writeCache();
-        }
-      };
-      probe.onerror = () => ready(FALLBACK);
-      probe.src = remoteUrl(item, size);
+      startLoad(key, item, size, img);
       return img;
     },
 
     // Сброс кэша (например, при полном сбросе настроек)
     clear() {
-      cache = {};
+      cache = null;
       cacheBroken = false;
+      pending.clear();
       try { localStorage.removeItem(CACHE_KEY); } catch (e) { /* пусто */ }
     }
   };

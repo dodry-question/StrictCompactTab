@@ -119,6 +119,19 @@ globalThis.localStorage = {
   removeItem: (k) => { iconStore.delete(k); }
 };
 
+// Через Worker иконка приходит байтами и превращается в data:URL — в браузере
+// это делает FileReader, в node его нет. Повторяем ровно его контракт:
+// результат появляется в onload, а не синхронно.
+globalThis.FileReader = class {
+  readAsDataURL(blob) {
+    blob.arrayBuffer().then((buffer) => {
+      this.result = 'data:' + (blob.type || 'application/octet-stream') +
+        ';base64,' + Buffer.from(buffer).toString('base64');
+      if (this.onload) this.onload();
+    });
+  }
+};
+
 const { SearchService } = await import('../services/search.js');
 const { SearchUI } = await import('../services/search-ui.js');
 const { WeatherService } = await import('../services/weather.js');
@@ -372,6 +385,152 @@ test('загруженная пользователем иконка идёт к
   assert.equal(iconStore.size, 0, 'свои иконки не кэшируются');
 });
 
+// --- Кэш на устройстве: сутки без сети, обновление в фоне -------------------
+
+const until = async (predicate) => {
+  for (let i = 0; i < 200 && !predicate(); i++) {
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+};
+
+const savedIcons = () => JSON.parse(iconStore.get('shortcutIconCache'));
+
+test('устаревшая иконка рисуется сразу, а обновляется в фоне', () => {
+  ShortcutIcons.clear();
+  imageProbes.length = 0;
+  iconStore.set('shortcutIconCache', JSON.stringify({
+    '128|example.com': { src: 'data:image/png;base64,old', ts: Date.now() - ShortcutIcons.REFRESH_MS - 1000 }
+  }));
+
+  const img = new MockElement('img');
+  ShortcutIcons.attach(img, { id: 'a', url: 'https://example.com/x' }, 128);
+
+  // Открытие вкладки не ждёт сеть: на первом кадре уже сохранённая иконка.
+  assert.equal(img.src, 'data:image/png;base64,old');
+  assert.ok(img.classes.has('is-loaded'));
+  assert.ok(!img.classes.has('icon-pending'));
+  assert.equal(imageProbes.length, 1, 'обновление уходит одним фоновым запросом');
+
+  imageProbes[0].onload();
+  const entry = savedIcons()['128|example.com'];
+  assert.equal(entry.src, imageProbes[0]._src);
+  assert.ok(Date.now() - entry.ts < 1000, 'время обновления записано');
+  assert.equal(img.src, entry.src);
+});
+
+test('иконка моложе суток не трогает сеть вообще', () => {
+  ShortcutIcons.clear();
+  imageProbes.length = 0;
+  iconStore.set('shortcutIconCache', JSON.stringify({
+    '128|example.com': { src: 'data:image/png;base64,fresh', ts: Date.now() - ShortcutIcons.REFRESH_MS + 60000 }
+  }));
+
+  const img = new MockElement('img');
+  ShortcutIcons.attach(img, { id: 'a', url: 'https://example.com/x' }, 128);
+
+  assert.equal(img.src, 'data:image/png;base64,fresh');
+  assert.equal(imageProbes.length, 0);
+});
+
+test('запись прошлой версии (строка без времени) показывается сразу и обновляется', () => {
+  ShortcutIcons.clear();
+  imageProbes.length = 0;
+  iconStore.set('shortcutIconCache', JSON.stringify({ '128|example.com': 'data:image/png;base64,legacy' }));
+
+  const img = new MockElement('img');
+  ShortcutIcons.attach(img, { id: 'a', url: 'https://example.com/' }, 128);
+
+  assert.equal(img.src, 'data:image/png;base64,legacy');
+  assert.equal(imageProbes.length, 1);
+});
+
+test('несколько плиток одного домена — один запрос, иконка достаётся всем', () => {
+  ShortcutIcons.clear();
+  imageProbes.length = 0;
+
+  const first = new MockElement('img');
+  const second = new MockElement('img');
+  ShortcutIcons.attach(first, { id: 'a', url: 'https://example.com/one' }, 128);
+  ShortcutIcons.attach(second, { id: 'b', url: 'https://example.com/two' }, 128);
+
+  assert.equal(imageProbes.length, 1);
+  imageProbes[0].onload();
+  assert.equal(first.src, imageProbes[0]._src);
+  assert.equal(second.src, imageProbes[0]._src);
+});
+
+test('перерисованная плитка не получает иконку прежнего ярлыка', () => {
+  ShortcutIcons.clear();
+  imageProbes.length = 0;
+
+  const img = new MockElement('img');
+  ShortcutIcons.attach(img, { id: 'a', url: 'https://old.example/' }, 128);
+  ShortcutIcons.attach(img, { id: 'b', url: 'https://new.example/' }, 128);
+
+  imageProbes[0].onload();   // ответ на запрос, который уже не нужен
+  assert.equal(img.src, ShortcutIcons.PLACEHOLDER);
+  assert.ok(img.classes.has('icon-pending'));
+
+  imageProbes[1].onload();
+  assert.equal(img.src, imageProbes[1]._src);
+});
+
+test('через Worker иконка ложится на устройство и больше не ходит в сеть', async () => {
+  ShortcutIcons.clear();
+  imageProbes.length = 0;
+  ShortcutIcons.setProxyBase(() => 'https://example.workers.dev');
+
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response(new Uint8Array([1, 2, 3]), {
+      status: 200,
+      headers: { 'content-type': 'image/png' }
+    });
+  };
+
+  const img = new MockElement('img');
+  ShortcutIcons.attach(img, { id: 'a', url: 'https://example.com/x' }, 128);
+  assert.equal(img.src, ShortcutIcons.PLACEHOLDER);
+
+  await until(() => img.classes.has('is-loaded'));
+  assert.deepEqual(calls, ['https://example.workers.dev/favicon?size=128&domain=example.com']);
+  assert.match(img.src, /^data:image\/png;base64,/);
+  assert.equal(imageProbes.length, 0, 'байты пришли запросом, а не через <img>');
+  assert.equal(savedIcons()['128|example.com'].src, img.src);
+
+  // Следующая вкладка: картинка из памяти, ни одного обращения к сети.
+  calls.length = 0;
+  const second = new MockElement('img');
+  ShortcutIcons.attach(second, { id: 'a', url: 'https://example.com/other' }, 128);
+  assert.equal(second.src, img.src);
+  assert.deepEqual(calls, []);
+
+  ShortcutIcons.setProxyBase(null);
+  globalThis.fetch = originalFetch;
+});
+
+test('недоступный Worker не ломает иконки: картинка идёт напрямую', async () => {
+  ShortcutIcons.clear();
+  imageProbes.length = 0;
+  ShortcutIcons.setProxyBase(() => 'https://example.workers.dev');
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => { throw new Error('offline'); };
+
+  const img = new MockElement('img');
+  ShortcutIcons.attach(img, { id: 'z', url: 'https://example.com/' }, 128);
+
+  await until(() => imageProbes.length === 1);
+  assert.equal(imageProbes[0]._src, 'https://www.google.com/s2/favicons?sz=128&domain=example.com');
+  imageProbes[0].onload();
+  assert.ok(img.classes.has('is-loaded'));
+
+  ShortcutIcons.setProxyBase(null);
+  globalThis.fetch = originalFetch;
+});
+
 test('renders category tabs with roving focus and reuses matching buttons', () => {
   const element = new MockElement();
   const selections = [];
@@ -511,6 +670,39 @@ test('reports an Open-Meteo forecast request failure', async () => {
 
   try {
     await assert.rejects(WeatherService.fetchForecast(0, 0), /503/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('weather via Worker: forecast and geocode go to the proxy routes', async () => {
+  const originalFetch = globalThis.fetch;
+  const urls = [];
+
+  globalThis.fetch = async (url) => {
+    urls.push(String(url));
+    return { ok: true, json: async () => ({ ok: true }) };
+  };
+
+  try {
+    await WeatherService.fetchForecast(58.6, 49.65, 'https://w.example/');
+    const forecast = new URL(urls[0]);
+    assert.equal(forecast.origin, 'https://w.example');
+    assert.equal(forecast.pathname, '/weather/forecast');
+    assert.equal(forecast.searchParams.get('latitude'), '58.6');
+    assert.equal(forecast.searchParams.get('forecast_days'), '5');
+
+    await WeatherService.fetchCurrent(58.6, 49.65, 'https://w.example');
+    const current = new URL(urls[1]);
+    assert.equal(current.pathname, '/weather/forecast');
+    assert.equal(current.searchParams.get('current_weather'), 'true');
+
+    await WeatherService.fetchGeocode('Москва', 'ru', 'https://w.example');
+    const geocode = new URL(urls[2]);
+    assert.equal(geocode.pathname, '/weather/geocode');
+    assert.equal(geocode.searchParams.get('name'), 'Москва');
+    assert.equal(geocode.searchParams.get('count'), '1');
+    assert.equal(geocode.searchParams.get('language'), 'ru');
   } finally {
     globalThis.fetch = originalFetch;
   }

@@ -1,7 +1,7 @@
 import { WeatherService } from './weather.js';
 
 const WeatherDrawer = {
-  init(state, translations) {
+  init(state, translations, getBase = () => '') {
     const trigger = document.getElementById('weather-widget');
     const topbar = document.getElementById('mist-topbar');
     const backdrop = document.getElementById('weather-drawer-backdrop');
@@ -161,7 +161,7 @@ const WeatherDrawer = {
 
       showMessage(getDictionary().weatherForecastLoading, 'loading');
       try {
-        const data = await WeatherService.fetchForecast(latitude, longitude);
+        const data = await WeatherService.fetchForecast(latitude, longitude, getBase());
         cachedForecast = { key, timestamp: Date.now(), data };
         renderForecast(data);
       } catch (error) {

@@ -96,6 +96,7 @@ function loadState() {
     STATE.mistHeadOffset = normalizeMistWidgets(result.mistHeadOffset);
     STATE.scheduleEnabled = result.scheduleEnabled ?? false;
     STATE.scheduleGroup = result.scheduleGroup ?? null;
+    STATE.scheduleAutoCheck = result.scheduleAutoCheck ?? false;
 
     // Защита от конфликтующего состояния в импортированной резервной копии:
 // Zen — самый строгий режим, поэтому он имеет приоритет над Mist

@@ -785,6 +785,159 @@ body.theme-adaptive .schedule-search:focus-visible {
   outline-color: var(--adapt-primary);
 }
 
+/* ---------- УВЕДОМЛЕНИЕ О НОВОМ РАСПИСАНИИ ---------- */
+
+/* Стоит над кнопкой расписания, чтобы не спорить с уведомлением
+   об обновлении расширения в самом углу. */
+.schedule-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 84px;
+  z-index: 61;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(360px, calc(100vw - 36px));
+  padding: 10px 12px;
+  color: #fff;
+  background: rgba(20, 20, 20, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 12px;
+  animation: scheduleToastIn 0.3s ease;
+}
+
+.schedule-toast-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.schedule-toast-action {
+  padding: 5px 10px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.schedule-toast-action:hover,
+.schedule-toast-action:focus-visible {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.schedule-toast-action:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.schedule-toast-close {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.schedule-toast-close:hover,
+.schedule-toast-close:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.schedule-toast-action:focus-visible,
+.schedule-toast-close:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 1px;
+}
+
+@keyframes scheduleToastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+body.theme-light .schedule-toast {
+  color: #1a202c;
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+body.theme-light .schedule-toast-action {
+  color: #1a202c;
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.theme-light .schedule-toast-action:hover,
+body.theme-light .schedule-toast-action:focus-visible {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+body.theme-light .schedule-toast-close {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+body.theme-light .schedule-toast-close:hover,
+body.theme-light .schedule-toast-close:focus-visible {
+  color: #1a202c;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .schedule-toast-action:focus-visible,
+body.theme-light .schedule-toast-close:focus-visible {
+  outline-color: #357ae8;
+}
+
+body.theme-adaptive .schedule-toast {
+  color: var(--adapt-on-surface);
+  background: rgba(var(--adapt-surface-rgb), 0.94);
+  border-color: rgba(var(--adapt-outline-rgb), 0.3);
+}
+
+body.theme-adaptive .schedule-toast-action {
+  color: var(--adapt-on-surface);
+  background: rgba(var(--adapt-primary-rgb), 0.16);
+  border-color: rgba(var(--adapt-primary-rgb), 0.4);
+}
+
+body.theme-adaptive .schedule-toast-action:hover,
+body.theme-adaptive .schedule-toast-action:focus-visible {
+  background: rgba(var(--adapt-primary-rgb), 0.28);
+}
+
+body.theme-adaptive .schedule-toast-close {
+  color: rgba(var(--adapt-on-surface-rgb), 0.7);
+}
+
+body.theme-adaptive .schedule-toast-close:hover,
+body.theme-adaptive .schedule-toast-close:focus-visible {
+  color: var(--adapt-on-surface);
+  background: rgba(var(--adapt-on-surface-rgb), 0.08);
+}
+
+body.theme-adaptive .schedule-toast-action:focus-visible,
+body.theme-adaptive .schedule-toast-close:focus-visible {
+  outline-color: var(--adapt-primary);
+}
+
 /* ---------- УЗКИЕ ЭКРАНЫ ---------- */
 
 @media (max-width: 520px) {

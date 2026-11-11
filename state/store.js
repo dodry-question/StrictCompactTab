@@ -58,6 +58,7 @@ const store = (function () {
     mistPerRow: 6,
     scheduleEnabled: false,
     scheduleGroup: null,
+    scheduleAutoCheck: false,
     mistHeadOffset: {
       clock: { x: 0, y: 0, w: 0, h: 0, s: 1 },
       search: { x: 0, y: 0, w: 0, h: 0, s: 1 }
@@ -75,7 +76,7 @@ const store = (function () {
     'showWeather', 'weatherCity', 'weatherCoords', 'weatherCache',
     'customSearchEngines', 'checkUpdates', 'layoutZenMode', 'layoutMistMode',
     'mistPreset', 'mistPerRow', 'scheduleEnabled', 'scheduleGroup',
-    'mistHeadOffset'
+    'scheduleAutoCheck', 'mistHeadOffset'
   ]);
 
   /** @type {Set<(state: any, key: string) => void>} */

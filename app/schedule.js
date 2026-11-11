@@ -2,12 +2,20 @@ import { saveState } from './state-render.js';
 
 import { ScheduleParser } from '../services/schedule-parser.js';
 import { ScheduleXlsx } from '../services/schedule-xlsx.js';
+import {
+  fetchLatestSchedule,
+  fetchScheduleFile,
+  sha256Hex,
+  normalizeBaseUrl
+} from '../services/schedule-sync.js';
 
 import { storage } from '../storage/storage.js';
 
 import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
+
+import { getWorkerUrl, isWorkerEnabled, onWorkerEnabled, workerUrlReady } from './worker-url.js';
 
 // --- ПЛАГИН «РАСПИСАНИЕ ЗАНЯТИЙ» (файл .xlsx из группы ВК) ---
 // Кнопка в правом нижнем углу + панель, выезжающая снизу. В отличие от
@@ -37,10 +45,23 @@ const scheduleDeleteBtn = document.getElementById('schedule-delete');
 const scheduleVkLink = document.getElementById('schedule-vk');
 const scheduleCloseBtn = document.getElementById('schedule-close');
 const scheduleEnabledCb = /** @type {HTMLInputElement} */ (document.getElementById('schedule-enabled'));
+const scheduleCheckBtn = /** @type {HTMLButtonElement} */ (document.getElementById('schedule-check'));
+const scheduleAutoCheckCb = /** @type {HTMLInputElement} */ (document.getElementById('schedule-auto-check'));
+const scheduleSubsettings = document.getElementById('schedule-subsettings');
+const scheduleWorkerInput = /** @type {HTMLInputElement} */ (document.getElementById('schedule-worker-url'));
+const scheduleToastEl = document.getElementById('schedule-toast');
+const scheduleToastText = document.getElementById('schedule-toast-text');
+const scheduleToastAction = /** @type {HTMLButtonElement} */ (document.getElementById('schedule-toast-action'));
+const scheduleToastClose = /** @type {HTMLButtonElement} */ (document.getElementById('schedule-toast-close'));
 
 const SCHEDULE_VK_URL = 'https://vk.ru/kollegevyatsu';
 const SCHEDULE_STORAGE_KEY = 'scheduleData';
 const SCHEDULE_STYLE_HREF = 'css/components/schedule-panel.css';
+
+// Служебные ключи авто-проверки. Все локальные: в облако и бэкап не входят.
+const SCHEDULE_LAST_CHECK_KEY = 'scheduleLastCheck';
+const SCHEDULE_NOTIFIED_HASH_KEY = 'scheduleNotifiedHash';
+const SCHEDULE_AUTO_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
 // 20 КБ стилей не должны разбираться при каждой новой вкладке, если плагином
 // не пользуются, поэтому <link> в index.html отсутствует, а таблица стилей
@@ -79,6 +100,9 @@ let scheduleMode = 'drop';    // drop | groups | schedule
 let scheduleBusy = false;
 let scheduleReturnFocus = null;
 let scheduleNextKey = '';     // день подсвеченных «следующих пар» (для таймера)
+let scheduleCheckBusy = false;
+let pendingSchedule = null;   // метаданные найденного, но не скачанного файла
+let scheduleToastTimer = 0;
 
 function scheduleDict() {
   return TRANSLATIONS[STATE.language] || TRANSLATIONS.en;
@@ -96,6 +120,8 @@ function isSchedulePanelOpen() {
 function syncScheduleEnabled() {
   const on = !!STATE.scheduleEnabled;
   if (scheduleEnabledCb) scheduleEnabledCb.checked = on;
+  if (scheduleAutoCheckCb) scheduleAutoCheckCb.checked = !!STATE.scheduleAutoCheck;
+  if (scheduleSubsettings) scheduleSubsettings.style.display = on ? '' : 'none';
   document.body.classList.toggle('schedule-on', on);
   if (on) ensureScheduleStyles();
   else closeSchedulePanel();
@@ -237,6 +263,9 @@ async function handleScheduleFile(file) {
     await saveScheduleData({
       fileName: file.name || '',
       fileTime: file.lastModified || Date.now(),
+      // Хеш нужен, чтобы сравнивать локальный файл с тем, что лежит на
+      // сервере: название и размер у новой недели могут совпасть, содержимое — нет.
+      hash: await sha256Hex(buffer),
       headerRow: parsed.headerRow,
       groups: parsed.groups
     });
@@ -287,6 +316,181 @@ function selectScheduleGroup(name) {
   saveState();
   scheduleShowView('schedule');
   renderScheduleGroup();
+}
+
+// --- проверка обновлений через Worker --------------------------------------
+//
+// VK видит только Worker: браузер запрашивает *.workers.dev. Проверка — один
+// GET /schedule/latest, скачивание — один GET /schedule/file. Сравниваем
+// SHA-256 файлов: имя и дата у новой недели могут остаться прежними, а хеш
+// содержимого изменится.
+
+function scheduleWorkerBase() {
+  if (!isWorkerEnabled()) return '';
+  if (scheduleWorkerInput) {
+    const raw = String(scheduleWorkerInput.value || '').trim();
+    if (raw) return normalizeBaseUrl(raw);
+  }
+  return getWorkerUrl();
+}
+
+function showScheduleToast(message, withAction) {
+  if (!scheduleToastEl || !scheduleToastText) return;
+
+  scheduleToastText.textContent = message || '';
+  if (scheduleToastAction) scheduleToastAction.hidden = !withAction;
+  scheduleToastEl.style.display = 'flex';
+
+  if (scheduleToastTimer) clearTimeout(scheduleToastTimer);
+  scheduleToastTimer = 0;
+  // Информационные сообщения убираем сами, предложение обновить — нет:
+  // пользователь должен успеть нажать кнопку.
+  if (!withAction) scheduleToastTimer = setTimeout(hideScheduleToast, 6000);
+}
+
+function hideScheduleToast() {
+  if (scheduleToastTimer) {
+    clearTimeout(scheduleToastTimer);
+    scheduleToastTimer = 0;
+  }
+  if (scheduleToastEl) scheduleToastEl.style.display = 'none';
+  pendingSchedule = null;
+}
+
+function readNotifiedHash() {
+  return new Promise(resolve => {
+    storage.get([SCHEDULE_NOTIFIED_HASH_KEY], result => {
+      resolve(String((result && result[SCHEDULE_NOTIFIED_HASH_KEY]) || ''));
+    });
+  });
+}
+
+function autoScheduleCheckDue() {
+  return new Promise(resolve => {
+    storage.get([SCHEDULE_LAST_CHECK_KEY], result => {
+      const last = Number(result && result[SCHEDULE_LAST_CHECK_KEY]) || 0;
+      resolve(Date.now() - last >= SCHEDULE_AUTO_INTERVAL_MS);
+    });
+  });
+}
+
+async function checkScheduleUpdate(options = {}) {
+  const dict = scheduleDict();
+  const auto = Boolean(options.auto);
+  if (scheduleCheckBusy) return;
+
+  if (!isWorkerEnabled()) {
+    if (!auto) showScheduleToast(dict.workerOff, false);
+    return;
+  }
+
+  const base = scheduleWorkerBase();
+  if (!base) {
+    if (!auto) showScheduleToast(dict.scheduleNoWorker, false);
+    return;
+  }
+
+  scheduleCheckBusy = true;
+  if (!auto && scheduleCheckBtn) {
+    scheduleCheckBtn.disabled = true;
+    scheduleCheckBtn.textContent = dict.scheduleChecking;
+  }
+
+  try {
+    await loadScheduleData();
+    // ОДИН запрос. refresh=1 — только что включённый рубильник: сервер один
+    // раз сходит в ВК и дальше отдаёт закешированное.
+    const latest = await fetchLatestSchedule(base, { refresh: Boolean(options.refresh) });
+
+    storage.set({ [SCHEDULE_LAST_CHECK_KEY]: Date.now() });
+
+    if (latest.none) {
+      if (!auto) showScheduleToast(dict.scheduleRemoteEmpty, false);
+      return;
+    }
+
+    const remote = /** @type {any} */ (latest).schedule;
+    const localHash = (scheduleData && scheduleData.hash) || '';
+
+    if (localHash && localHash === remote.hash) {
+      if (!auto) showScheduleToast(dict.scheduleUpToDate, false);
+      return;
+    }
+
+    // Авто-проверка не должна повторять одно и то же предложение в каждой
+    // новой вкладке, пока пользователь его не обновил или не скрыл.
+    if (auto && (await readNotifiedHash()) === remote.hash) return;
+
+    pendingSchedule = remote;
+    const label = remote.fileName
+      ? dict.scheduleUpdateFound + ' · ' + remote.fileName
+      : dict.scheduleUpdateFound;
+    showScheduleToast(label, true);
+
+    if (auto) storage.set({ [SCHEDULE_NOTIFIED_HASH_KEY]: remote.hash });
+  } catch (error) {
+    console.error('Schedule: проверка обновления не удалась', error);
+    if (!auto) showScheduleToast(dict.scheduleCheckFailed, false);
+  } finally {
+    scheduleCheckBusy = false;
+    if (scheduleCheckBtn) {
+      scheduleCheckBtn.disabled = false;
+      scheduleCheckBtn.textContent = dict.scheduleCheck;
+    }
+  }
+}
+
+async function downloadScheduleUpdate() {
+  const dict = scheduleDict();
+  if (scheduleBusy) return;
+
+  const base = scheduleWorkerBase();
+  if (!base) {
+    showScheduleToast(isWorkerEnabled() ? dict.scheduleNoWorker : dict.workerOff, false);
+    return;
+  }
+
+  scheduleBusy = true;
+  if (scheduleToastAction) scheduleToastAction.disabled = true;
+  if (scheduleSubtitle) scheduleSubtitle.textContent = dict.scheduleDownloading;
+
+  try {
+    const file = await fetchScheduleFile(base);   // ОДИН запрос
+    const sheet = await ScheduleXlsx.read(file.buffer);
+    const parsed = ScheduleParser.parse(sheet);
+
+    if (!parsed.groups.length) {
+      showScheduleToast(dict.scheduleUnsupported, false);
+      return;
+    }
+
+    const meta = pendingSchedule || {};
+    await saveScheduleData({
+      fileName: meta.fileName || 'schedule.xlsx',
+      fileTime: meta.date || Date.now(),
+      hash: file.hash,
+      headerRow: parsed.headerRow,
+      groups: parsed.groups
+    });
+
+    storage.set({
+      [SCHEDULE_LAST_CHECK_KEY]: Date.now(),
+      [SCHEDULE_NOTIFIED_HASH_KEY]: file.hash
+    });
+
+    if (scheduleGroupsSearch) scheduleGroupsSearch.value = '';
+    hideScheduleToast();
+    saveState();
+    renderSchedulePanel();
+    showScheduleToast(dict.scheduleUpdatedFromWorker, false);
+  } catch (error) {
+    console.error('Schedule: не удалось скачать обновление', error);
+    if (scheduleSubtitle) scheduleSubtitle.textContent = '';
+    showScheduleToast(dict.scheduleCheckFailed, false);
+  } finally {
+    scheduleBusy = false;
+    if (scheduleToastAction) scheduleToastAction.disabled = false;
+  }
 }
 
 // --- виды панели -----------------------------------------------------------
@@ -554,6 +758,37 @@ if (scheduleEnabledCb) {
   });
 }
 
+// Авто-проверка: галка включает не только таймер, но и немедленную проверку —
+// иначе после включения пришлось бы ждать следующего открытия вкладки
+if (scheduleAutoCheckCb) {
+  scheduleAutoCheckCb.addEventListener('change', () => {
+    STATE.scheduleAutoCheck = scheduleAutoCheckCb.checked;
+    saveState();
+    if (STATE.scheduleAutoCheck) {
+      workerUrlReady.then(() => checkScheduleUpdate());
+    }
+  });
+}
+
+if (scheduleCheckBtn) {
+  scheduleCheckBtn.addEventListener('click', () => checkScheduleUpdate());
+}
+
+// Включили рубильник — ровно один поход за расписанием с refresh=1: сервер
+// сходит в ВК один раз, дальше метаданные и файл лежат в его кеше.
+onWorkerEnabled(() => {
+  if (!STATE.scheduleEnabled) return;
+  checkScheduleUpdate({ refresh: true });
+});
+
+if (scheduleToastAction) {
+  scheduleToastAction.addEventListener('click', downloadScheduleUpdate);
+}
+
+if (scheduleToastClose) {
+  scheduleToastClose.addEventListener('click', hideScheduleToast);
+}
+
 // Выбор файла кликом по зоне переноса и через системный диалог
 if (scheduleDrop) {
   scheduleDrop.addEventListener('click', () => {
@@ -639,6 +874,18 @@ document.addEventListener('change', event => {
   }
 });
 
+// Авто-проверка при открытии новой вкладки — не чаще раза в 6 часов.
+// Задержка даёт loadState() и адресу Worker прочитаться раньше запроса.
+setTimeout(() => {
+  if (!STATE.scheduleEnabled || !STATE.scheduleAutoCheck) return;
+  workerUrlReady
+    .then(() => autoScheduleCheckDue())
+    .then(due => {
+      if (due) checkScheduleUpdate({ auto: true });
+    })
+    .catch(() => {});
+}, 4000);
+
 // Подсветка «следующих пар» не должна устареть, пока панель открыта: раз в
 // минуту сверяем день И ВРЕМЯ ближайшего занятия, и как только только что
 // начавшаяся пара закончилась, обводка и значок сами переезжают дальше —
@@ -660,5 +907,8 @@ export {
   isSchedulePanelOpen,
   refreshSchedulePanel,
   handleScheduleFile,
+  checkScheduleUpdate,
+  downloadScheduleUpdate,
+  hideScheduleToast,
   scheduleData
 };

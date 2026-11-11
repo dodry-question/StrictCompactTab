@@ -1,7 +1,7 @@
 ﻿# Сборка релизного архива расширения.
 #
 #   .\tools\build-release.ps1              # версия берётся из manifest.json
-#   .\tools\build-release.ps1 -Version 1.11.2
+#   .\tools\build-release.ps1 -Version 1.11.3b
 #   .\tools\build-release.ps1 -OutDir D:\releases
 #
 # Архив кладётся ЗА пределы репо (по умолчанию — Рабочий стол): zip релиза
@@ -15,6 +15,7 @@
 #                               не должна покидать проект
 #   assets\preview_*          — скриншоты для GitHub, расширение их не грузит
 #                                (192 КБ мёртвого веса в каждой установке)
+#   assets\banner-*           — баннер для витрины (itch.io), в коде не участвует
 #   *.zip                     — чтобы архив не включал сам себя
 #   файлы инструментов разработки (tsconfig.json, eslint.config.js,
 #   .prettierrc.json, .prettierignore, .editorconfig, .gitignore,
@@ -34,7 +35,10 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 
 if (-not $Version) {
-  $Version = (Get-Content (Join-Path $root 'manifest.json') -Raw | ConvertFrom-Json).version
+  $manifest = Get-Content (Join-Path $root 'manifest.json') -Raw | ConvertFrom-Json
+  # version_name — та строка, которую видит пользователь ('1.11.3b');
+  # version остаётся числовой, потому что Chrome другой формат не принимает.
+  $Version = if ($manifest.version_name) { $manifest.version_name } else { $manifest.version }
 }
 if (-not $OutDir) {
   $OutDir = [Environment]::GetFolderPath('Desktop')
@@ -59,7 +63,7 @@ $files += Get-ChildItem -Path $root -File |
   Where-Object { $_.Extension -notin '.zip', '.md' -and $_.Name -notin $skipNames }
 foreach ($dir in @('app', 'assets', 'css', 'i18n', 'services', 'state', 'storage', 'src')) {
   $files += Get-ChildItem -Path (Join-Path $root $dir) -Recurse -File |
-    Where-Object { $_.BaseName -notlike 'preview_*' }
+    Where-Object { $_.BaseName -notlike 'preview_*' -and $_.BaseName -notlike 'banner-*' }
 }
 
 $zip = [System.IO.Compression.ZipFile]::Open($out, [System.IO.Compression.ZipArchiveMode]::Create)

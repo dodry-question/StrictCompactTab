@@ -51,10 +51,17 @@ function buildBackupPayload(allData) {
 
   // Копируем хранилище целиком, но вырезаем то, что не является настройкой:
   // scheduleData — это разобранный .xlsx (сотни КБ, файл расписания живёт
-  // отдельно и в бэкап не переносится), служебные ключи проверки обновлений
-  // и кэш иконок. Раньше они попадали в JSON, раздувая его в разы.
+  // отдельно и в бэкап не переносится), служебные ключи проверки обновлений,
+  // кэш иконок, код облачной синхронизации и служебные данные проверки
+  // расписания. Иначе чужой бэкап уносил бы с собой код от облака.
   const payload = Object.assign({}, raw);
   delete payload.scheduleData;
+  delete payload.scheduleMeta;
+  delete payload.scheduleLastCheck;
+  delete payload.scheduleNotifiedHash;
+  delete payload.cloudSyncConfig;
+  delete payload.workerBaseUrl;
+  delete payload.workerEnabled;
   delete payload.lastUpdateCheck;
   delete payload.cachedLatestVersion;
   delete payload.shortcutIconCache;
@@ -204,12 +211,14 @@ function getExtensionVersion() {
     if (typeof chrome !== 'undefined' && chrome.runtime &&
         typeof chrome.runtime.getManifest === 'function') {
       const manifest = chrome.runtime.getManifest();
-      if (manifest && manifest.version) return manifest.version;
+      if (manifest && (manifest.version_name || manifest.version)) {
+        return manifest.version_name || manifest.version;
+      }
     }
   } catch (err) {
     // не страница расширения — уходим на запасной вариант
   }
-  return '1.11.1';
+  return '1.11.3b';
 }
 
 function handleUpdateResult(latestVersion) {

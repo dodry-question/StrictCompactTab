@@ -185,6 +185,23 @@ body.theme-light .settings-input::placeholder {
   opacity: 1 !important;
 }
 
+body.theme-light .settings-hint {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.theme-light .settings-hint.is-error {
+  color: #c0392b;
+}
+
+body.theme-light .settings-hint.is-success {
+  color: #1e7e4f;
+}
+
+body.theme-light .settings-input.is-invalid {
+  border-color: #d64545 !important;
+  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.15) !important;
+}
+
 /* Оболочка редактирования ярлыка */
 body.theme-light .modal-shortcut-edit-container {
   background-color: rgba(0, 0, 0, 0.02) !important;

@@ -18,6 +18,8 @@ import { WeatherDrawer } from '../services/weather-drawer.js';
 
 import { SearchService } from '../services/search.js';
 
+import { getWorkerUrl } from './worker-url.js';
+
 import { STATE } from '../state/store.js';
 
 import { TRANSLATIONS } from '../i18n/translations.js';
@@ -40,7 +42,7 @@ if (searchForm && searchInput) {
 }
 
 // Открытие подробного прогноза во внутренней выдвижной панели.
-if (weatherWidget) WeatherDrawer.init(STATE, TRANSLATIONS);
+if (weatherWidget) WeatherDrawer.init(STATE, TRANSLATIONS, getWorkerUrl);
 
 // --- УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ И МОДАЛЬНЫМ ОКНОМ ---
 const modal = document.getElementById('settings-modal');

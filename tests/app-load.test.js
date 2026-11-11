@@ -432,3 +432,55 @@ test('размер обоев: битые/недоступные значени�
     assert.equal(maxHeight, 1440, `высота при аргументах ${JSON.stringify(args)}`);
   }
 });
+
+// --- Рубильник Worker -------------------------------------------------------
+// Общий сервер (облако, расписание, погода, иконки) выключен по умолчанию:
+// пока пользователь сам его не включил, наружу не уходит ни один запрос.
+
+const { getWorkerUrl, isWorkerEnabled, loadWorkerUrl } = await import('../app/worker-url.js');
+const { handleUpload } = await import('../app/cloud-sync.js');
+
+test('рубильник выключен по умолчанию: адрес сохранён, но наружу не отдаётся', () => {
+  storageMap.set('workerBaseUrl', JSON.stringify('https://example.workers.dev'));
+  loadWorkerUrl();
+
+  assert.equal(isWorkerEnabled(), false);
+  assert.equal(getWorkerUrl(), '', 'выключенный сервер = пустой адрес для всех потребителей');
+  assert.equal(byId('worker-enabled').checked, false);
+  assert.equal(byId('cloud-worker-url').value, 'https://example.workers.dev');
+  assert.equal(byId('cloud-worker-url').disabled, true);
+  assert.equal(byId('schedule-worker-url').disabled, true);
+});
+
+test('рубильник выключен: «Сохранить в облако» не отправляет запрос', async () => {
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response('{}', { status: 200 });
+  };
+
+  byId('cloud-worker-url').value = 'https://example.workers.dev';
+  byId('cloud-sync-code').value = 'SCT1-ABCDE-FGHJK-MNPQR-STVWX';
+  await handleUpload();
+
+  assert.deepEqual(calls, []);
+  assert.match(byId('cloud-status').textContent, /Worker/);
+  globalThis.fetch = () => new Promise(() => {});
+});
+
+test('рубильник включает и выключает сервер одним переключателем', () => {
+  const toggle = byId('worker-enabled');
+
+  toggle.checked = true;
+  toggle.dispatch('change');
+  assert.equal(isWorkerEnabled(), true);
+  assert.equal(getWorkerUrl(), 'https://example.workers.dev');
+  assert.equal(byId('schedule-worker-url').disabled, false);
+  assert.equal(JSON.parse(storageMap.get('workerEnabled')), true);
+
+  toggle.checked = false;
+  toggle.dispatch('change');
+  assert.equal(getWorkerUrl(), '');
+  assert.equal(byId('cloud-worker-url').disabled, true);
+  assert.equal(JSON.parse(storageMap.get('workerEnabled')), false);
+});

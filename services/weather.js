@@ -1,5 +1,17 @@
+const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
+const GEOCODE_URL = 'https://geocoding-api.open-meteo.com/v1/search';
+
+// Адрес Worker приходит снаружи (app/worker-url.js). Пустая строка — прямой
+// запрос к Open-Meteo: так расширение работает и без настроенного воркера,
+// а на мобильном интернете, где провайдер режет api.open-meteo.com,
+// запросы идут через свой воркер.
+function endpoint(base, route, directUrl, params) {
+  const trimmed = typeof base === 'string' ? base.replace(/\/+$/, '') : '';
+  return trimmed ? `${trimmed}${route}?${params}` : `${directUrl}?${params}`;
+}
+
 const WeatherService = {
-  async fetchForecast(latitude, longitude) {
+  async fetchForecast(latitude, longitude, base = '') {
     const params = new URLSearchParams({
       latitude: String(latitude),
       longitude: String(longitude),
@@ -12,8 +24,31 @@ const WeatherService = {
       wind_speed_unit: 'kmh',
       precipitation_unit: 'mm'
     });
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    const response = await fetch(endpoint(base, '/weather/forecast', FORECAST_URL, params));
     if (!response.ok) throw new Error(`Open-Meteo forecast request failed: ${response.status}`);
+    return response.json();
+  },
+
+  async fetchCurrent(latitude, longitude, base = '') {
+    const params = new URLSearchParams({
+      latitude: String(latitude),
+      longitude: String(longitude),
+      current_weather: 'true',
+      timezone: 'auto'
+    });
+    const response = await fetch(endpoint(base, '/weather/forecast', FORECAST_URL, params));
+    if (!response.ok) throw new Error(`Open-Meteo weather request failed: ${response.status}`);
+    return response.json();
+  },
+
+  async fetchGeocode(cityName, language, base = '') {
+    const params = new URLSearchParams({
+      name: String(cityName),
+      count: '1',
+      language: language === 'ru' ? 'ru' : 'en'
+    });
+    const response = await fetch(endpoint(base, '/weather/geocode', GEOCODE_URL, params));
+    if (!response.ok) throw new Error(`Geocoding API error: ${response.status}`);
     return response.json();
   },
 

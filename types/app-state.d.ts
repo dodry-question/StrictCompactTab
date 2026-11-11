@@ -129,5 +129,6 @@ export type AppState = {
   mistPerRow: number;
   scheduleEnabled: boolean;
   scheduleGroup: string | null;
+  scheduleAutoCheck: boolean;
   mistHeadOffset: MistWidgets;
 };

@@ -14,7 +14,8 @@ export default [
   {
     // assets/ — бинарная графика и минифицированная сторонняя библиотека
     // (material-color-utilities.min.js): линтить их бессмысленно.
-    ignores: ['node_modules/**', 'assets/**', '**/*.zip', 'tests/fixtures/**']
+    // .wrangler/ — сборка `wrangler dev`, генерируется заново при каждом запуске.
+    ignores: ['node_modules/**', 'assets/**', '**/*.zip', 'tests/fixtures/**', '**/.wrangler/**']
   },
   js.configs.recommended,
   {

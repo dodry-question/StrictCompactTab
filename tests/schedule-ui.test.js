@@ -11,6 +11,7 @@ import { setImmediate as nodeSetImmediate } from 'node:timers';
 import { STATE } from '../state/store.js';
 import { storage } from '../storage/storage.js';
 import { ScheduleParser } from '../services/schedule-parser.js';
+import { sha256Hex } from '../services/schedule-sync.js';
 
 // ---------------------------------------------------------------------------
 // Тест интерфейса плагина «Расписание».
@@ -269,6 +270,7 @@ const app = globalThis;
 const { syncScheduleEnabled, handleScheduleFile, isSchedulePanelOpen, closeSchedulePanel } = await import('../app/schedule.js');
 const { applyLanguage } = await import('../app/appearance.js');
 const { saveState } = await import('../app/state-render.js');
+const { loadWorkerUrl } = await import('../app/worker-url.js');
 // Пауз нужна для цепочек промисов (открытие панели читает файл из хранилища).
 // Реальный таймер node:timers/promises, а не globalThis.setTimeout — тот в стабе
 // заглушен. Разбор .xlsx — тоже асинхронный, поэтому там ждём по условию.
@@ -739,4 +741,159 @@ test('смена режима макета закрывает панель', asy
   const zen = makeElement('input', 'layout-zen-mode');
   (docListeners.change || []).forEach((h) => h({ target: zen }));
   assert.equal(panel.classList.contains('is-open'), false, 'панель должна закрыться при смене режима');
+});
+
+// --- проверка обновлений через Worker ---------------------------------------
+
+async function loadFixtureSchedule() {
+  const buffer = await new Blob([fs.readFileSync(FIXTURE)]).arrayBuffer();
+  await handleScheduleFile({ name: '5_28_09-03_10.xlsx', lastModified: Date.now(), arrayBuffer: async () => buffer });
+  await settle();
+  return JSON.parse(store.get('scheduleData'));
+}
+
+function latestResponse(hash, fileName) {
+  return new Response(
+    JSON.stringify({
+      ok: true,
+      hash,
+      title: fileName,
+      fileName,
+      size: 435101,
+      date: 1700000000,
+      postId: 9910,
+      checkedAt: 1700000001,
+      stale: false
+    }),
+    { status: 200, headers: { 'content-type': 'application/json' } }
+  );
+}
+
+test('рубильник выключен: проверка расписания не отправляет ни одного запроса', async () => {
+  await loadFixtureSchedule();
+
+  // Адрес сохранён с прошлого раза, сервер выключен: поле неактивно, но
+  // значение на месте — включение рубильника не должно его терять.
+  store.set('workerBaseUrl', JSON.stringify('https://example.workers.dev'));
+  loadWorkerUrl();
+  await settle();
+  assert.equal(byId('schedule-worker-url').value, 'https://example.workers.dev');
+
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return latestResponse('new-hash', '11 09-15.11.xlsx');
+  };
+
+  assert.equal(byId('worker-enabled').checked, false, 'по умолчанию сервер выключен');
+  assert.equal(byId('schedule-worker-url').disabled, true, 'поле адреса неактивно, пока сервер выключен');
+
+  byId('schedule-check').dispatch('click');
+  await settle();
+
+  assert.deepEqual(calls, [], 'выключенный Worker не должен получать запросы');
+  assert.match(byId('schedule-toast-text').textContent, /Worker/);
+  assert.equal(byId('schedule-toast-action').hidden, true);
+  byId('schedule-toast-close').dispatch('click');
+});
+
+test('включение рубильника: ровно один запрос с refresh=1, дальше — обычный', async () => {
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return latestResponse('new-hash', '11 09-15.11.xlsx');
+  };
+
+  const toggle = byId('worker-enabled');
+  toggle.checked = true;
+  toggle.dispatch('change');
+  await waitFor(() => byId('schedule-toast-action').hidden === false, 'предложение обновить после включения');
+
+  // Один поход в ВК на включение: дальше метаданные и файл держит сервер.
+  assert.deepEqual(calls, ['https://example.workers.dev/schedule/latest?refresh=1']);
+  assert.equal(JSON.parse(store.get('workerEnabled')), true);
+  assert.equal(byId('cloud-worker-url').disabled, false);
+
+  calls.length = 0;
+  byId('schedule-toast-close').dispatch('click');
+  byId('schedule-check').dispatch('click');
+  await waitFor(() => calls.length === 1, 'обычная проверка после включения');
+  await settle();
+
+  assert.deepEqual(calls, ['https://example.workers.dev/schedule/latest']);
+  byId('schedule-toast-close').dispatch('click');
+});
+
+test('проверка обновления: ровно один GET /schedule/latest и предложение обновить', async () => {
+  const saved = await loadFixtureSchedule();
+  assert.ok(saved.hash, 'у загруженного файла должен быть хеш');
+
+  byId('schedule-worker-url').value = 'https://example.workers.dev';
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return latestResponse('new-hash', '11 09-15.11.xlsx');
+  };
+
+  byId('schedule-check').dispatch('click');
+  await waitFor(() => byId('schedule-toast').style.display === 'flex', 'тост о новом расписании');
+
+  assert.deepEqual(calls, ['https://example.workers.dev/schedule/latest']);
+  assert.match(byId('schedule-toast-text').textContent, /new schedule/i);
+  assert.equal(byId('schedule-toast-action').hidden, false, 'кнопка «Обновить» должна быть видна');
+
+  byId('schedule-toast-close').dispatch('click');
+  assert.equal(byId('schedule-toast').style.display, 'none');
+});
+
+test('проверка обновления: тот же хеш — «актуально», кнопки обновления нет', async () => {
+  const saved = JSON.parse(store.get('scheduleData'));
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return latestResponse(saved.hash, saved.fileName);
+  };
+
+  byId('schedule-check').dispatch('click');
+  await waitFor(
+    () => /up to date/i.test(byId('schedule-toast-text').textContent),
+    'сообщение «расписание актуально»'
+  );
+
+  assert.equal(calls.length, 1);
+  assert.equal(byId('schedule-toast-action').hidden, true);
+});
+
+test('обновление по кнопке: ровно один GET /schedule/file, файл заменяется', async () => {
+  const bytes = fs.readFileSync(FIXTURE);
+  const buffer = await new Blob([bytes]).arrayBuffer();
+  const expectedHash = await sha256Hex(buffer);
+
+  byId('schedule-worker-url').value = 'https://example.workers.dev';
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    const href = String(url);
+    calls.push(href);
+    if (href.endsWith('/schedule/file')) {
+      return new Response(buffer, { status: 200, headers: { 'x-schedule-hash': expectedHash } });
+    }
+    return latestResponse('another-hash', '11 09-15.11.xlsx');
+  };
+
+  byId('schedule-check').dispatch('click');
+  await waitFor(() => byId('schedule-toast-action').hidden === false, 'предложение обновить');
+
+  byId('schedule-toast-action').dispatch('click');
+  await waitFor(
+    () => JSON.parse(store.get('scheduleData')).fileName === '11 09-15.11.xlsx',
+    'обновлённый файл в хранилище'
+  );
+
+  assert.deepEqual(calls, [
+    'https://example.workers.dev/schedule/latest',
+    'https://example.workers.dev/schedule/file'
+  ]);
+  const updated = JSON.parse(store.get('scheduleData'));
+  assert.equal(updated.hash, expectedHash);
+  assert.ok(updated.groups.length > 0);
 });
